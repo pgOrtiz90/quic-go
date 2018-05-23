@@ -14,7 +14,6 @@ import (
 
 	quic "github.com/lucas-clemente/quic-go"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/qerr"
 
 	"time"
@@ -55,7 +54,7 @@ var _ = Describe("Client", func() {
 
 		headerStream = newMockStream(3)
 		client.headerStream = headerStream
-		client.requestWriter = newRequestWriter(headerStream, utils.DefaultLogger)
+		client.requestWriter = newRequestWriter(headerStream)
 		var err error
 		req, err = http.NewRequest("GET", "https://localhost:1337", nil)
 		Expect(err).ToNot(HaveOccurred())

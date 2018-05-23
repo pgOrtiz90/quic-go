@@ -55,28 +55,28 @@ func (c *certChain) GetLeafCert(sni string) ([]byte, error) {
 	return cert.Certificate[0], nil
 }
 
-func (c *certChain) getCertForSNI(sni string) (*tls.Certificate, error) {
-	conf := c.config
-	conf, err := maybeGetConfigForClient(conf, sni)
+func (cc *certChain) getCertForSNI(sni string) (*tls.Certificate, error) {
+	c := cc.config
+	c, err := maybeGetConfigForClient(c, sni)
 	if err != nil {
 		return nil, err
 	}
 	// The rest of this function is mostly copied from crypto/tls.getCertificate
 
-	if conf.GetCertificate != nil {
-		cert, err := conf.GetCertificate(&tls.ClientHelloInfo{ServerName: sni})
+	if c.GetCertificate != nil {
+		cert, err := c.GetCertificate(&tls.ClientHelloInfo{ServerName: sni})
 		if cert != nil || err != nil {
 			return cert, err
 		}
 	}
 
-	if len(conf.Certificates) == 0 {
+	if len(c.Certificates) == 0 {
 		return nil, errNoMatchingCertificate
 	}
 
-	if len(conf.Certificates) == 1 || conf.NameToCertificate == nil {
+	if len(c.Certificates) == 1 || c.NameToCertificate == nil {
 		// There's only one choice, so no point doing any work.
-		return &conf.Certificates[0], nil
+		return &c.Certificates[0], nil
 	}
 
 	name := strings.ToLower(sni)
@@ -84,7 +84,7 @@ func (c *certChain) getCertForSNI(sni string) (*tls.Certificate, error) {
 		name = name[:len(name)-1]
 	}
 
-	if cert, ok := conf.NameToCertificate[name]; ok {
+	if cert, ok := c.NameToCertificate[name]; ok {
 		return cert, nil
 	}
 
@@ -94,13 +94,13 @@ func (c *certChain) getCertForSNI(sni string) (*tls.Certificate, error) {
 	for i := range labels {
 		labels[i] = "*"
 		candidate := strings.Join(labels, ".")
-		if cert, ok := conf.NameToCertificate[candidate]; ok {
+		if cert, ok := c.NameToCertificate[candidate]; ok {
 			return cert, nil
 		}
 	}
 
 	// If nothing matches, return the first certificate.
-	return &conf.Certificates[0], nil
+	return &c.Certificates[0], nil
 }
 
 func maybeGetConfigForClient(c *tls.Config, sni string) (*tls.Config, error) {

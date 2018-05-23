@@ -102,37 +102,38 @@ func (s *serverConfigClient) parseValues(tagMap map[Tag][]byte) error {
 		return qerr.Error(qerr.CryptoMessageParameterNotFound, "PUBS")
 	}
 
-	var pubsKexs []struct {
+	var pubs_kexs []struct {
 		Length uint32
 		Value  []byte
 	}
-	var lastLen uint32
-	for i := 0; i < len(pubs)-3; i += int(lastLen) + 3 {
+	var last_len uint32
+
+	for i := 0; i < len(pubs)-3; i += int(last_len) + 3 {
 		// the PUBS value is always prepended by 3 byte little endian length field
 
-		err := binary.Read(bytes.NewReader([]byte{pubs[i], pubs[i+1], pubs[i+2], 0x00}), binary.LittleEndian, &lastLen)
+		err := binary.Read(bytes.NewReader([]byte{pubs[i], pubs[i+1], pubs[i+2], 0x00}), binary.LittleEndian, &last_len)
 		if err != nil {
 			return qerr.Error(qerr.CryptoInvalidValueLength, "PUBS not decodable")
 		}
-		if lastLen == 0 {
+		if last_len == 0 {
 			return qerr.Error(qerr.CryptoInvalidValueLength, "PUBS")
 		}
 
-		if i+3+int(lastLen) > len(pubs) {
+		if i+3+int(last_len) > len(pubs) {
 			return qerr.Error(qerr.CryptoInvalidValueLength, "PUBS")
 		}
 
-		pubsKexs = append(pubsKexs, struct {
+		pubs_kexs = append(pubs_kexs, struct {
 			Length uint32
 			Value  []byte
-		}{lastLen, pubs[i+3 : i+3+int(lastLen)]})
+		}{last_len, pubs[i+3 : i+3+int(last_len)]})
 	}
 
-	if c255Foundat >= len(pubsKexs) {
+	if c255Foundat >= len(pubs_kexs) {
 		return qerr.Error(qerr.CryptoMessageParameterNotFound, "KEXS not in PUBS")
 	}
 
-	if pubsKexs[c255Foundat].Length != 32 {
+	if pubs_kexs[c255Foundat].Length != 32 {
 		return qerr.Error(qerr.CryptoInvalidValueLength, "PUBS")
 	}
 
@@ -142,7 +143,7 @@ func (s *serverConfigClient) parseValues(tagMap map[Tag][]byte) error {
 		return err
 	}
 
-	s.sharedSecret, err = s.kex.CalculateSharedKey(pubsKexs[c255Foundat].Value)
+	s.sharedSecret, err = s.kex.CalculateSharedKey(pubs_kexs[c255Foundat].Value)
 	if err != nil {
 		return err
 	}

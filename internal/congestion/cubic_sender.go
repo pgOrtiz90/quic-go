@@ -5,12 +5,13 @@ import (
 
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/lucas-clemente/quic-go/traces"
 )
 
 const (
-	maxBurstBytes                                     = 3 * protocol.DefaultTCPMSS
-	renoBeta                       float32            = 0.7 // Reno backoff factor.
-	defaultMinimumCongestionWindow protocol.ByteCount = 2 * protocol.DefaultTCPMSS
+	maxBurstBytes                                        = 3 * protocol.DefaultTCPMSS
+	defaultMinimumCongestionWindow protocol.PacketNumber = 2
+	renoBeta                       float32               = 0.7 // Reno backoff factor.
 )
 
 type cubicSender struct {
@@ -31,6 +32,12 @@ type cubicSender struct {
 	// Track the largest packet number outstanding when a CWND cutback occurs.
 	largestSentAtLastCutback protocol.PacketNumber
 
+	// Congestion window in packets.
+	congestionWindow protocol.PacketNumber
+
+	// Slow start congestion window in packets, aka ssthresh.
+	slowstartThreshold protocol.PacketNumber
+
 	// Whether the last loss event caused us to exit slowstart.
 	// Used for stats collection of slowstartPacketsLost
 	lastCutbackExitedSlowstart bool
@@ -38,35 +45,24 @@ type cubicSender struct {
 	// When true, exit slow start with large cutback of congestion window.
 	slowStartLargeReduction bool
 
-	// Congestion window in packets.
-	congestionWindow protocol.ByteCount
-
 	// Minimum congestion window in packets.
-	minCongestionWindow protocol.ByteCount
+	minCongestionWindow protocol.PacketNumber
 
-	// Maximum congestion window.
-	maxCongestionWindow protocol.ByteCount
-
-	// Slow start congestion window in bytes, aka ssthresh.
-	slowstartThreshold protocol.ByteCount
+	// Maximum number of outstanding packets for tcp.
+	maxTCPCongestionWindow protocol.PacketNumber
 
 	// Number of connections to simulate.
 	numConnections int
 
 	// ACK counter for the Reno implementation.
-	numAckedPackets uint64
+	congestionWindowCount protocol.ByteCount
 
-	initialCongestionWindow    protocol.ByteCount
-	initialMaxCongestionWindow protocol.ByteCount
-
-	minSlowStartExitWindow protocol.ByteCount
+	initialCongestionWindow    protocol.PacketNumber
+	initialMaxCongestionWindow protocol.PacketNumber
 }
 
-var _ SendAlgorithm = &cubicSender{}
-var _ SendAlgorithmWithDebugInfo = &cubicSender{}
-
 // NewCubicSender makes a new cubic sender
-func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestionWindow, initialMaxCongestionWindow protocol.ByteCount) SendAlgorithmWithDebugInfo {
+func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestionWindow, initialMaxCongestionWindow protocol.PacketNumber) SendAlgorithmWithDebugInfo {
 	return &cubicSender{
 		rttStats:                   rttStats,
 		initialCongestionWindow:    initialCongestionWindow,
@@ -74,7 +70,7 @@ func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestio
 		congestionWindow:           initialCongestionWindow,
 		minCongestionWindow:        defaultMinimumCongestionWindow,
 		slowstartThreshold:         initialMaxCongestionWindow,
-		maxCongestionWindow:        initialMaxCongestionWindow,
+		maxTCPCongestionWindow:     initialMaxCongestionWindow,
 		numConnections:             defaultNumConnections,
 		cubic:                      NewCubic(clock),
 		reno:                       reno,
@@ -85,26 +81,21 @@ func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestio
 func (c *cubicSender) TimeUntilSend(bytesInFlight protocol.ByteCount) time.Duration {
 	if c.InRecovery() {
 		// PRR is used when in recovery.
-		if c.prr.CanSend(c.GetCongestionWindow(), bytesInFlight, c.GetSlowStartThreshold()) {
+		if c.prr.TimeUntilSend(c.GetCongestionWindow(), bytesInFlight, c.GetSlowStartThreshold()) == 0 {
 			return 0
 		}
 	}
-	delay := c.rttStats.SmoothedRTT() / time.Duration(2*c.GetCongestionWindow())
+	delay := c.rttStats.SmoothedRTT() / time.Duration(2*c.GetCongestionWindow()/protocol.DefaultTCPMSS)
 	if !c.InSlowStart() { // adjust delay, such that it's 1.25*cwd/rtt
 		delay = delay * 8 / 5
 	}
 	return delay
 }
 
-func (c *cubicSender) OnPacketSent(
-	sentTime time.Time,
-	bytesInFlight protocol.ByteCount,
-	packetNumber protocol.PacketNumber,
-	bytes protocol.ByteCount,
-	isRetransmittable bool,
-) {
+func (c *cubicSender) OnPacketSent(sentTime time.Time, bytesInFlight protocol.ByteCount, packetNumber protocol.PacketNumber, bytes protocol.ByteCount, isRetransmittable bool) bool {
+	// Only update bytesInFlight for data packets.
 	if !isRetransmittable {
-		return
+		return false
 	}
 	if c.InRecovery() {
 		// PRR is used when in recovery.
@@ -112,6 +103,7 @@ func (c *cubicSender) OnPacketSent(
 	}
 	c.largestSentPacketNumber = packetNumber
 	c.hybridSlowStart.OnPacketSent(packetNumber)
+	return true
 }
 
 func (c *cubicSender) InRecovery() bool {
@@ -123,18 +115,18 @@ func (c *cubicSender) InSlowStart() bool {
 }
 
 func (c *cubicSender) GetCongestionWindow() protocol.ByteCount {
-	return c.congestionWindow
+	return protocol.ByteCount(c.congestionWindow) * protocol.DefaultTCPMSS
 }
 
 func (c *cubicSender) GetSlowStartThreshold() protocol.ByteCount {
-	return c.slowstartThreshold
+	return protocol.ByteCount(c.slowstartThreshold) * protocol.DefaultTCPMSS
 }
 
 func (c *cubicSender) ExitSlowstart() {
 	c.slowstartThreshold = c.congestionWindow
 }
 
-func (c *cubicSender) SlowstartThreshold() protocol.ByteCount {
+func (c *cubicSender) SlowstartThreshold() protocol.PacketNumber {
 	return c.slowstartThreshold
 }
 
@@ -144,29 +136,20 @@ func (c *cubicSender) MaybeExitSlowStart() {
 	}
 }
 
-func (c *cubicSender) OnPacketAcked(
-	ackedPacketNumber protocol.PacketNumber,
-	ackedBytes protocol.ByteCount,
-	priorInFlight protocol.ByteCount,
-	eventTime time.Time,
-) {
+func (c *cubicSender) OnPacketAcked(ackedPacketNumber protocol.PacketNumber, ackedBytes protocol.ByteCount, bytesInFlight protocol.ByteCount) {
 	c.largestAckedPacketNumber = utils.MaxPacketNumber(ackedPacketNumber, c.largestAckedPacketNumber)
 	if c.InRecovery() {
 		// PRR is used when in recovery.
 		c.prr.OnPacketAcked(ackedBytes)
 		return
 	}
-	c.maybeIncreaseCwnd(ackedPacketNumber, ackedBytes, priorInFlight, eventTime)
+	c.maybeIncreaseCwnd(ackedPacketNumber, ackedBytes, bytesInFlight)
 	if c.InSlowStart() {
 		c.hybridSlowStart.OnPacketAcked(ackedPacketNumber)
 	}
 }
 
-func (c *cubicSender) OnPacketLost(
-	packetNumber protocol.PacketNumber,
-	lostBytes protocol.ByteCount,
-	priorInFlight protocol.ByteCount,
-) {
+func (c *cubicSender) OnPacketLost(packetNumber protocol.PacketNumber, lostBytes protocol.ByteCount, bytesInFlight protocol.ByteCount) {
 	// TCP NewReno (RFC6582) says that once a loss occurs, any losses in packets
 	// already sent should be treated as a single loss event, since it's expected.
 	if packetNumber <= c.largestSentAtLastCutback {
@@ -174,8 +157,10 @@ func (c *cubicSender) OnPacketLost(
 			c.stats.slowstartPacketsLost++
 			c.stats.slowstartBytesLost += lostBytes
 			if c.slowStartLargeReduction {
-				// Reduce congestion window by lost_bytes for every loss.
-				c.congestionWindow = utils.MaxByteCount(c.congestionWindow-lostBytes, c.minSlowStartExitWindow)
+				if c.stats.slowstartPacketsLost == 1 || (c.stats.slowstartBytesLost/protocol.DefaultTCPMSS) > (c.stats.slowstartBytesLost-lostBytes)/protocol.DefaultTCPMSS {
+					// Reduce congestion window by 1 for every mss of bytes lost.
+					c.congestionWindow = utils.MaxPacketNumber(c.congestionWindow-1, c.minCongestionWindow)
+				}
 				c.slowstartThreshold = c.congestionWindow
 			}
 		}
@@ -186,19 +171,17 @@ func (c *cubicSender) OnPacketLost(
 		c.stats.slowstartPacketsLost++
 	}
 
-	c.prr.OnPacketLost(priorInFlight)
+	c.prr.OnPacketLost(bytesInFlight)
 
 	// TODO(chromium): Separate out all of slow start into a separate class.
 	if c.slowStartLargeReduction && c.InSlowStart() {
-		if c.congestionWindow >= 2*c.initialCongestionWindow {
-			c.minSlowStartExitWindow = c.congestionWindow / 2
-		}
-		c.congestionWindow = c.congestionWindow - protocol.DefaultTCPMSS
+		c.congestionWindow = c.congestionWindow - 1
 	} else if c.reno {
-		c.congestionWindow = protocol.ByteCount(float32(c.congestionWindow) * c.RenoBeta())
+		c.congestionWindow = protocol.PacketNumber(float32(c.congestionWindow) * c.RenoBeta())
 	} else {
 		c.congestionWindow = c.cubic.CongestionWindowAfterPacketLoss(c.congestionWindow)
 	}
+	// Enforce a minimum congestion window.
 	if c.congestionWindow < c.minCongestionWindow {
 		c.congestionWindow = c.minCongestionWindow
 	}
@@ -206,7 +189,11 @@ func (c *cubicSender) OnPacketLost(
 	c.largestSentAtLastCutback = c.largestSentPacketNumber
 	// reset packet count from congestion avoidance mode. We start
 	// counting again when we're out of recovery.
-	c.numAckedPackets = 0
+	c.congestionWindowCount = 0
+
+	//Pablo Garrido
+	traces.PrintCWND(c.congestionWindow)
+	//EndPablo
 }
 
 func (c *cubicSender) RenoBeta() float32 {
@@ -219,39 +206,37 @@ func (c *cubicSender) RenoBeta() float32 {
 
 // Called when we receive an ack. Normal TCP tracks how many packets one ack
 // represents, but quic has a separate ack for each packet.
-func (c *cubicSender) maybeIncreaseCwnd(
-	ackedPacketNumber protocol.PacketNumber,
-	ackedBytes protocol.ByteCount,
-	priorInFlight protocol.ByteCount,
-	eventTime time.Time,
-) {
+func (c *cubicSender) maybeIncreaseCwnd(ackedPacketNumber protocol.PacketNumber, ackedBytes protocol.ByteCount, bytesInFlight protocol.ByteCount) {
 	// Do not increase the congestion window unless the sender is close to using
 	// the current window.
-	if !c.isCwndLimited(priorInFlight) {
+	if !c.isCwndLimited(bytesInFlight) {
 		c.cubic.OnApplicationLimited()
 		return
 	}
-	if c.congestionWindow >= c.maxCongestionWindow {
+	if c.congestionWindow >= c.maxTCPCongestionWindow {
 		return
 	}
 	if c.InSlowStart() {
 		// TCP slow start, exponential growth, increase by one for each ACK.
-		c.congestionWindow += protocol.DefaultTCPMSS
+		c.congestionWindow++
 		return
 	}
-	// Congestion avoidance
 	if c.reno {
 		// Classic Reno congestion avoidance.
-		c.numAckedPackets++
+		c.congestionWindowCount++
 		// Divide by num_connections to smoothly increase the CWND at a faster
 		// rate than conventional Reno.
-		if c.numAckedPackets*uint64(c.numConnections) >= uint64(c.congestionWindow)/uint64(protocol.DefaultTCPMSS) {
-			c.congestionWindow += protocol.DefaultTCPMSS
-			c.numAckedPackets = 0
+		if protocol.PacketNumber(c.congestionWindowCount*protocol.ByteCount(c.numConnections)) >= c.congestionWindow {
+			c.congestionWindow++
+			c.congestionWindowCount = 0
 		}
 	} else {
-		c.congestionWindow = utils.MinByteCount(c.maxCongestionWindow, c.cubic.CongestionWindowAfterAck(ackedBytes, c.congestionWindow, c.rttStats.MinRTT(), eventTime))
+		c.congestionWindow = utils.MinPacketNumber(c.maxTCPCongestionWindow, c.cubic.CongestionWindowAfterAck(c.congestionWindow, c.rttStats.MinRTT()))
 	}
+
+	//Pablo Garrido
+	traces.PrintCWND(c.congestionWindow)
+	//EndPablo
 }
 
 func (c *cubicSender) isCwndLimited(bytesInFlight protocol.ByteCount) bool {
@@ -295,6 +280,10 @@ func (c *cubicSender) OnRetransmissionTimeout(packetsRetransmitted bool) {
 	c.cubic.Reset()
 	c.slowstartThreshold = c.congestionWindow / 2
 	c.congestionWindow = c.minCongestionWindow
+
+	//Pablo Garrido
+	traces.PrintCWND(c.congestionWindow)
+	//EndPablo
 }
 
 // OnConnectionMigration is called when the connection is migrated (?)
@@ -306,13 +295,25 @@ func (c *cubicSender) OnConnectionMigration() {
 	c.largestSentAtLastCutback = 0
 	c.lastCutbackExitedSlowstart = false
 	c.cubic.Reset()
-	c.numAckedPackets = 0
+	c.congestionWindowCount = 0
 	c.congestionWindow = c.initialCongestionWindow
 	c.slowstartThreshold = c.initialMaxCongestionWindow
-	c.maxCongestionWindow = c.initialMaxCongestionWindow
+	c.maxTCPCongestionWindow = c.initialMaxCongestionWindow
+
+	//Pablo Garrido
+	traces.PrintCWND(c.congestionWindow)
+	//EndPablo
 }
 
 // SetSlowStartLargeReduction allows enabling the SSLR experiment
 func (c *cubicSender) SetSlowStartLargeReduction(enabled bool) {
 	c.slowStartLargeReduction = enabled
+}
+
+// RetransmissionDelay gives the time to retransmission
+func (c *cubicSender) RetransmissionDelay() time.Duration {
+	if c.rttStats.SmoothedRTT() == 0 {
+		return 0
+	}
+	return c.rttStats.SmoothedRTT() + c.rttStats.MeanDeviation()*4
 }

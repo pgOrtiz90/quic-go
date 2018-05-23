@@ -20,17 +20,8 @@ var (
 
 // writePublicHeader writes a Public Header.
 func (h *Header) writePublicHeader(b *bytes.Buffer, pers protocol.Perspective, _ protocol.VersionNumber) error {
-	if h.VersionFlag && pers == protocol.PerspectiveServer {
-		return errors.New("PublicHeader: Writing of Version Negotiation Packets not supported")
-	}
 	if h.VersionFlag && h.ResetFlag {
 		return errResetAndVersionFlagSet
-	}
-	if !h.DestConnectionID.Equal(h.SrcConnectionID) {
-		return fmt.Errorf("PublicHeader: SrcConnectionID must be equal to DestConnectionID")
-	}
-	if len(h.DestConnectionID) != 8 {
-		return fmt.Errorf("PublicHeader: wrong length for Connection ID: %d (expected 8)", len(h.DestConnectionID))
 	}
 
 	publicFlagByte := uint8(0x00)
@@ -65,7 +56,7 @@ func (h *Header) writePublicHeader(b *bytes.Buffer, pers protocol.Perspective, _
 	b.WriteByte(publicFlagByte)
 
 	if !h.OmitConnectionID {
-		b.Write(h.DestConnectionID)
+		utils.BigEndian.WriteUint64(b, uint64(h.ConnectionID))
 	}
 	if h.VersionFlag && pers == protocol.PerspectiveClient {
 		utils.BigEndian.WriteUint32(b, uint32(h.Version))
@@ -73,23 +64,36 @@ func (h *Header) writePublicHeader(b *bytes.Buffer, pers protocol.Perspective, _
 	if len(h.DiversificationNonce) > 0 {
 		b.Write(h.DiversificationNonce)
 	}
+
 	// if we're a server, and the VersionFlag is set, we must not include anything else in the packet
-	if !h.hasPacketNumber(pers) {
-		return nil
+	//if !h.hasPacketNumber(pers) {
+	//		return nil
+	//}
+
+	//Pablo Garrido
+	if h.hasPacketNumber(pers) {
+		switch h.PacketNumberLen {
+		case protocol.PacketNumberLen1:
+			b.WriteByte(uint8(h.PacketNumber))
+		case protocol.PacketNumberLen2:
+			utils.BigEndian.WriteUint16(b, uint16(h.PacketNumber))
+		case protocol.PacketNumberLen4:
+			utils.BigEndian.WriteUint32(b, uint32(h.PacketNumber))
+		case protocol.PacketNumberLen6:
+			utils.BigEndian.WriteUint48(b, uint64(h.PacketNumber)&(1<<48-1))
+		default:
+			return errors.New("PublicHeader: PacketNumberLen not set")
+		}
 	}
 
-	switch h.PacketNumberLen {
-	case protocol.PacketNumberLen1:
-		b.WriteByte(uint8(h.PacketNumber))
-	case protocol.PacketNumberLen2:
-		utils.BigEndian.WriteUint16(b, uint16(h.PacketNumber))
-	case protocol.PacketNumberLen4:
-		utils.BigEndian.WriteUint32(b, uint32(h.PacketNumber))
-	case protocol.PacketNumberLen6:
-		utils.BigEndian.WriteUint48(b, uint64(h.PacketNumber)&(1<<48-1))
-	default:
-		return errors.New("PublicHeader: PacketNumberLen not set")
+	b.WriteByte(h.FecType)
+	if h.FecType > 0{
+		b.WriteByte(h.FecId)
+		b.WriteByte(h.FecRatio)
+		b.WriteByte(h.FecCount)
 	}
+
+	//End Pablo
 
 	return nil
 }
@@ -132,23 +136,21 @@ func parsePublicHeader(b *bytes.Reader, packetSentBy protocol.Perspective) (*Hea
 
 	// Connection ID
 	if !header.OmitConnectionID {
-		connID := make(protocol.ConnectionID, 8)
-		if _, err := io.ReadFull(b, connID); err != nil {
-			if err == io.ErrUnexpectedEOF {
-				err = io.EOF
-			}
+		var connID uint64
+		connID, err = utils.BigEndian.ReadUint64(b)
+		if err != nil {
 			return nil, err
 		}
-		if connID[0] == 0 && connID[1] == 0 && connID[2] == 0 && connID[3] == 0 && connID[4] == 0 && connID[5] == 0 && connID[6] == 0 && connID[7] == 0 {
+		header.ConnectionID = protocol.ConnectionID(connID)
+		if header.ConnectionID == 0 {
 			return nil, errInvalidConnectionID
 		}
-		header.DestConnectionID = connID
-		header.SrcConnectionID = connID
 	}
 
-	// Contrary to what the gQUIC wire spec says, the 0x4 bit only indicates the presence of the diversification nonce for packets sent by the server.
-	// It doesn't have any meaning when sent by the client.
 	if packetSentBy == protocol.PerspectiveServer && publicFlagByte&0x04 > 0 {
+		// TODO: remove the if once the Google servers send the correct value
+		// assume that a packet doesn't contain a diversification nonce if the version flag or the reset flag is set, no matter what the public flag says
+		// see https://github.com/lucas-clemente/quic-go/issues/232
 		if !header.VersionFlag && !header.ResetFlag {
 			header.DiversificationNonce = make([]byte, 32)
 			if _, err := io.ReadFull(b, header.DiversificationNonce); err != nil {
@@ -156,7 +158,6 @@ func parsePublicHeader(b *bytes.Reader, packetSentBy protocol.Perspective) (*Hea
 			}
 		}
 	}
-
 	// Version (optional)
 	if !header.ResetFlag && header.VersionFlag {
 		if packetSentBy == protocol.PerspectiveServer { // parse the version negotiation packet
@@ -197,6 +198,31 @@ func parsePublicHeader(b *bytes.Reader, packetSentBy protocol.Perspective) (*Hea
 		}
 		header.PacketNumber = protocol.PacketNumber(packetNumber)
 	}
+
+	//Pablo Garrido - Parser FEC options
+	header.FecType, err = b.ReadByte()
+	if err != nil {
+		return nil, qerr.InvalidFecData
+	}
+
+	if header.FecType > 0 {
+		header.FecId, err = b.ReadByte()
+		if err != nil{
+			return nil, err
+		}
+
+		header.FecRatio,err = b.ReadByte()
+		if err != nil{
+			return nil, err
+		}
+
+		header.FecCount, err = b.ReadByte()
+		if err != nil {
+			return nil, err
+		}
+	}
+	//End Pablo
+
 	return header, nil
 }
 
@@ -225,6 +251,11 @@ func (h *Header) getPublicHeaderLength(pers protocol.Perspective) (protocol.Byte
 		length += 4
 	}
 	length += protocol.ByteCount(len(h.DiversificationNonce))
+
+	if h.FecType > 0{
+		length += 4
+	}
+
 	return length, nil
 }
 
@@ -240,10 +271,14 @@ func (h *Header) hasPacketNumber(packetSentBy protocol.Perspective) bool {
 	return true
 }
 
-func (h *Header) logPublicHeader(logger utils.Logger) {
+func (h *Header) logPublicHeader() {
+	connID := "(omitted)"
+	if !h.OmitConnectionID {
+		connID = fmt.Sprintf("%#x", h.ConnectionID)
+	}
 	ver := "(unset)"
 	if h.Version != 0 {
 		ver = h.Version.String()
 	}
-	logger.Debugf("\tPublic Header{ConnectionID: %s, PacketNumber: %#x, PacketNumberLen: %d, Version: %s, DiversificationNonce: %#v}", h.DestConnectionID, h.PacketNumber, h.PacketNumberLen, ver, h.DiversificationNonce)
+	utils.Debugf("   Public Header{ConnectionID: %s, PacketNumber: %#x, PacketNumberLen: %d, Version: %s, DiversificationNonce: %#v}", connID, h.PacketNumber, h.PacketNumberLen, ver, h.DiversificationNonce)
 }

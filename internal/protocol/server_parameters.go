@@ -2,23 +2,19 @@ package protocol
 
 import "time"
 
-// MaxPacketSizeIPv4 is the maximum packet size that we use for sending IPv4 packets.
-const MaxPacketSizeIPv4 = 1252
-
-// MaxPacketSizeIPv6 is the maximum packet size that we use for sending IPv6 packets.
-const MaxPacketSizeIPv6 = 1232
+// MaxPacketSize is the maximum packet size that we use for sending packets.
+// It includes the QUIC packet header, but excludes the UDP and IP header.
+const MaxPacketSize ByteCount = 1200
 
 // NonForwardSecurePacketSizeReduction is the number of bytes a non forward-secure packet has to be smaller than a forward-secure packet
 // This makes sure that those packets can always be retransmitted without splitting the contained StreamFrames
 const NonForwardSecurePacketSizeReduction = 50
 
-const defaultMaxCongestionWindowPackets = 1000
-
 // DefaultMaxCongestionWindow is the default for the max congestion window
-const DefaultMaxCongestionWindow ByteCount = defaultMaxCongestionWindowPackets * DefaultTCPMSS
+const DefaultMaxCongestionWindow = 1000
 
 // InitialCongestionWindow is the initial congestion window in QUIC packets
-const InitialCongestionWindow ByteCount = 32 * DefaultTCPMSS
+const InitialCongestionWindow = 32
 
 // MaxUndecryptablePackets limits the number of undecryptable packets that a
 // session queues for later until it sends a public reset.
@@ -28,13 +24,20 @@ const MaxUndecryptablePackets = 10
 // This timeout allows the Go scheduler to switch to the Go rountine that reads the crypto stream and to escalate the crypto
 const PublicResetTimeout = 500 * time.Millisecond
 
+// AckSendDelay is the maximum delay that can be applied to an ACK for a retransmittable packet
+// This is the value Chromium is using
+const AckSendDelay = 25 * time.Millisecond
+
 // ReceiveStreamFlowControlWindow is the stream-level flow control window for receiving data
 // This is the value that Google servers are using
-const ReceiveStreamFlowControlWindow = (1 << 10) * 32 // 32 kB
+//const ReceiveStreamFlowControlWindow = (1 << 10) * 32 // 32 kB
+const ReceiveStreamFlowControlWindow = 1 * (1 << 20) // 1 MB
 
 // ReceiveConnectionFlowControlWindow is the connection-level flow control window for receiving data
 // This is the value that Google servers are using
-const ReceiveConnectionFlowControlWindow = (1 << 10) * 48 // 48 kB
+//const ReceiveConnectionFlowControlWindow = (1 << 10) * 48 // 48 kB
+const ReceiveConnectionFlowControlWindow = 1.5 * (1 << 20) // 1.5 MB
+
 
 // DefaultMaxReceiveStreamFlowControlWindowServer is the default maximum stream-level flow control window for receiving data, for the server
 // This is the value that Google servers are using
@@ -72,7 +75,7 @@ const MaxStreamsMultiplier = 1.1
 const MaxStreamsMinimumIncrement = 10
 
 // MaxSessionUnprocessedPackets is the max number of packets stored in each session that are not yet processed.
-const MaxSessionUnprocessedPackets = defaultMaxCongestionWindowPackets
+const MaxSessionUnprocessedPackets = DefaultMaxCongestionWindow
 
 // SkipPacketAveragePeriodLength is the average period length in which one packet number is skipped to prevent an Optimistic ACK attack
 const SkipPacketAveragePeriodLength PacketNumber = 500
@@ -83,21 +86,17 @@ const MaxTrackedSkippedPackets = 10
 // CookieExpiryTime is the valid time of a cookie
 const CookieExpiryTime = 24 * time.Hour
 
-// MaxOutstandingSentPackets is maximum number of packets saved for retransmission.
-// When reached, it imposes a soft limit on sending new packets:
-// Sending ACKs and retransmission is still allowed, but now new regular packets can be sent.
-const MaxOutstandingSentPackets = 2 * defaultMaxCongestionWindowPackets
-
-// MaxTrackedSentPackets is maximum number of sent packets saved for retransmission.
-// When reached, no more packets will be sent.
-// This value *must* be larger than MaxOutstandingSentPackets.
-const MaxTrackedSentPackets = MaxOutstandingSentPackets * 5 / 4
+// MaxTrackedSentPackets is maximum number of sent packets saved for either later retransmission or entropy calculation
+const MaxTrackedSentPackets = 2 * DefaultMaxCongestionWindow
 
 // MaxTrackedReceivedAckRanges is the maximum number of ACK ranges tracked
-const MaxTrackedReceivedAckRanges = defaultMaxCongestionWindowPackets
+const MaxTrackedReceivedAckRanges = DefaultMaxCongestionWindow
 
 // MaxNonRetransmittableAcks is the maximum number of packets containing an ACK, but no retransmittable frames, that we send in a row
 const MaxNonRetransmittableAcks = 19
+
+// RetransmittablePacketsBeforeAck is the number of retransmittable that an ACK is sent for
+const RetransmittablePacketsBeforeAck = 10
 
 // MaxStreamFrameSorterGaps is the maximum number of gaps between received StreamFrames
 // prevents DoS attacks against the streamFrameSorter
@@ -135,19 +134,7 @@ const NumCachedCertificates = 128
 // 2. it reduces the head-of-line blocking, when a packet is lost
 const MinStreamFrameSize ByteCount = 128
 
-// MaxAckFrameSize is the maximum size for an (IETF QUIC) ACK frame that we write
-// Due to the varint encoding, ACK frames can grow (almost) indefinitely large.
-// The MaxAckFrameSize should be large enough to encode many ACK range,
-// but must ensure that a maximum size ACK frame fits into one packet.
-const MaxAckFrameSize ByteCount = 1000
-
 // MinPacingDelay is the minimum duration that is used for packet pacing
 // If the packet packing frequency is higher, multiple packets might be sent at once.
 // Example: For a packet pacing delay of 20 microseconds, we would send 5 packets at once, wait for 100 microseconds, and so forth.
 const MinPacingDelay time.Duration = 100 * time.Microsecond
-
-// ConnectionIDLen is the length of the source Connection ID used on IETF QUIC packets.
-// The Short Header contains the connection ID, but not the length,
-// so we need to know this value in advance (or encode it into the connection ID).
-// TODO: make this configurable
-const ConnectionIDLen = 8

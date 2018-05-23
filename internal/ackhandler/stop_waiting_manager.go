@@ -30,9 +30,8 @@ func (s *stopWaitingManager) GetStopWaitingFrame(force bool) *wire.StopWaitingFr
 }
 
 func (s *stopWaitingManager) ReceivedAck(ack *wire.AckFrame) {
-	largestAcked := ack.LargestAcked()
-	if largestAcked >= s.nextLeastUnacked {
-		s.nextLeastUnacked = largestAcked + 1
+	if ack.LargestAcked >= s.nextLeastUnacked {
+		s.nextLeastUnacked = ack.LargestAcked + 1
 	}
 }
 

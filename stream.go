@@ -8,6 +8,7 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/flowcontrol"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/wire"
+	"fmt"
 )
 
 const (
@@ -18,6 +19,7 @@ const (
 // The streamSender is notified by the stream about various events.
 type streamSender interface {
 	queueControlFrame(wire.Frame)
+	onHasWindowUpdate(protocol.StreamID)
 	onHasStreamData(protocol.StreamID)
 	onStreamCompleted(protocol.StreamID)
 }
@@ -31,6 +33,10 @@ type uniStreamSender struct {
 
 func (s *uniStreamSender) queueControlFrame(f wire.Frame) {
 	s.streamSender.queueControlFrame(f)
+}
+
+func (s *uniStreamSender) onHasWindowUpdate(id protocol.StreamID) {
+	s.streamSender.onHasWindowUpdate(id)
 }
 
 func (s *uniStreamSender) onHasStreamData(id protocol.StreamID) {
@@ -100,7 +106,8 @@ func newStream(streamID protocol.StreamID,
 	flowController flowcontrol.StreamFlowController,
 	version protocol.VersionNumber,
 ) *stream {
-	s := &stream{sender: sender, version: version}
+	fmt.Printf("New Stream2\n")
+	s := &stream{sender: sender}
 	senderForSendStream := &uniStreamSender{
 		streamSender: sender,
 		onStreamCompletedImpl: func() {

@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/bifurcation/mint"
@@ -77,7 +76,6 @@ func tlsToMintConfig(tlsConf *tls.Config, pers protocol.Perspective) (*mint.Conf
 		mconf.ServerName = tlsConf.ServerName
 		mconf.InsecureSkipVerify = tlsConf.InsecureSkipVerify
 		mconf.Certificates = make([]*mint.Certificate, len(tlsConf.Certificates))
-		mconf.RootCAs = tlsConf.RootCAs
 		mconf.VerifyPeerCertificate = tlsConf.VerifyPeerCertificate
 		for i, certChain := range tlsConf.Certificates {
 			mconf.Certificates[i] = &mint.Certificate{
@@ -108,45 +106,39 @@ func tlsToMintConfig(tlsConf *tls.Config, pers protocol.Perspective) (*mint.Conf
 
 // unpackInitialOrRetryPacket unpacks packets Initial and Retry packets
 // These packets must contain a STREAM_FRAME for the crypto stream, starting at offset 0.
-func unpackInitialPacket(aead crypto.AEAD, hdr *wire.Header, data []byte, logger utils.Logger, version protocol.VersionNumber) (*wire.StreamFrame, error) {
-	decrypted, err := aead.Open(data[:0], data, hdr.PacketNumber, hdr.Raw)
+func unpackInitialPacket(aead crypto.AEAD, hdr *wire.Header, data []byte, version protocol.VersionNumber) (*wire.StreamFrame, error) {
+	unpacker := &packetUnpacker{aead: &nullAEAD{aead}, version: version}
+	packet, err := unpacker.Unpack(hdr.Raw, hdr, data)
 	if err != nil {
 		return nil, err
 	}
 	var frame *wire.StreamFrame
-	r := bytes.NewReader(decrypted)
-	for {
-		f, err := wire.ParseNextFrame(r, hdr, version)
-		if err != nil {
-			return nil, err
-		}
+	for _, f := range packet.frames {
 		var ok bool
-		if frame, ok = f.(*wire.StreamFrame); ok || frame == nil {
+		frame, ok = f.(*wire.StreamFrame)
+		if ok {
 			break
 		}
 	}
 	if frame == nil {
 		return nil, errors.New("Packet doesn't contain a STREAM_FRAME")
 	}
-	if frame.StreamID != version.CryptoStreamID() {
-		return nil, fmt.Errorf("Received STREAM_FRAME for wrong stream (Stream ID %d)", frame.StreamID)
-	}
 	// We don't need a check for the stream ID here.
 	// The packetUnpacker checks that there's no unencrypted stream data except for the crypto stream.
 	if frame.Offset != 0 {
 		return nil, errors.New("received stream data with non-zero offset")
 	}
-	if logger.Debug() {
-		logger.Debugf("<- Reading packet 0x%x (%d bytes) for connection %x", hdr.PacketNumber, len(data)+len(hdr.Raw), hdr.DestConnectionID)
-		hdr.Log(logger)
-		wire.LogFrame(logger, frame, false)
+	if utils.Debug() {
+		utils.Debugf("<- Reading packet 0x%x (%d bytes) for connection %x", hdr.PacketNumber, len(data)+len(hdr.Raw), hdr.ConnectionID)
+		hdr.Log()
+		wire.LogFrame(frame, false)
 	}
 	return frame, nil
 }
 
 // packUnencryptedPacket provides a low-overhead way to pack a packet.
 // It is supposed to be used in the early stages of the handshake, before a session (which owns a packetPacker) is available.
-func packUnencryptedPacket(aead crypto.AEAD, hdr *wire.Header, f wire.Frame, pers protocol.Perspective, logger utils.Logger) ([]byte, error) {
+func packUnencryptedPacket(aead crypto.AEAD, hdr *wire.Header, f wire.Frame, pers protocol.Perspective) ([]byte, error) {
 	raw := *getPacketBuffer()
 	buffer := bytes.NewBuffer(raw[:0])
 	if err := hdr.Write(buffer, pers, hdr.Version); err != nil {
@@ -159,10 +151,10 @@ func packUnencryptedPacket(aead crypto.AEAD, hdr *wire.Header, f wire.Frame, per
 	raw = raw[0:buffer.Len()]
 	_ = aead.Seal(raw[payloadStartIndex:payloadStartIndex], raw[payloadStartIndex:], hdr.PacketNumber, raw[:payloadStartIndex])
 	raw = raw[0 : buffer.Len()+aead.Overhead()]
-	if logger.Debug() {
-		logger.Debugf("-> Sending packet 0x%x (%d bytes) for connection %x, %s", hdr.PacketNumber, len(raw), hdr.SrcConnectionID, protocol.EncryptionUnencrypted)
-		hdr.Log(logger)
-		wire.LogFrame(logger, f, true)
+	if utils.Debug() {
+		utils.Debugf("-> Sending packet 0x%x (%d bytes) for connection %x, %s", hdr.PacketNumber, len(raw), hdr.ConnectionID, protocol.EncryptionUnencrypted)
+		hdr.Log()
+		wire.LogFrame(f, true)
 	}
 	return raw, nil
 }

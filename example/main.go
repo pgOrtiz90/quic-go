@@ -91,7 +91,7 @@ func init() {
 				}
 			}
 			if err != nil {
-				utils.DefaultLogger.Infof("Error receiving upload: %#v", err)
+				utils.Infof("Error receiving upload: %#v", err)
 			}
 		}
 		io.WriteString(w, `<html><body><form action="/demo/upload" method="post" enctype="multipart/form-data">
@@ -126,14 +126,12 @@ func main() {
 	tls := flag.Bool("tls", false, "activate support for IETF QUIC (work in progress)")
 	flag.Parse()
 
-	logger := utils.DefaultLogger
-
 	if *verbose {
-		logger.SetLogLevel(utils.LogLevelDebug)
+		utils.SetLogLevel(utils.LogLevelDebug)
 	} else {
-		logger.SetLogLevel(utils.LogLevelInfo)
+		utils.SetLogLevel(utils.LogLevelInfo)
 	}
-	logger.SetLogTimeFormat("")
+	utils.SetLogTimeFormat("")
 
 	versions := protocol.SupportedVersions
 	if *tls {

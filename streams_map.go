@@ -206,14 +206,8 @@ func (m *streamsMap) HandleMaxStreamIDFrame(f *wire.MaxStreamIDFrame) error {
 }
 
 func (m *streamsMap) UpdateLimits(p *handshake.TransportParameters) {
-	// Max{Uni,Bidi}StreamID returns the highest stream ID that the peer is allowed to open.
-	// Invert the perspective to determine the value that we are allowed to open.
-	peerPers := protocol.PerspectiveServer
-	if m.perspective == protocol.PerspectiveServer {
-		peerPers = protocol.PerspectiveClient
-	}
-	m.outgoingBidiStreams.SetMaxStream(protocol.MaxBidiStreamID(int(p.MaxBidiStreams), peerPers))
-	m.outgoingUniStreams.SetMaxStream(protocol.MaxUniStreamID(int(p.MaxUniStreams), peerPers))
+	m.outgoingBidiStreams.SetMaxStream(p.MaxBidiStreamID)
+	m.outgoingUniStreams.SetMaxStream(p.MaxUniStreamID)
 }
 
 func (m *streamsMap) CloseWithError(err error) {

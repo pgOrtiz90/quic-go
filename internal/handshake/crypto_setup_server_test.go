@@ -161,17 +161,15 @@ var _ = Describe("Server Crypto Setup", func() {
 		supportedVersions = []protocol.VersionNumber{version, 98, 99}
 		csInt, err := NewCryptoSetup(
 			stream,
-			protocol.ConnectionID{1, 2, 3, 4, 5, 6, 7, 8},
+			protocol.ConnectionID(42),
 			remoteAddr,
 			version,
-			make([]byte, 32), // div nonce
 			scfg,
 			&TransportParameters{IdleTimeout: protocol.DefaultIdleTimeout},
 			supportedVersions,
 			nil,
 			paramsChan,
 			handshakeEvent,
-			utils.DefaultLogger,
 		)
 		Expect(err).NotTo(HaveOccurred())
 		cs = csInt.(*cryptoSetupServer)
@@ -181,9 +179,24 @@ var _ = Describe("Server Crypto Setup", func() {
 		sourceAddrValid = true
 		cs.acceptSTKCallback = func(_ net.Addr, _ *Cookie) bool { return sourceAddrValid }
 		cs.keyDerivation = mockQuicCryptoKeyDerivation
-		cs.keyExchange = func() (crypto.KeyExchange, error) { return &mockKEX{ephermal: true}, nil }
+		cs.keyExchange = func() crypto.KeyExchange { return &mockKEX{ephermal: true} }
 		cs.nullAEAD = mockcrypto.NewMockAEAD(mockCtrl)
 		cs.cryptoStream = stream
+	})
+
+	Context("diversification nonce", func() {
+		BeforeEach(func() {
+			cs.secureAEAD = mockcrypto.NewMockAEAD(mockCtrl)
+			cs.receivedForwardSecurePacket = false
+
+			Expect(cs.DiversificationNonce()).To(BeEmpty())
+			// Div nonce is created after CHLO
+			cs.handleCHLO("", nil, map[Tag][]byte{TagNONC: nonce32})
+		})
+
+		It("returns diversification nonces", func() {
+			Expect(cs.DiversificationNonce()).To(HaveLen(32))
+		})
 	})
 
 	Context("when responding to client messages", func() {

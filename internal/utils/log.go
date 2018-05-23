@@ -11,6 +11,8 @@ import (
 // LogLevel of quic-go
 type LogLevel uint8
 
+const logEnv = "QUIC_GO_LOG_LEVEL"
+
 const (
 	// LogLevelNothing disables
 	LogLevelNothing LogLevel = iota
@@ -20,94 +22,87 @@ const (
 	LogLevelInfo
 	// LogLevelDebug enables debug logs (e.g. packet contents)
 	LogLevelDebug
+	// LogLevelDebug enables debug logs and FEC logs
+	LogLevelDebugFEC
 )
 
-const logEnv = "QUIC_GO_LOG_LEVEL"
-
-// A Logger logs.
-type Logger interface {
-	SetLogLevel(LogLevel)
-	SetLogTimeFormat(format string)
-	Debug() bool
-
-	Errorf(format string, args ...interface{})
-	Infof(format string, args ...interface{})
-	Debugf(format string, args ...interface{})
-}
-
-// DefaultLogger is used by quic-go for logging.
-var DefaultLogger Logger
-
-type defaultLogger struct {
-	logLevel   LogLevel
-	timeFormat string
-}
-
-var _ Logger = &defaultLogger{}
+var (
+	logLevel   = LogLevelNothing
+	timeFormat = ""
+)
 
 // SetLogLevel sets the log level
-func (l *defaultLogger) SetLogLevel(level LogLevel) {
-	l.logLevel = level
+func SetLogLevel(level LogLevel) {
+	logLevel = level
 }
 
 // SetLogTimeFormat sets the format of the timestamp
 // an empty string disables the logging of timestamps
-func (l *defaultLogger) SetLogTimeFormat(format string) {
+func SetLogTimeFormat(format string) {
 	log.SetFlags(0) // disable timestamp logging done by the log package
-	l.timeFormat = format
+	timeFormat = format
+}
+
+
+//DebugFEC logs
+// Debugf logs something
+func DebugfFEC(format string, args ...interface{}) {
+	if logLevel == LogLevelDebugFEC  || logLevel == LogLevelDebug{
+		logMessage(format, args...)
+	}
 }
 
 // Debugf logs something
-func (l *defaultLogger) Debugf(format string, args ...interface{}) {
-	if l.logLevel == LogLevelDebug {
-		l.logMessage(format, args...)
+func Debugf(format string, args ...interface{}) {
+	if logLevel == LogLevelDebug {
+		logMessage(format, args...)
 	}
 }
 
 // Infof logs something
-func (l *defaultLogger) Infof(format string, args ...interface{}) {
-	if l.logLevel >= LogLevelInfo {
-		l.logMessage(format, args...)
+func Infof(format string, args ...interface{}) {
+	if logLevel >= LogLevelInfo {
+		logMessage(format, args...)
 	}
 }
 
 // Errorf logs something
-func (l *defaultLogger) Errorf(format string, args ...interface{}) {
-	if l.logLevel >= LogLevelError {
-		l.logMessage(format, args...)
+func Errorf(format string, args ...interface{}) {
+	if logLevel >= LogLevelError {
+		logMessage(format, args...)
 	}
 }
 
-func (l *defaultLogger) logMessage(format string, args ...interface{}) {
-	if len(l.timeFormat) > 0 {
-		log.Printf(time.Now().Format(l.timeFormat)+" "+format, args...)
+func logMessage(format string, args ...interface{}) {
+	if len(timeFormat) > 0 {
+		log.Printf(time.Now().Format(timeFormat)+" "+format, args...)
 	} else {
 		log.Printf(format, args...)
 	}
 }
 
 // Debug returns true if the log level is LogLevelDebug
-func (l *defaultLogger) Debug() bool {
-	return l.logLevel == LogLevelDebug
+func Debug() bool {
+	return logLevel == LogLevelDebug
 }
 
 func init() {
-	DefaultLogger = &defaultLogger{}
-	DefaultLogger.SetLogLevel(readLoggingEnv())
+	readLoggingEnv()
 }
 
-func readLoggingEnv() LogLevel {
+func readLoggingEnv() {
 	switch strings.ToLower(os.Getenv(logEnv)) {
 	case "":
-		return LogLevelNothing
+		return
 	case "debug":
-		return LogLevelDebug
+		logLevel = LogLevelDebug
 	case "info":
-		return LogLevelInfo
+		logLevel = LogLevelInfo
 	case "error":
-		return LogLevelError
+		logLevel = LogLevelError
+	case "FEC":
+		logLevel = LogLevelDebugFEC
 	default:
 		fmt.Fprintln(os.Stderr, "invalid quic-go log level, see https://github.com/lucas-clemente/quic-go/wiki/Logging")
-		return LogLevelNothing
 	}
 }

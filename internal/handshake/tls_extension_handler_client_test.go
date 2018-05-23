@@ -7,7 +7,6 @@ import (
 	"github.com/bifurcation/mint"
 	"github.com/bifurcation/mint/syntax"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -19,7 +18,7 @@ var _ = Describe("TLS Extension Handler, for the client", func() {
 	)
 
 	BeforeEach(func() {
-		handler = NewExtensionHandlerClient(&TransportParameters{}, protocol.VersionWhatever, nil, protocol.VersionWhatever, utils.DefaultLogger).(*extensionHandlerClient)
+		handler = NewExtensionHandlerClient(&TransportParameters{}, protocol.VersionWhatever, nil, protocol.VersionWhatever).(*extensionHandlerClient)
 		el = make(mint.ExtensionList, 0)
 	})
 
@@ -67,11 +66,11 @@ var _ = Describe("TLS Extension Handler, for the client", func() {
 		BeforeEach(func() {
 			fakeBody = &tlsExtensionBody{data: []byte("foobar foobar")}
 			parameters = map[transportParameterID][]byte{
-				initialMaxStreamDataParameterID:  {0x11, 0x22, 0x33, 0x44},
-				initialMaxDataParameterID:        {0x22, 0x33, 0x44, 0x55},
-				initialMaxBidiStreamsParameterID: {0x33, 0x44},
-				idleTimeoutParameterID:           {0x13, 0x37},
-				statelessResetTokenParameterID:   bytes.Repeat([]byte{0}, 16),
+				initialMaxStreamDataParameterID:   {0x11, 0x22, 0x33, 0x44},
+				initialMaxDataParameterID:         {0x22, 0x33, 0x44, 0x55},
+				initialMaxStreamIDBiDiParameterID: {0x33, 0x44, 0x55, 0x66},
+				idleTimeoutParameterID:            {0x13, 0x37},
+				statelessResetTokenParameterID:    bytes.Repeat([]byte{0}, 16),
 			}
 		})
 

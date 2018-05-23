@@ -18,7 +18,7 @@ var _ = Describe("STREAM frame (for IETF QUIC)", func() {
 			data = append(data, encodeVarInt(0xdecafbad)...) // offset
 			data = append(data, []byte("foobar")...)
 			r := bytes.NewReader(data)
-			frame, err := parseStreamFrame(r, versionIETFFrames)
+			frame, err := ParseStreamFrame(r, versionIETFFrames)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(frame.StreamID).To(Equal(protocol.StreamID(0x12345)))
 			Expect(frame.Data).To(Equal([]byte("foobar")))
@@ -33,7 +33,7 @@ var _ = Describe("STREAM frame (for IETF QUIC)", func() {
 			data = append(data, encodeVarInt(4)...)       // data length
 			data = append(data, []byte("foobar")...)
 			r := bytes.NewReader(data)
-			frame, err := parseStreamFrame(r, versionIETFFrames)
+			frame, err := ParseStreamFrame(r, versionIETFFrames)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(frame.StreamID).To(Equal(protocol.StreamID(0x12345)))
 			Expect(frame.Data).To(Equal([]byte("foob")))
@@ -47,7 +47,7 @@ var _ = Describe("STREAM frame (for IETF QUIC)", func() {
 			data = append(data, encodeVarInt(9)...) // stream ID
 			data = append(data, []byte("foobar")...)
 			r := bytes.NewReader(data)
-			frame, err := parseStreamFrame(r, versionIETFFrames)
+			frame, err := ParseStreamFrame(r, versionIETFFrames)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(frame.StreamID).To(Equal(protocol.StreamID(9)))
 			Expect(frame.Data).To(Equal([]byte("foobar")))
@@ -56,24 +56,11 @@ var _ = Describe("STREAM frame (for IETF QUIC)", func() {
 			Expect(r.Len()).To(BeZero())
 		})
 
-		It("allows empty frames at offset 0", func() {
+		It("rejects empty frames than don't have the FIN bit set", func() {
 			data := []byte{0x10}
 			data = append(data, encodeVarInt(0x1337)...) // stream ID
 			r := bytes.NewReader(data)
-			f, err := parseStreamFrame(r, versionIETFFrames)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(f.StreamID).To(Equal(protocol.StreamID(0x1337)))
-			Expect(f.Data).To(BeEmpty())
-			Expect(f.Offset).To(BeZero())
-			Expect(f.FinBit).To(BeFalse())
-		})
-
-		It("rejects empty frames than don't have the FIN bit set", func() {
-			data := []byte{0x10 ^ 0x4}
-			data = append(data, encodeVarInt(0x1337)...)     // stream ID
-			data = append(data, encodeVarInt(0xdecafbad)...) // offset
-			r := bytes.NewReader(data)
-			_, err := parseStreamFrame(r, versionIETFFrames)
+			_, err := ParseStreamFrame(r, versionIETFFrames)
 			Expect(err).To(MatchError(qerr.EmptyStreamFrameNoFin))
 		})
 
@@ -83,7 +70,7 @@ var _ = Describe("STREAM frame (for IETF QUIC)", func() {
 			data = append(data, encodeVarInt(uint64(protocol.MaxByteCount-5))...) // offset
 			data = append(data, []byte("foobar")...)
 			r := bytes.NewReader(data)
-			_, err := parseStreamFrame(r, versionIETFFrames)
+			_, err := ParseStreamFrame(r, versionIETFFrames)
 			Expect(err).To(MatchError(qerr.Error(qerr.InvalidStreamData, "data overflows maximum offset")))
 		})
 
@@ -93,10 +80,10 @@ var _ = Describe("STREAM frame (for IETF QUIC)", func() {
 			data = append(data, encodeVarInt(0xdecafbad)...) // offset
 			data = append(data, encodeVarInt(6)...)          // data length
 			data = append(data, []byte("foobar")...)
-			_, err := parseStreamFrame(bytes.NewReader(data), versionIETFFrames)
+			_, err := ParseStreamFrame(bytes.NewReader(data), versionIETFFrames)
 			Expect(err).NotTo(HaveOccurred())
 			for i := range data {
-				_, err := parseStreamFrame(bytes.NewReader(data[0:i]), versionIETFFrames)
+				_, err := ParseStreamFrame(bytes.NewReader(data[0:i]), versionIETFFrames)
 				Expect(err).To(HaveOccurred())
 			}
 		})

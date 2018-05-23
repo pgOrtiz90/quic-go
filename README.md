@@ -1,4 +1,4 @@
-# A QUIC + FEC  implementation in pure Go
+# A QUIC implementation in pure Go
 
 <img src="docs/quic.png" width=303 height=124>
 

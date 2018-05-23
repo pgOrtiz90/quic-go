@@ -150,7 +150,6 @@ func (m *streamsMapLegacy) openStreamImpl() (streamI, error) {
 	if m.numOutgoingStreams >= m.maxOutgoingStreams {
 		return nil, qerr.TooManyOpenStreams
 	}
-
 	m.numOutgoingStreams++
 	s := m.newStream(m.nextStreamToOpen)
 	m.nextStreamToOpen += 2

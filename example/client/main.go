@@ -19,14 +19,12 @@ func main() {
 	flag.Parse()
 	urls := flag.Args()
 
-	logger := utils.DefaultLogger
-
 	if *verbose {
-		logger.SetLogLevel(utils.LogLevelDebug)
+		utils.SetLogLevel(utils.LogLevelDebug)
 	} else {
-		logger.SetLogLevel(utils.LogLevelInfo)
+		utils.SetLogLevel(utils.LogLevelInfo)
 	}
-	logger.SetLogTimeFormat("")
+	utils.SetLogTimeFormat("")
 
 	versions := protocol.SupportedVersions
 	if *tls {
@@ -44,21 +42,21 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(len(urls))
 	for _, addr := range urls {
-		logger.Infof("GET %s", addr)
+		utils.Infof("GET %s", addr)
 		go func(addr string) {
 			rsp, err := hclient.Get(addr)
 			if err != nil {
 				panic(err)
 			}
-			logger.Infof("Got response for %s: %#v", addr, rsp)
+			utils.Infof("Got response for %s: %#v", addr, rsp)
 
 			body := &bytes.Buffer{}
 			_, err = io.Copy(body, rsp.Body)
 			if err != nil {
 				panic(err)
 			}
-			logger.Infof("Request Body:")
-			logger.Infof("%s", body.Bytes())
+			utils.Infof("Request Body:")
+			utils.Infof("%s", body.Bytes())
 			wg.Done()
 		}(addr)
 	}

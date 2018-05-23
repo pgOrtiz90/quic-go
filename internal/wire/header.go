@@ -4,24 +4,17 @@ import (
 	"bytes"
 
 	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
 )
 
 // Header is the header of a QUIC packet.
 // It contains fields that are only needed for the gQUIC Public Header and the IETF draft Header.
 type Header struct {
-	IsPublicHeader bool
-
-	Raw []byte
-
-	Version protocol.VersionNumber
-
-	DestConnectionID protocol.ConnectionID
-	SrcConnectionID  protocol.ConnectionID
+	Raw              []byte
+	ConnectionID     protocol.ConnectionID
 	OmitConnectionID bool
-
-	PacketNumberLen protocol.PacketNumberLen
-	PacketNumber    protocol.PacketNumber
+	PacketNumberLen  protocol.PacketNumberLen
+	PacketNumber     protocol.PacketNumber
+	Version          protocol.VersionNumber // VersionNumber sent by the client
 
 	IsVersionNegotiation bool
 	SupportedVersions    []protocol.VersionNumber // Version Number sent in a Version Negotiation Packet by the server
@@ -35,7 +28,17 @@ type Header struct {
 	Type         protocol.PacketType
 	IsLongHeader bool
 	KeyPhase     int
-	PayloadLen   protocol.ByteCount
+
+	// only needed for logging
+	isPublicHeader bool
+
+	//Pablo
+	FecType	byte
+	FecRatio byte
+	FecId		byte
+	FecCount byte
+	//End Pablo
+
 }
 
 // ParseHeaderSentByServer parses the header for a packet that was sent by the server.
@@ -55,7 +58,6 @@ func ParseHeaderSentByServer(b *bytes.Reader, version protocol.VersionNumber) (*
 		// the client knows the version that this packet was sent with
 		isPublicHeader = !version.UsesTLS()
 	}
-
 	return parsePacketHeader(b, protocol.PerspectiveServer, isPublicHeader)
 }
 
@@ -67,13 +69,12 @@ func ParseHeaderSentByClient(b *bytes.Reader) (*Header, error) {
 	}
 	_ = b.UnreadByte() // unread the type byte
 
-	// In an IETF QUIC packet header
-	// * either 0x80 is set (for the Long Header)
-	// * or 0x8 is unset (for the Short Header)
-	// In a gQUIC Public Header
-	// * 0x80 is always unset and
-	// * and 0x8 is always set (this is the Connection ID flag, which the client always sets)
-	isPublicHeader := typeByte&0x88 == 0x8
+	// If this is a gQUIC header 0x80 and 0x40 will be set to 0.
+	// If this is an IETF QUIC header there are two options:
+	// * either 0x80 will be 1 (for the Long Header)
+	// * or 0x40 (the Connection ID Flag) will be 0 (for the Short Header), since we don't the client to omit it
+	isPublicHeader := typeByte&0xc0 == 0
+
 	return parsePacketHeader(b, protocol.PerspectiveClient, isPublicHeader)
 }
 
@@ -84,16 +85,16 @@ func parsePacketHeader(b *bytes.Reader, sentBy protocol.Perspective, isPublicHea
 		if err != nil {
 			return nil, err
 		}
-		hdr.IsPublicHeader = true // save that this is a Public Header, so we can log it correctly later
+		hdr.isPublicHeader = true // save that this is a Public Header, so we can log it correctly later
 		return hdr, nil
 	}
-	return parseHeader(b)
+	return parseHeader(b, sentBy)
 }
 
 // Write writes the Header.
 func (h *Header) Write(b *bytes.Buffer, pers protocol.Perspective, version protocol.VersionNumber) error {
 	if !version.UsesTLS() {
-		h.IsPublicHeader = true // save that this is a Public Header, so we can log it correctly later
+		h.isPublicHeader = true // save that this is a Public Header, so we can log it correctly later
 		return h.writePublicHeader(b, pers, version)
 	}
 	return h.writeHeader(b)
@@ -108,10 +109,10 @@ func (h *Header) GetLength(pers protocol.Perspective, version protocol.VersionNu
 }
 
 // Log logs the Header
-func (h *Header) Log(logger utils.Logger) {
-	if h.IsPublicHeader {
-		h.logPublicHeader(logger)
+func (h *Header) Log() {
+	if h.isPublicHeader {
+		h.logPublicHeader()
 	} else {
-		h.logHeader(logger)
+		h.logHeader()
 	}
 }

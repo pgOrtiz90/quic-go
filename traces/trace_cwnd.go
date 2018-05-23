@@ -23,7 +23,7 @@ func (t *trace_cwnd) OpenFile ( ){
 	return
 }
 
-func (t *trace_cwnd) Print( cwnd protocol.ByteCount){
+func (t *trace_cwnd) Print( cwnd protocol.PacketNumber){
 	fmt.Fprintf(t.file, "%f \t %d \n", time.Now().Sub(t.timeStart).Seconds(), cwnd)
 }
 

@@ -5,61 +5,39 @@ import (
 
 	"github.com/lucas-clemente/quic-go/internal/congestion"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/qerr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Stream Flow controller", func() {
-	var (
-		controller             *streamFlowController
-		queuedWindowUpdate     bool
-		queuedConnWindowUpdate bool
-	)
+	var controller *streamFlowController
 
 	BeforeEach(func() {
-		queuedWindowUpdate = false
-		queuedConnWindowUpdate = false
 		rttStats := &congestion.RTTStats{}
 		controller = &streamFlowController{
 			streamID:   10,
-			connection: NewConnectionFlowController(1000, 1000, func() { queuedConnWindowUpdate = true }, rttStats, utils.DefaultLogger).(*connectionFlowController),
+			connection: NewConnectionFlowController(1000, 1000, rttStats).(*connectionFlowController),
 		}
 		controller.maxReceiveWindowSize = 10000
 		controller.rttStats = rttStats
-		controller.logger = utils.DefaultLogger
-		controller.queueWindowUpdate = func() { queuedWindowUpdate = true }
 	})
 
 	Context("Constructor", func() {
 		rttStats := &congestion.RTTStats{}
-		receiveWindow := protocol.ByteCount(2000)
-		maxReceiveWindow := protocol.ByteCount(3000)
-		sendWindow := protocol.ByteCount(4000)
 
 		It("sets the send and receive windows", func() {
-			cc := NewConnectionFlowController(0, 0, nil, nil, utils.DefaultLogger)
-			fc := NewStreamFlowController(5, true, cc, receiveWindow, maxReceiveWindow, sendWindow, nil, rttStats, utils.DefaultLogger).(*streamFlowController)
+			receiveWindow := protocol.ByteCount(2000)
+			maxReceiveWindow := protocol.ByteCount(3000)
+			sendWindow := protocol.ByteCount(4000)
+
+			cc := NewConnectionFlowController(0, 0, nil)
+			fc := NewStreamFlowController(5, true, cc, receiveWindow, maxReceiveWindow, sendWindow, rttStats).(*streamFlowController)
 			Expect(fc.streamID).To(Equal(protocol.StreamID(5)))
 			Expect(fc.receiveWindow).To(Equal(receiveWindow))
 			Expect(fc.maxReceiveWindowSize).To(Equal(maxReceiveWindow))
 			Expect(fc.sendWindow).To(Equal(sendWindow))
 			Expect(fc.contributesToConnection).To(BeTrue())
-		})
-
-		It("queues window updates with the correction stream ID", func() {
-			var queued bool
-			queueWindowUpdate := func(id protocol.StreamID) {
-				Expect(id).To(Equal(protocol.StreamID(5)))
-				queued = true
-			}
-
-			cc := NewConnectionFlowController(0, 0, nil, nil, utils.DefaultLogger)
-			fc := NewStreamFlowController(5, true, cc, receiveWindow, maxReceiveWindow, sendWindow, queueWindowUpdate, rttStats, utils.DefaultLogger).(*streamFlowController)
-			fc.AddBytesRead(receiveWindow)
-			fc.MaybeQueueWindowUpdate()
-			Expect(queued).To(BeTrue())
 		})
 	})
 
@@ -191,30 +169,16 @@ var _ = Describe("Stream Flow controller", func() {
 				controller.receiveWindow = 100
 				controller.receiveWindowSize = 60
 				controller.bytesRead = 100 - 60
-				controller.connection.(*connectionFlowController).receiveWindow = 100
 				controller.connection.(*connectionFlowController).receiveWindowSize = 120
 				oldWindowSize = controller.receiveWindowSize
 			})
 
-			It("queues window updates", func() {
-				controller.MaybeQueueWindowUpdate()
-				Expect(queuedWindowUpdate).To(BeFalse())
+			It("tells if it has window updates", func() {
+				Expect(controller.HasWindowUpdate()).To(BeFalse())
 				controller.AddBytesRead(30)
-				controller.MaybeQueueWindowUpdate()
-				Expect(queuedWindowUpdate).To(BeTrue())
+				Expect(controller.HasWindowUpdate()).To(BeTrue())
 				Expect(controller.GetWindowUpdate()).ToNot(BeZero())
-				queuedWindowUpdate = false
-				controller.MaybeQueueWindowUpdate()
-				Expect(queuedWindowUpdate).To(BeFalse())
-			})
-
-			It("queues connection-level window updates", func() {
-				controller.contributesToConnection = true
-				controller.MaybeQueueWindowUpdate()
-				Expect(queuedConnWindowUpdate).To(BeFalse())
-				controller.AddBytesRead(60)
-				controller.MaybeQueueWindowUpdate()
-				Expect(queuedConnWindowUpdate).To(BeTrue())
+				Expect(controller.HasWindowUpdate()).To(BeFalse())
 			})
 
 			It("tells the connection flow controller when the window was autotuned", func() {
@@ -247,8 +211,7 @@ var _ = Describe("Stream Flow controller", func() {
 				controller.AddBytesRead(30)
 				err := controller.UpdateHighestReceived(90, true)
 				Expect(err).ToNot(HaveOccurred())
-				controller.MaybeQueueWindowUpdate()
-				Expect(queuedWindowUpdate).To(BeFalse())
+				Expect(controller.HasWindowUpdate()).To(BeFalse())
 				offset := controller.GetWindowUpdate()
 				Expect(offset).To(BeZero())
 			})

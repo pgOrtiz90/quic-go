@@ -123,9 +123,6 @@ func (m *incomingUniStreamsMap) DeleteStream(id protocol.StreamID) error {
 func (m *incomingUniStreamsMap) CloseWithError(err error) {
 	m.mutex.Lock()
 	m.closeErr = err
-	for _, str := range m.streams {
-		str.closeForShutdown(err)
-	}
 	m.mutex.Unlock()
 	m.cond.Broadcast()
 }

@@ -3,6 +3,7 @@ package h2quic
 import (
 	"bytes"
 	"errors"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/textproto"
@@ -15,7 +16,7 @@ import (
 // copied from net/http2/transport.go
 
 var errResponseHeaderListSize = errors.New("http2: response header list larger than advertised limit")
-var noBody = ioutil.NopCloser(bytes.NewReader(nil))
+var noBody io.ReadCloser = ioutil.NopCloser(bytes.NewReader(nil))
 
 // from the handleResponse function
 func responseFromHeaders(f *http2.MetaHeadersFrame) (*http.Response, error) {

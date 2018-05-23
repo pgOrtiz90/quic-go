@@ -19,8 +19,6 @@ type extensionHandlerClient struct {
 	initialVersion    protocol.VersionNumber
 	supportedVersions []protocol.VersionNumber
 	version           protocol.VersionNumber
-
-	logger utils.Logger
 }
 
 var _ mint.AppExtensionHandler = &extensionHandlerClient{}
@@ -32,7 +30,6 @@ func NewExtensionHandlerClient(
 	initialVersion protocol.VersionNumber,
 	supportedVersions []protocol.VersionNumber,
 	version protocol.VersionNumber,
-	logger utils.Logger,
 ) TLSExtensionHandler {
 	// The client reads the transport parameters from the Encrypted Extensions message.
 	// The paramsChan is used in the session's run loop's select statement.
@@ -44,7 +41,6 @@ func NewExtensionHandlerClient(
 		initialVersion:    initialVersion,
 		supportedVersions: supportedVersions,
 		version:           version,
-		logger:            logger,
 	}
 }
 
@@ -53,7 +49,7 @@ func (h *extensionHandlerClient) Send(hType mint.HandshakeType, el *mint.Extensi
 		return nil
 	}
 
-	h.logger.Debugf("Sending Transport Parameters: %s", h.ourParams)
+	utils.Debugf("Sending Transport Parameters: %s", h.ourParams)
 	data, err := syntax.Marshal(clientHelloTransportParameters{
 		InitialVersion: uint32(h.initialVersion),
 		Parameters:     h.ourParams.getTransportParameters(),
@@ -122,11 +118,11 @@ func (h *extensionHandlerClient) Receive(hType mint.HandshakeType, el *mint.Exte
 		// TODO: return the right error here
 		return errors.New("server didn't sent stateless_reset_token")
 	}
-	params, err := readTransportParameters(eetp.Parameters)
+	params, err := readTransportParamters(eetp.Parameters)
 	if err != nil {
 		return err
 	}
-	h.logger.Debugf("Received Transport Parameters: %s", params)
+	utils.Debugf("Received Transport Parameters: %s", params)
 	h.paramsChan <- *params
 	return nil
 }

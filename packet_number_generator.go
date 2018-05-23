@@ -48,7 +48,7 @@ func (p *packetNumberGenerator) generateNewSkip() error {
 		return err
 	}
 
-	skip := protocol.PacketNumber(num) * (p.averagePeriod - 1) / (math.MaxUint16 / 2)
+		skip := protocol.PacketNumber(num) * (p.averagePeriod - 1) / (math.MaxUint16 / 2)
 	// make sure that there are never two consecutive packet numbers that are skipped
 	p.nextToSkip = p.next + 2 + skip
 

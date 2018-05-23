@@ -40,7 +40,7 @@ type sendStream struct {
 	finSent           bool // set when a STREAM_FRAME with FIN bit has b
 
 	dataForWriting []byte
-	writeChan      chan struct{}
+		writeChan      chan struct{}
 	writeDeadline  time.Time
 
 	flowController flowcontrol.StreamFlowController
@@ -135,7 +135,6 @@ func (s *sendStream) Write(p []byte) (int, error) {
 func (s *sendStream) popStreamFrame(maxBytes protocol.ByteCount) (*wire.StreamFrame, bool /* has more data to send */) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-
 	if s.closeForShutdownErr != nil {
 		return nil, false
 	}
@@ -149,12 +148,15 @@ func (s *sendStream) popStreamFrame(maxBytes protocol.ByteCount) (*wire.StreamFr
 	if maxDataLen == 0 { // a STREAM frame must have at least one byte of data
 		return nil, s.dataForWriting != nil
 	}
+	utils.DebugfFEC("PopStreamFrame: %d\n", maxDataLen)
+
 	frame.Data, frame.FinBit = s.getDataForWriting(maxDataLen)
 	if len(frame.Data) == 0 && !frame.FinBit {
 		// this can happen if:
 		// - popStreamFrame is called but there's no data for writing
 		// - there's data for writing, but the stream is stream-level flow control blocked
 		// - there's data for writing, but the stream is connection-level flow control blocked
+		utils.DebugfFEC("FLow block\n")
 		if s.dataForWriting == nil {
 			return nil, false
 		}
@@ -162,6 +164,7 @@ func (s *sendStream) popStreamFrame(maxBytes protocol.ByteCount) (*wire.StreamFr
 		return nil, !isBlocked
 	}
 	if frame.FinBit {
+		utils.DebugfFEC("FLow Fin\n")
 		s.finSent = true
 		s.sender.onStreamCompleted(s.streamID)
 	} else if s.streamID != s.version.CryptoStreamID() { // TODO(#657): Flow control for the crypto stream
@@ -188,7 +191,7 @@ func (s *sendStream) getDataForWriting(maxBytes protocol.ByteCount) ([]byte, boo
 	if maxBytes == 0 {
 		return nil, false
 	}
-
+	utils.DebugfFEC("getDataForWriting %d\n", maxBytes)
 	var ret []byte
 	if protocol.ByteCount(len(s.dataForWriting)) > maxBytes {
 		ret = s.dataForWriting[:maxBytes]

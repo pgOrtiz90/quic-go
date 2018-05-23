@@ -25,8 +25,7 @@ var _ = Describe("QUIC Proxy", func() {
 		hdr := wire.Header{
 			PacketNumber:     p,
 			PacketNumberLen:  protocol.PacketNumberLen6,
-			DestConnectionID: protocol.ConnectionID{0xde, 0xad, 0xbe, 0xef, 0, 0, 0x13, 0x37},
-			SrcConnectionID:  protocol.ConnectionID{0xde, 0xad, 0xbe, 0xef, 0, 0, 0x13, 0x37},
+			ConnectionID:     1337,
 			OmitConnectionID: false,
 		}
 		hdr.Write(b, protocol.PerspectiveServer, protocol.VersionWhatever)
@@ -157,7 +156,7 @@ var _ = Describe("QUIC Proxy", func() {
 
 			go func() {
 				for {
-					buf := make([]byte, protocol.MaxReceivePacketSize)
+					buf := make([]byte, protocol.MaxPacketSize)
 					// the ReadFromUDP will error as soon as the UDP conn is closed
 					n, addr, err2 := serverConn.ReadFromUDP(buf)
 					if err2 != nil {
@@ -232,7 +231,7 @@ var _ = Describe("QUIC Proxy", func() {
 				// receive the packets echoed by the server on client side
 				go func() {
 					for {
-						buf := make([]byte, protocol.MaxReceivePacketSize)
+						buf := make([]byte, protocol.MaxPacketSize)
 						// the ReadFromUDP will error as soon as the UDP conn is closed
 						n, _, err2 := clientConn.ReadFromUDP(buf)
 						if err2 != nil {
@@ -283,7 +282,7 @@ var _ = Describe("QUIC Proxy", func() {
 				// receive the packets echoed by the server on client side
 				go func() {
 					for {
-						buf := make([]byte, protocol.MaxReceivePacketSize)
+						buf := make([]byte, protocol.MaxPacketSize)
 						// the ReadFromUDP will error as soon as the UDP conn is closed
 						n, _, err2 := clientConn.ReadFromUDP(buf)
 						if err2 != nil {
@@ -364,7 +363,7 @@ var _ = Describe("QUIC Proxy", func() {
 				// receive the packets echoed by the server on client side
 				go func() {
 					for {
-						buf := make([]byte, protocol.MaxReceivePacketSize)
+						buf := make([]byte, protocol.MaxPacketSize)
 						// the ReadFromUDP will error as soon as the UDP conn is closed
 						n, _, err2 := clientConn.ReadFromUDP(buf)
 						if err2 != nil {

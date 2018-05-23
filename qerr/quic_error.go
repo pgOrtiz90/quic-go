@@ -2,6 +2,8 @@ package qerr
 
 import (
 	"fmt"
+
+	"github.com/lucas-clemente/quic-go/internal/utils"
 )
 
 // ErrorCode can be used as a normal error without reason.
@@ -29,7 +31,6 @@ func (e *QuicError) Error() string {
 	return fmt.Sprintf("%s: %s", e.ErrorCode.String(), e.ErrorMessage)
 }
 
-// Timeout says if this error is a timeout.
 func (e *QuicError) Timeout() bool {
 	switch e.ErrorCode {
 	case NetworkIdleTimeout,
@@ -49,5 +50,6 @@ func ToQuicError(err error) *QuicError {
 	case ErrorCode:
 		return Error(e, "")
 	}
+	utils.Errorf("Internal error: %v", err)
 	return Error(InternalError, err.Error())
 }

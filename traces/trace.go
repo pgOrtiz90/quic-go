@@ -47,7 +47,7 @@ func CWNDTraceInit (){
 	return
 }
 
-func PrintCWND(cwnd protocol.ByteCount){
+func PrintCWND(cwnd protocol.PacketNumber){
 	if(trace.cwnd != nil){
 		trace.cwnd.Print(cwnd)
 	}

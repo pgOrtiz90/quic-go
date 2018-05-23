@@ -10,13 +10,15 @@ import (
 // SentPacketHandler handles ACKs received for outgoing packets
 type SentPacketHandler interface {
 	// SentPacket may modify the packet
-	SentPacket(packet *Packet)
-	SentPacketsAsRetransmission(packets []*Packet, retransmissionOf protocol.PacketNumber)
+	SentPacket(packet *Packet) error
 	ReceivedAck(ackFrame *wire.AckFrame, withPacketNumber protocol.PacketNumber, encLevel protocol.EncryptionLevel, recvTime time.Time) error
 	SetHandshakeComplete()
 
-	// The SendMode determines if and what kind of packets can be sent.
-	SendMode() SendMode
+	// SendingAllowed says if a packet can be sent.
+	// Sending packets might not be possible because:
+	// * we're congestion limited
+	// * we're tracking the maximum number of sent packets
+	SendingAllowed() bool
 	// TimeUntilSend is the time when the next packet should be sent.
 	// It is used for pacing packets.
 	TimeUntilSend() time.Time
@@ -30,10 +32,15 @@ type SentPacketHandler interface {
 	GetStopWaitingFrame(force bool) *wire.StopWaitingFrame
 	GetLowestPacketNotConfirmedAcked() protocol.PacketNumber
 	DequeuePacketForRetransmission() (packet *Packet)
-	GetPacketNumberLen(protocol.PacketNumber) protocol.PacketNumberLen
+	GetLeastUnacked() protocol.PacketNumber
 
 	GetAlarmTimeout() time.Time
-	OnAlarm() error
+	OnAlarm()
+
+	//Pablo
+	GetCWND() protocol.ByteCount
+	GetBytesFlight() protocol.ByteCount
+	//End Pablo
 }
 
 // ReceivedPacketHandler handles ACKs needed to send for incoming packets

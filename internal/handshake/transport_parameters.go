@@ -20,13 +20,11 @@ type TransportParameters struct {
 	StreamFlowControlWindow     protocol.ByteCount
 	ConnectionFlowControlWindow protocol.ByteCount
 
-	MaxPacketSize protocol.ByteCount
+	MaxBidiStreamID protocol.StreamID // only used for IETF QUIC
+	MaxUniStreamID  protocol.StreamID // only used for IETF QUIC
+	MaxStreams      uint32            // only used for gQUIC
 
-	MaxUniStreams  uint16 // only used for IETF QUIC
-	MaxBidiStreams uint16 // only used for IETF QUIC
-	MaxStreams     uint32 // only used for gQUIC
-
-	OmitConnectionID bool // only used for gQUIC
+	OmitConnectionID bool
 	IdleTimeout      time.Duration
 }
 
@@ -95,7 +93,7 @@ func (p *TransportParameters) getHelloMap() map[Tag][]byte {
 }
 
 // readTransportParameters reads the transport parameters sent in the QUIC TLS extension
-func readTransportParameters(paramsList []transportParameter) (*TransportParameters, error) {
+func readTransportParamters(paramsList []transportParameter) (*TransportParameters, error) {
 	params := &TransportParameters{}
 
 	var foundInitialMaxStreamData bool
@@ -116,31 +114,29 @@ func readTransportParameters(paramsList []transportParameter) (*TransportParamet
 				return nil, fmt.Errorf("wrong length for initial_max_data: %d (expected 4)", len(p.Value))
 			}
 			params.ConnectionFlowControlWindow = protocol.ByteCount(binary.BigEndian.Uint32(p.Value))
-		case initialMaxBidiStreamsParameterID:
-			if len(p.Value) != 2 {
-				return nil, fmt.Errorf("wrong length for initial_max_stream_id_bidi: %d (expected 2)", len(p.Value))
+		case initialMaxStreamIDBiDiParameterID:
+			if len(p.Value) != 4 {
+				return nil, fmt.Errorf("wrong length for initial_max_stream_id_bidi: %d (expected 4)", len(p.Value))
 			}
-			params.MaxBidiStreams = binary.BigEndian.Uint16(p.Value)
-		case initialMaxUniStreamsParameterID:
-			if len(p.Value) != 2 {
-				return nil, fmt.Errorf("wrong length for initial_max_stream_id_uni: %d (expected 2)", len(p.Value))
+			// TODO(#1154): validate the stream ID
+			params.MaxBidiStreamID = protocol.StreamID(binary.BigEndian.Uint32(p.Value))
+		case initialMaxStreamIDUniParameterID:
+			if len(p.Value) != 4 {
+				return nil, fmt.Errorf("wrong length for initial_max_stream_id_uni: %d (expected 4)", len(p.Value))
 			}
-			params.MaxUniStreams = binary.BigEndian.Uint16(p.Value)
+			// TODO(#1154): validate the stream ID
+			params.MaxUniStreamID = protocol.StreamID(binary.BigEndian.Uint32(p.Value))
 		case idleTimeoutParameterID:
 			foundIdleTimeout = true
 			if len(p.Value) != 2 {
 				return nil, fmt.Errorf("wrong length for idle_timeout: %d (expected 2)", len(p.Value))
 			}
 			params.IdleTimeout = utils.MaxDuration(protocol.MinRemoteIdleTimeout, time.Duration(binary.BigEndian.Uint16(p.Value))*time.Second)
-		case maxPacketSizeParameterID:
-			if len(p.Value) != 2 {
-				return nil, fmt.Errorf("wrong length for max_packet_size: %d (expected 2)", len(p.Value))
+		case omitConnectionIDParameterID:
+			if len(p.Value) != 0 {
+				return nil, fmt.Errorf("wrong length for omit_connection_id: %d (expected empty)", len(p.Value))
 			}
-			maxPacketSize := protocol.ByteCount(binary.BigEndian.Uint16(p.Value))
-			if maxPacketSize < 1200 {
-				return nil, fmt.Errorf("invalid value for max_packet_size: %d (minimum 1200)", maxPacketSize)
-			}
-			params.MaxPacketSize = maxPacketSize
+			params.OmitConnectionID = true
 		}
 	}
 
@@ -157,10 +153,10 @@ func (p *TransportParameters) getTransportParameters() []transportParameter {
 	binary.BigEndian.PutUint32(initialMaxStreamData, uint32(p.StreamFlowControlWindow))
 	initialMaxData := make([]byte, 4)
 	binary.BigEndian.PutUint32(initialMaxData, uint32(p.ConnectionFlowControlWindow))
-	initialMaxBidiStreamID := make([]byte, 2)
-	binary.BigEndian.PutUint16(initialMaxBidiStreamID, p.MaxBidiStreams)
-	initialMaxUniStreamID := make([]byte, 2)
-	binary.BigEndian.PutUint16(initialMaxUniStreamID, p.MaxUniStreams)
+	initialMaxBidiStreamID := make([]byte, 4)
+	binary.BigEndian.PutUint32(initialMaxBidiStreamID, uint32(p.MaxBidiStreamID))
+	initialMaxUniStreamID := make([]byte, 4)
+	binary.BigEndian.PutUint32(initialMaxUniStreamID, uint32(p.MaxUniStreamID))
 	idleTimeout := make([]byte, 2)
 	binary.BigEndian.PutUint16(idleTimeout, uint16(p.IdleTimeout/time.Second))
 	maxPacketSize := make([]byte, 2)
@@ -168,10 +164,13 @@ func (p *TransportParameters) getTransportParameters() []transportParameter {
 	params := []transportParameter{
 		{initialMaxStreamDataParameterID, initialMaxStreamData},
 		{initialMaxDataParameterID, initialMaxData},
-		{initialMaxBidiStreamsParameterID, initialMaxBidiStreamID},
-		{initialMaxUniStreamsParameterID, initialMaxUniStreamID},
+		{initialMaxStreamIDBiDiParameterID, initialMaxBidiStreamID},
+		{initialMaxStreamIDUniParameterID, initialMaxUniStreamID},
 		{idleTimeoutParameterID, idleTimeout},
 		{maxPacketSizeParameterID, maxPacketSize},
+	}
+	if p.OmitConnectionID {
+		params = append(params, transportParameter{omitConnectionIDParameterID, []byte{}})
 	}
 	return params
 }
@@ -179,5 +178,5 @@ func (p *TransportParameters) getTransportParameters() []transportParameter {
 // String returns a string representation, intended for logging.
 // It should only used for IETF QUIC.
 func (p *TransportParameters) String() string {
-	return fmt.Sprintf("&handshake.TransportParameters{StreamFlowControlWindow: %#x, ConnectionFlowControlWindow: %#x, MaxBidiStreams: %d, MaxUniStreams: %d, IdleTimeout: %s}", p.StreamFlowControlWindow, p.ConnectionFlowControlWindow, p.MaxBidiStreams, p.MaxUniStreams, p.IdleTimeout)
+	return fmt.Sprintf("&handshake.TransportParameters{StreamFlowControlWindow: %#x, ConnectionFlowControlWindow: %#x, MaxBidiStreamID: %d, MaxUniStreamID: %d, OmitConnectionID: %t, IdleTimeout: %s}", p.StreamFlowControlWindow, p.ConnectionFlowControlWindow, p.MaxBidiStreamID, p.MaxUniStreamID, p.OmitConnectionID, p.IdleTimeout)
 }

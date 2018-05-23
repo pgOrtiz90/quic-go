@@ -27,14 +27,14 @@ const (
 type PacketType uint8
 
 const (
-	// PacketTypeInitial is the packet type of an Initial packet
-	PacketTypeInitial PacketType = 0x7f
+	// PacketTypeInitial is the packet type of a Initial packet
+	PacketTypeInitial PacketType = 2
 	// PacketTypeRetry is the packet type of a Retry packet
-	PacketTypeRetry PacketType = 0x7e
-	// PacketTypeHandshake is the packet type of a Handshake packet
-	PacketTypeHandshake PacketType = 0x7d
+	PacketTypeRetry PacketType = 3
+	// PacketTypeHandshake is the packet type of a Cleartext packet
+	PacketTypeHandshake PacketType = 4
 	// PacketType0RTT is the packet type of a 0-RTT packet
-	PacketType0RTT PacketType = 0x7c
+	PacketType0RTT PacketType = 5
 )
 
 func (t PacketType) String() string {
@@ -51,6 +51,9 @@ func (t PacketType) String() string {
 		return fmt.Sprintf("unknown packet type: %d", t)
 	}
 }
+
+// A ConnectionID in QUIC
+type ConnectionID uint64
 
 // A ByteCount in QUIC
 type ByteCount uint64

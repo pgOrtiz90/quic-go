@@ -122,7 +122,7 @@ var _ = Describe("Client Crypto Setup", func() {
 		csInt, err := NewCryptoSetupClient(
 			stream,
 			"hostname",
-			protocol.ConnectionID{1, 2, 3, 4, 5, 6, 7, 8},
+			0,
 			version,
 			nil,
 			&TransportParameters{IdleTimeout: protocol.DefaultIdleTimeout},
@@ -130,12 +130,12 @@ var _ = Describe("Client Crypto Setup", func() {
 			handshakeEvent,
 			protocol.Version39,
 			nil,
-			utils.DefaultLogger,
 		)
 		Expect(err).ToNot(HaveOccurred())
 		cs = csInt.(*cryptoSetupClient)
 		cs.certManager = certManager
 		cs.keyDerivation = keyDerivation
+		cs.keyExchange = func() crypto.KeyExchange { return &mockKEX{ephermal: true} }
 		cs.nullAEAD = mockcrypto.NewMockAEAD(mockCtrl)
 		cs.cryptoStream = stream
 	})
@@ -715,16 +715,16 @@ var _ = Describe("Client Crypto Setup", func() {
 
 		It("tries to escalate the crypto after receiving a diversification nonce", func() {
 			done := make(chan struct{})
-			cs.diversificationNonce = nil
-			cs.serverVerified = true
 			go func() {
 				defer GinkgoRecover()
 				err := cs.HandleCryptoStream()
 				Expect(err).To(MatchError(qerr.Error(qerr.HandshakeFailed, errMockStreamClosing.Error())))
 				close(done)
 			}()
+			cs.diversificationNonce = nil
+			cs.serverVerified = true
 			Expect(cs.secureAEAD).To(BeNil())
-			Expect(cs.SetDiversificationNonce([]byte("div"))).To(Succeed())
+			cs.SetDiversificationNonce([]byte("div"))
 			Eventually(handshakeEvent).Should(Receive())
 			Expect(cs.secureAEAD).ToNot(BeNil())
 			Expect(handshakeEvent).ToNot(Receive())
@@ -924,7 +924,7 @@ var _ = Describe("Client Crypto Setup", func() {
 				close(done)
 			}()
 			nonce := []byte("foobar")
-			Expect(cs.SetDiversificationNonce(nonce)).To(Succeed())
+			cs.SetDiversificationNonce(nonce)
 			Eventually(func() []byte { return cs.diversificationNonce }).Should(Equal(nonce))
 			// make the go routine return
 			stream.close()
@@ -940,8 +940,8 @@ var _ = Describe("Client Crypto Setup", func() {
 				close(done)
 			}()
 			nonce := []byte("foobar")
-			Expect(cs.SetDiversificationNonce(nonce)).To(Succeed())
-			Expect(cs.SetDiversificationNonce(nonce)).To(Succeed())
+			cs.SetDiversificationNonce(nonce)
+			cs.SetDiversificationNonce(nonce)
 			Eventually(func() []byte { return cs.diversificationNonce }).Should(Equal(nonce))
 			// make the go routine return
 			stream.close()
@@ -953,17 +953,13 @@ var _ = Describe("Client Crypto Setup", func() {
 			go func() {
 				defer GinkgoRecover()
 				err := cs.HandleCryptoStream()
-				Expect(err).To(MatchError(qerr.Error(qerr.HandshakeFailed, errMockStreamClosing.Error())))
+				Expect(err).To(MatchError(errConflictingDiversificationNonces))
 				close(done)
 			}()
 			nonce1 := []byte("foobar")
 			nonce2 := []byte("raboof")
-			err := cs.SetDiversificationNonce(nonce1)
-			Expect(err).ToNot(HaveOccurred())
-			err = cs.SetDiversificationNonce(nonce2)
-			Expect(err).To(MatchError(errConflictingDiversificationNonces))
-			// make the go routine return
-			stream.close()
+			cs.SetDiversificationNonce(nonce1)
+			cs.SetDiversificationNonce(nonce2)
 			Eventually(done).Should(BeClosed())
 		})
 	})

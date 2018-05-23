@@ -31,8 +31,6 @@ type cryptoSetupTLS struct {
 	handshakeEvent chan<- struct{}
 }
 
-var _ CryptoSetupTLS = &cryptoSetupTLS{}
-
 // NewCryptoSetupTLSServer creates a new TLS CryptoSetup instance for a server
 func NewCryptoSetupTLSServer(
 	tls MintTLS,
@@ -40,7 +38,7 @@ func NewCryptoSetupTLSServer(
 	nullAEAD crypto.AEAD,
 	handshakeEvent chan<- struct{},
 	version protocol.VersionNumber,
-) CryptoSetupTLS {
+) CryptoSetup {
 	return &cryptoSetupTLS{
 		tls:            tls,
 		cryptoStream:   cryptoStream,
@@ -59,7 +57,7 @@ func NewCryptoSetupTLSClient(
 	handshakeEvent chan<- struct{},
 	tls MintTLS,
 	version protocol.VersionNumber,
-) (CryptoSetupTLS, error) {
+) (CryptoSetup, error) {
 	nullAEAD, err := crypto.NewNullAEAD(protocol.PerspectiveClient, connID, version)
 	if err != nil {
 		return nil, err
@@ -109,18 +107,22 @@ handshakeLoop:
 	return nil
 }
 
-func (h *cryptoSetupTLS) OpenHandshake(dst, src []byte, packetNumber protocol.PacketNumber, associatedData []byte) ([]byte, error) {
-	return h.nullAEAD.Open(dst, src, packetNumber, associatedData)
-}
-
-func (h *cryptoSetupTLS) Open1RTT(dst, src []byte, packetNumber protocol.PacketNumber, associatedData []byte) ([]byte, error) {
+func (h *cryptoSetupTLS) Open(dst, src []byte, packetNumber protocol.PacketNumber, associatedData []byte) ([]byte, protocol.EncryptionLevel, error) {
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
 
-	if h.aead == nil {
-		return nil, errors.New("no 1-RTT sealer")
+	if h.aead != nil {
+		data, err := h.aead.Open(dst, src, packetNumber, associatedData)
+		if err != nil {
+			return nil, protocol.EncryptionUnspecified, err
+		}
+		return data, protocol.EncryptionForwardSecure, nil
 	}
-	return h.aead.Open(dst, src, packetNumber, associatedData)
+	data, err := h.nullAEAD.Open(dst, src, packetNumber, associatedData)
+	if err != nil {
+		return nil, protocol.EncryptionUnspecified, err
+	}
+	return data, protocol.EncryptionUnencrypted, nil
 }
 
 func (h *cryptoSetupTLS) GetSealer() (protocol.EncryptionLevel, Sealer) {
@@ -153,6 +155,14 @@ func (h *cryptoSetupTLS) GetSealerWithEncryptionLevel(encLevel protocol.Encrypti
 
 func (h *cryptoSetupTLS) GetSealerForCryptoStream() (protocol.EncryptionLevel, Sealer) {
 	return protocol.EncryptionUnencrypted, h.nullAEAD
+}
+
+func (h *cryptoSetupTLS) DiversificationNonce() []byte {
+	panic("diversification nonce not needed for TLS")
+}
+
+func (h *cryptoSetupTLS) SetDiversificationNonce([]byte) {
+	panic("diversification nonce not needed for TLS")
 }
 
 func (h *cryptoSetupTLS) ConnectionState() ConnectionState {
