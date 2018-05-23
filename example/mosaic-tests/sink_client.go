@@ -8,7 +8,7 @@ import (
 	//"math/rand"
 	quic "github.com/lucas-clemente/quic-go"
 
-//	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/lucas-clemente/quic-go/internal/utils"
 )
 //  SINK_CLIENT.GO
 //
@@ -22,7 +22,7 @@ func main() {
 
 	ip := flag.String("ip", "localhost:4242", "IP:Port Addres")
 	tcp := flag.Bool("tcp", false, "Use a TCP/QUIC connection")
-	//v := flag.Bool("v", false, "FEC Debug Information")
+	v := flag.Bool("v", false, "FEC Debug Information")
 
 	packet_size := 1452//Maximum packet size
 	buf := make([]byte, packet_size)
@@ -32,9 +32,9 @@ func main() {
 	bytesReceived := 0
 	fmt.Printf("Start Connection with, %s \n", *ip)
 
-	//if(*v) {
-	//	utils.SetLogLevel(utils.LogLevelDebug)
-	//}
+	if(*v) {
+		utils.SetLogLevel(utils.LogLevelDebugFEC)
+	}
 
 	if (*tcp){   // IF TCP -> Start a connection with TLS/TCP Socket
 		start = time.Now()

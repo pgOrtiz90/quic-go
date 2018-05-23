@@ -13,7 +13,7 @@ import (
 "math/big"
 "flag"
 quic "github.com/lucas-clemente/quic-go"
-//	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/traces"
 )
 
@@ -21,14 +21,14 @@ func main() {
 
 	ip := flag.String("ip", "localhost:4242", "IP:Port Addres")
 	mb := flag.Int("mb", 1, "File size in Mbytes")
-	//v := flag.Bool("v", false, "FEC Debug Information")
-	//fecRatio := flag.Int("ratio", 4, "Fec Ratio")
+	v := flag.Bool("v", false, "FEC Debug Information")
+	fecRatio := flag.Int("ratio", 4, "Fec Ratio")
 	flag.Parse()
 
-//	if(*v) {
-		//utils.SetLogLevel(utils.LogLevelDebugFEC)
-//		utils.SetLogLevel(utils.LogLevelDebug)
-//	}
+	if(*v) {
+		utils.SetLogLevel(utils.LogLevelDebugFEC)
+		//utils.SetLogLevel(utils.LogLevelDebug)
+    }
 
 
 	traces.SetTraceFileName("bul_app")
@@ -39,10 +39,7 @@ func main() {
 
 	fmt.Printf("Init Server \n")
 
-//message := make([]byte, *packet_size)  // Generate a message of PACKET_SIZE full of random information
-	//rand.Read(message)
 	max_send_bytes := (*mb)*1024*1024;
-	//	max_send_bytes := *mb*4*1024;
 	bytesSent := 0
 
 
@@ -51,13 +48,13 @@ func main() {
 
 
 	//Generate QUIC Config
-	//config := &quic.Config{
-	//	FecRatio: 														 uint8(*fecRatio),
-	//}
+	config := &quic.Config{
+		FecRatio: 														 uint8(*fecRatio),
+	}
 
 	//Listens on the given network address for QUIC conexion
 	tlsconf := generateTLSConfig()
-	listener, err := quic.ListenAddr(*ip, tlsconf, nil)
+	listener, err := quic.ListenAddr(*ip, tlsconf, config)
 	defer listener.Close()
 	if err != nil {
 		return
