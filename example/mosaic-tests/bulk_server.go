@@ -23,6 +23,7 @@ func main() {
 	mb := flag.Int("mb", 1, "File size in Mbytes")
 	v := flag.Bool("v", false, "FEC Debug Information")
 	fecRatio := flag.Int("ratio", 4, "Fec Ratio")
+	trace := flag.String("trace","bulk_server", "Trace File Name")
 	flag.Parse()
 
 	if(*v) {
@@ -31,7 +32,7 @@ func main() {
     }
 
 
-	traces.SetTraceFileName("bul_app")
+	traces.SetTraceFileName(*trace)
 	traces.SetFecEncoderTraceLevel()
 	traces.SetCWNDTraceLevel()
 
