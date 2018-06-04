@@ -63,7 +63,7 @@ type cubicSender struct {
 
 // NewCubicSender makes a new cubic sender
 func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestionWindow, initialMaxCongestionWindow protocol.PacketNumber) SendAlgorithmWithDebugInfo {
-	return &cubicSender{
+	CubicSender := &cubicSender{
 		rttStats:                   rttStats,
 		initialCongestionWindow:    initialCongestionWindow,
 		initialMaxCongestionWindow: initialMaxCongestionWindow,
@@ -75,6 +75,12 @@ func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestio
 		cubic:                      NewCubic(clock),
 		reno:                       reno,
 	}
+	
+	//Pablo Garrido
+	traces.PrintCWND(CubicSender.congestionWindow)
+	//EndPablo
+	
+	return CubicSender
 }
 
 // TimeUntilSend returns when the next packet should be sent.
@@ -164,6 +170,10 @@ func (c *cubicSender) OnPacketLost(packetNumber protocol.PacketNumber, lostBytes
 				c.slowstartThreshold = c.congestionWindow
 			}
 		}
+		//Pablo Garrido
+			traces.PrintCWND(c.congestionWindow)
+		//EndPablo
+		
 		return
 	}
 	c.lastCutbackExitedSlowstart = c.InSlowStart()
@@ -219,6 +229,11 @@ func (c *cubicSender) maybeIncreaseCwnd(ackedPacketNumber protocol.PacketNumber,
 	if c.InSlowStart() {
 		// TCP slow start, exponential growth, increase by one for each ACK.
 		c.congestionWindow++
+		
+		//Pablo Garrido
+			traces.PrintCWND(c.congestionWindow)
+		//EndPablo
+		
 		return
 	}
 	if c.reno {
@@ -246,6 +261,7 @@ func (c *cubicSender) isCwndLimited(bytesInFlight protocol.ByteCount) bool {
 	}
 	availableBytes := congestionWindow - bytesInFlight
 	slowStartLimited := c.InSlowStart() && bytesInFlight > congestionWindow/2
+	
 	return slowStartLimited || availableBytes <= maxBurstBytes
 }
 
