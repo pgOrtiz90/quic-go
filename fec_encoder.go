@@ -6,7 +6,6 @@ import (
 
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"time"
-	"fmt"
 	"github.com/lucas-clemente/quic-go/traces"
 )
 
@@ -19,24 +18,31 @@ type FecEncoder struct{
 	lastPacketNumber protocol.PacketNumber
 
 	dynamicRatio *dynamicFecRatio
+	Dynamic bool
+	Timer time.Duration
+	N		uint
+	Delta float64
+	Target float64
+
+	ratio_aux uint8
 }
 
 
 type dynamicFecRatio struct{
-	Ratio float32
+	Ratio float64
 	timer time.Duration
-	N		uint32
-	delta float32
-
+	N		uint
+	delta float64
 
 	rtx uint32
 	tx uint32
-	residual float32
-	target float32
-	n uint32
+	residual float64
+	target float64
+	n uint
 
 	encoder *FecEncoder
 }
+
 
 
 
@@ -47,13 +53,25 @@ func (f *FecEncoder) ParsePacket(raw []byte, header *wire.Header) int{
 		return 0
 	}
 
-	if(f.Id == 0 && f.Count == 0){
-		f.dynamicRatio = &dynamicFecRatio{float32(f.Ratio), 3*25*time.Millisecond, 2, 0.33, 0,0,0,0.01,0, f}
-		traces.FecEncoderTraceInit(f.Ratio, 0.33, 0.01, 0, 3*25*time.Millisecond)
-		traces.PrintFecEncoder(f.Ratio)
-		go f.dynamicRatio.StartTimer()
-	}
+	if (f.Dynamic == true) {
 
+		if (f.Id == 0 && f.Count == 0) {
+			f.dynamicRatio = &dynamicFecRatio{Ratio: float64(f.Ratio),
+				timer: f.Timer,
+				N: f.N,
+				delta: f.Delta,
+				rtx: 0,
+				tx: 0,
+				residual: 0,
+				target: f.Target,
+				n: 0,
+				encoder: f}
+			traces.FecEncoderTraceInit(f.Ratio, 0.33, 0.01, f.N, f.Timer)
+			traces.PrintFecEncoder(f.Ratio)
+			f.ratio_aux = f.Ratio
+			go f.dynamicRatio.StartTimer()
+		}
+	}
 	f.Count = f.Count + 1
 
 	if(f.dynamicRatio != nil) {
@@ -97,8 +115,11 @@ func (f *FecEncoder) ComposeFecPacket () (*wire.FecFrame, error){
 	frame := &wire.FecFrame{}
 	frame.Data = make([]byte, f.MaxLength)
 	copy(frame.Data, f.FECData)
+
+	//Update values
 	f.FECData = nil
 	f.Count = 0
+	f.Ratio = f.ratio_aux
 	f.MaxLength = 0
 	f.Id += 1
 
@@ -125,17 +146,23 @@ func (f *FecEncoder) GetFecType(number protocol.PacketNumber)uint8{
 
 }
 
+
 func (f *FecEncoder) AddRetransmissionCount(){
 	if(f.dynamicRatio != nil) {
 		f.dynamicRatio.AddRetransmissionCount()
 	}
 }
 
+func (f *FecEncoder) SetLastPacketNumber(number protocol.PacketNumber){
+	f.lastPacketNumber = number
+}
+
 
 func (f *FecEncoder) ChangeFecRatio(ratio uint8){
+	f.ratio_aux = ratio
 	f.Ratio = ratio
 	if(f.dynamicRatio != nil) {
-		f.dynamicRatio.Ratio = float32(ratio)
+		f.dynamicRatio.Ratio = float64(ratio)
 	}
 	traces.PrintFecEncoder(f.Ratio)
 }
@@ -150,7 +177,7 @@ func (d *dynamicFecRatio) StartTimer(){
 		//go func() {
 			<-timer.C
 
-			d.residual += float32(d.rtx)/float32(d.tx - d.rtx)
+			d.residual += float64(d.rtx)/float64(d.tx - d.rtx)
 			d.n++
 			d.rtx = 0
 			d.tx  = 0
@@ -176,7 +203,7 @@ func (d *dynamicFecRatio) AddTransmissionCount(){
 
 func (d *dynamicFecRatio) UpdateRatio(){
 
-	residual := d.residual/float32(d.N)
+	residual := d.residual/float64(d.N)
 
 	if(residual > d.target) {
 		d.Ratio = d.Ratio * (1 - d.delta)
@@ -188,7 +215,11 @@ func (d *dynamicFecRatio) UpdateRatio(){
 		d.Ratio = 255
 	}
 
-	d.encoder.Ratio = uint8(int(d.Ratio))
+	if (d.Ratio < 2){
+		d.Ratio = 2
+	}
+
+	d.encoder.ratio_aux = uint8(int(d.Ratio))
 	traces.PrintFecEncoder(d.encoder.Ratio)
-	fmt.Printf("Update Ratio %f, %d\n", d.Ratio, d.encoder.Ratio)
+	//fmt.Printf("Update Ratio Old: %d, New: %f, residual: %f, Target: %f N: %d\n", d.encoder.Ratio, d.Ratio, residual, d.target,d.N)
 }

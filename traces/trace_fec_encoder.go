@@ -12,7 +12,7 @@ type trace_fec_encoder struct{
 	Ratio  uint8
 	delta  float32
 	target float32
-	N		   uint32
+	N		   uint
 	timer  time.Duration
 
 

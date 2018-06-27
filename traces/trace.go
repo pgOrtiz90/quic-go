@@ -23,6 +23,8 @@ type traceLevels struct{
 	//Fec Module - trace
 	fec_encoder_option bool
 	fec_encoder *trace_fec_encoder
+	fec_decoder_option bool
+	fec_decoder *trace_fec_decoder
 
 	//Application level trace
 	application_option bool
@@ -55,7 +57,7 @@ func PrintCWND(cwnd protocol.PacketNumber){
 }
 
 
-func FecEncoderTraceInit ( ratio uint8 , delta float32, target float32, N uint32, T time.Duration){
+func FecEncoderTraceInit ( ratio uint8 , delta float32, target float32, N uint, T time.Duration){
 
 	if(trace.fec_encoder_option){
 		fileName := fmt.Sprintf("%s_fec_encoder.tr", trace.fileName)
@@ -67,12 +69,37 @@ func FecEncoderTraceInit ( ratio uint8 , delta float32, target float32, N uint32
 	return
 }
 
+func FecDecoderTraceInit( ){
+
+	if(trace.fec_decoder_option){
+		fileName := fmt.Sprintf("%s_fec_decoder.tr", trace.fileName)
+
+		trace_decoder := &trace_fec_decoder{FileName: fileName}
+		trace_decoder.OpenFile()
+		trace.fec_decoder = trace_decoder
+	}
+	return
+}
+
 func PrintFecEncoder(ratio uint8){
 	if(trace.fec_encoder != nil){
 		trace.fec_encoder.Print(ratio)
 	}
 	return
 }
+
+func  PrintFecDecoder ( ){
+	if(trace.fec_decoder != nil){
+		trace.fec_decoder.Print( )
+	}
+	}
+
+func  StoreFecDecoder (blocks uint, decoded uint, fails uint, redundant uint){
+	if(trace.fec_decoder != nil){
+		trace.fec_decoder.Store(blocks , decoded , fails , redundant )
+	}
+}
+
 
 func SetTraceFileName(fileName string){
 	trace.timeStart = time.Now()
@@ -81,6 +108,11 @@ func SetTraceFileName(fileName string){
 
 func SetFecEncoderTraceLevel(){
 	trace.fec_encoder_option = true
+}
+
+func SetFecDecoderTraceLevel(){
+	trace.fec_decoder_option = true
+	FecDecoderTraceInit()
 }
 
 

@@ -9,6 +9,7 @@ import (
 	quic "github.com/lucas-clemente/quic-go"
 
 	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/lucas-clemente/quic-go/traces"
 )
 //  SINK_CLIENT.GO
 //
@@ -28,6 +29,8 @@ func main() {
 	buf := make([]byte, packet_size)
 	flag.Parse()
 
+	traces.SetFecDecoderTraceLevel()
+
 	start := time.Now()
 	bytesReceived := 0
 	fmt.Printf("Start Connection with, %s \n", *ip)
@@ -35,6 +38,16 @@ func main() {
 	if(*v) {
 		utils.SetLogLevel(utils.LogLevelDebugFEC)
 	}
+
+	//Generate QUIC Config
+		decoder := &quic.FecDecoder{Ratio: 0,
+		Id: 0,
+		Count: 0,
+		MaxLength: 0}
+
+	config := &quic.Config{
+		Encoder: nil,
+		Decoder: decoder}
 
 	if (*tcp){   // IF TCP -> Start a connection with TLS/TCP Socket
 		start = time.Now()
@@ -64,7 +77,7 @@ func main() {
 		conn.Close()
 	}else{
 		start = time.Now()
-		session, err := quic.DialAddr(*ip, &tls.Config{InsecureSkipVerify: true}, nil)
+		session, err := quic.DialAddr(*ip, &tls.Config{InsecureSkipVerify: true}, config)
 		if err != nil {
 			panic(err)
 			return
@@ -88,7 +101,7 @@ func main() {
 		end := time.Now()
 		for{
 			end = time.Now()
-			stream.SetReadDeadline(time.Now().Add(20*time.Second))
+			stream.SetReadDeadline(time.Now().Add(2000*time.Second))
 			n, err := stream.Read(buf)
 			if (err != nil){
 				t := float64(end.Sub(start)/1000) // Duration is in nanoseconds -> I get microseconds to get Mbps
@@ -106,6 +119,8 @@ func main() {
 
 		stream.Close()
 		session.Close(nil)
+
+		traces.PrintFecDecoder()
 	}
 	return
 }

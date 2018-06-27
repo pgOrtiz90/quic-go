@@ -24,6 +24,11 @@ func main() {
 	v := flag.Bool("v", false, "FEC Debug Information")
 	fecRatio := flag.Int("ratio", 4, "Fec Ratio")
 	trace := flag.String("trace","bulk_server", "Trace File Name")
+	rtt := flag.Int("rtt",20, "RTT avg.")
+	N := flag.Uint("N",3, "T=N*RTT")
+	delta := flag.Float64("delta",0.33, "T=N*RTT")
+	target := flag.Float64("target",0.01, "Target of Dynamic FEC algorithm")
+	//dynamic := flag.Bool("dynamic",false, "Target of Dynamic FEC algorithm")
 	flag.Parse()
 
 	if(*v) {
@@ -49,9 +54,24 @@ func main() {
 
 
 	//Generate QUIC Config
+	encoder := &quic.FecEncoder{Id: 0,
+															Ratio: uint8(*fecRatio),
+															Count: 0,
+															FECData: nil,
+															Timer: 3*time.Duration(*rtt)*time.Millisecond,
+															N: *N,
+															Dynamic: true,
+															Delta: *delta,
+															Target: *target}
+
+	decoder := &quic.FecDecoder{Ratio: 0,
+		Id: 0,
+		Count: 0,
+		MaxLength: 0}
+
 	config := &quic.Config{
-		FecRatio: 														 uint8(*fecRatio),
-	}
+		Encoder: encoder,
+		Decoder: decoder}
 
 	//Listens on the given network address for QUIC conexion
 	tlsconf := generateTLSConfig()

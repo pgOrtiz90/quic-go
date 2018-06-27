@@ -192,11 +192,11 @@ func newSession(
 	//fecHandler := &FecHandler{0,4, 0, 0,nil, 0} // Initiliaze a FecHandler with ratio equals to 4
 	//fecHandler := &FecHandler{0,3, 0, 0,nil, 0,nil, 0, nil ,  nil, time.Now(), 0} // Initiliaze a FecHandler with ratio equals to
 	//s.fecHandler = fecHandler
-	encoder :=  &FecEncoder{0,config.FecRatio, 0, nil, 0, 0, nil}
-	s.encoder = encoder
+	//encoder :=  &FecEncoder{0,config.FecRatio, 0, nil, 0, 0, nil, config}
+	s.encoder = config.Encoder
 
-	decoder :=  &FecDecoder{0,0, 0, 0,0,nil, nil,0, nil, 4}
-	s.decoder = decoder
+	//decoder :=  &FecDecoder{0,0, 0, 0,0,nil, nil,0, nil, 4}
+	s.decoder = config.Decoder
 	//END
 
 	return s, s.postSetup(1)
@@ -250,11 +250,11 @@ var newClientSession = func(
 	//PABLO GARRIDO
 	//fecHandler := &FecHandler{0,0, 0, 0,nil, 0,nil, 0, nil ,  nil, time.Now(), 0} // Initiliaze a FecHandler with ratio equals to
 	//s.fecHandler = fecHandler
-	encoder :=  &FecEncoder{0,config.FecRatio, 0, nil, 0, 0, nil}
-	s.encoder = encoder
+	//encoder :=  &FecEncoder{0,config.FecRatio, 0, nil, 0, 0, nil}
+	s.encoder = config.Encoder
 
-	decoder :=  &FecDecoder{0,0, 0, 0,0,nil, nil,0, nil, 4}
-	s.decoder = decoder
+	//decoder :=  &FecDecoder{0,0, 0, 0,0,nil, nil,0, nil, 4}
+	s.decoder = config.Decoder
 	//END
 	s.cryptoSetup = cs
 	return s, s.postSetup(1)
@@ -419,7 +419,7 @@ runLoop:
 			//Pablo Garrido
 
 			if ((p.header.FecType & 0xC0) == 0xC0 )  {
-				utils.DebugfFEC("Received FEC packet - Type: %d, Block: %d,PN: %d, LEN: %d \n", p.header.FecType, p.header.FecId,p.header.PacketNumber, len(p.data))
+				utils.DebugfFEC("Received FEC packet - Type:%d, Block: %d, Ratio: %d, Count: %d, PN: %d, LEN: %d \n", p.header.FecType,p.header.FecId, p.header.FecRatio, p.header.FecCount, p.header.PacketNumber, len(p.data))
 			}else if ((p.header.FecType & 0xC0) == 0x80) {
 				utils.DebugfFEC("Received PROTECTED packet - Type:%d, Block: %d, Ratio: %d, Count: %d, PN: %d, LEN: %d \n", p.header.FecType,p.header.FecId, p.header.FecRatio, p.header.FecCount, p.header.PacketNumber, len(p.data))
 			}else {
@@ -871,6 +871,10 @@ func (s *session) sendPackets() error {
 		if !sentPacket || !s.sentPacketHandler.SendingAllowed() {
 			return nil
 		}
+
+		if (!s.sentPacketHandler.SendingAllowed()){
+			fmt.Printf("CWND Limited\n")
+		}
 	}
 	// Only start the pacing timer if we sent as many packets as we were allowed.
 	// There will probably be more to send when calling sendPacket again.
@@ -948,17 +952,9 @@ func (s *session) sendPacket() (bool, error) {
 		// queue all retransmittable frames sent in forward-secure packets
 		utils.Debugf("\tDequeueing retransmission for packet 0x%x", retransmitPacket.PacketNumber)
 
-		//Pablo
-		if (s.encoder != nil) {
-			s.encoder.AddRetransmissionCount()
-		}
 
-		utils.DebugfFEC("P_UC - Stream Frame reTransmission from PN: %d", retransmitPacket.PacketNumber)
-		//End Pablo
 
-		s.rtx = s.rtx + 1
-		lossRate := s.rtx/s.tx
-		fmt.Printf("PN: %d, Loss RATE: %f\n", retransmitPacket.PacketNumber, lossRate)
+
 
 		// resend the frames that were in the packet
 		for _, frame := range retransmitPacket.GetFramesForRetransmission() {
@@ -971,6 +967,20 @@ func (s *session) sendPacket() (bool, error) {
 				utils.DebugfFEC("P_UC - Control Frame reTransmission from PN: %d", retransmitPacket.PacketNumber)
 				s.packer.QueueControlFrame(frame)
 			}
+		}
+
+		if len(retransmitPacket.GetFramesForRetransmission()) > 0{
+			s.rtx = s.rtx + 1
+			lossRate := s.rtx/s.tx
+			fmt.Printf("PN: %d, Loss RATE: %f\n", retransmitPacket.PacketNumber, lossRate)
+
+			//Pablo
+			if (s.encoder != nil) {
+				s.encoder.AddRetransmissionCount()
+			}
+
+			utils.DebugfFEC("P_UC - Stream Frame reTransmission from PN: %d", retransmitPacket.PacketNumber)
+			//End Pablo
 		}
 	}
 
@@ -990,16 +1000,22 @@ func (s *session) sendPacket() (bool, error) {
 		if (s.encoder.Ratio > 0) {
 			cwnd := s.sentPacketHandler.GetCWND()
 
-			if (cwnd < protocol.ByteCount(s.encoder.Ratio)*1200) {
+			if (cwnd < protocol.ByteCount(s.encoder.Ratio)*protocol.DefaultTCPMSS) {
 
-				aux := protocol.ByteCount(cwnd / 1200)
+				aux := protocol.ByteCount(cwnd / protocol.DefaultTCPMSS)
+				if (aux < 2){
+					aux = 2
+				}
+
 				s.encoder.ChangeFecRatio(uint8(aux))
 
+				//fmt.Printf("Change FEC Ratio to: %d\n", aux)
 				utils.DebugfFEC("Change FEC Ratio to: %d\n", s.encoder.Ratio)
-				fmt.Printf("Change FEC Ratio to: %d\n", s.encoder.Ratio)
 			}
 		}
 	}
+
+
 
 
 	//flowWindow  := s.connFlowController.SendWindowSize()

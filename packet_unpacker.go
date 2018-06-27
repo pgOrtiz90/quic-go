@@ -53,8 +53,20 @@ func (u *packetUnpacker) Unpack(headerBinary []byte, hdr *wire.Header, data []by
 	decrypted, encryptionLevel, err := u.aead.Open(buf, data, hdr.PacketNumber, headerBinary)
 	if err != nil {
 		// Wrap err in quicError so that public reset is sent by session
+		//fmt.Printf("Decrypt Error %d, LEN: %d\n\n", hdr.PacketNumber, len(data))
+		//for i:= 0 ; i < len(headerBinary); i++{
+		//	fmt.Printf("%d ",headerBinary[i])
+		//}
+		//fmt.Printf("\n")
+		//for i:= 0 ; i < len(data); i++{
+		//	fmt.Printf("%d ",data[i])
+		//}
+		//fmt.Printf("\n")
+		//fmt.Printf("\n")
 		return nil, qerr.Error(qerr.DecryptionFailure, err.Error())
+
 	}
+	//fmt.Printf("Decrypt OK %d, LEN: %d\n\n", hdr.PacketNumber, len(data))
 	r := bytes.NewReader(decrypted)
 
 	if r.Len() == 0 {

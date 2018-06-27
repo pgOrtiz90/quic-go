@@ -14,7 +14,7 @@ const NonForwardSecurePacketSizeReduction = 50
 const DefaultMaxCongestionWindow = 1000
 
 // InitialCongestionWindow is the initial congestion window in QUIC packets
-const InitialCongestionWindow = 10
+const InitialCongestionWindow = 32
 
 // MaxUndecryptablePackets limits the number of undecryptable packets that a
 // session queues for later until it sends a public reset.
@@ -31,12 +31,12 @@ const AckSendDelay = 25 * time.Millisecond
 // ReceiveStreamFlowControlWindow is the stream-level flow control window for receiving data
 // This is the value that Google servers are using
 //const ReceiveStreamFlowControlWindow = (1 << 10) * 32 // 32 kB
-const ReceiveStreamFlowControlWindow = 1 * (1 << 20) // 1 MB
+const ReceiveStreamFlowControlWindow = 20 * (1 << 20) // 1 MB
 
 // ReceiveConnectionFlowControlWindow is the connection-level flow control window for receiving data
 // This is the value that Google servers are using
 //const ReceiveConnectionFlowControlWindow = (1 << 10) * 48 // 48 kB
-const ReceiveConnectionFlowControlWindow = 1.5 * (1 << 20) // 1.5 MB
+const ReceiveConnectionFlowControlWindow = 20 * (1 << 20) // 1.5 MB
 
 
 // DefaultMaxReceiveStreamFlowControlWindowServer is the default maximum stream-level flow control window for receiving data, for the server

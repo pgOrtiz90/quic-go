@@ -154,6 +154,10 @@ func populateClientConfig(config *Config) *Config {
 		maxIncomingUniStreams = 0
 	}
 
+	//PABLO
+	encoder := config.Encoder
+	decoder := config.Decoder
+
 	return &Config{
 		Versions:                              versions,
 		HandshakeTimeout:                      handshakeTimeout,
@@ -164,6 +168,8 @@ func populateClientConfig(config *Config) *Config {
 		MaxIncomingStreams:                    maxIncomingStreams,
 		MaxIncomingUniStreams:                 maxIncomingUniStreams,
 		KeepAlive:                             config.KeepAlive,
+		Encoder:															 encoder,
+		Decoder:															 decoder,
 	}
 
 }

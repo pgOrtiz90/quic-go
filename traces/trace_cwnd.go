@@ -19,7 +19,7 @@ type trace_cwnd struct{
 
 func (t *trace_cwnd) OpenFile ( ){
 	t.file,_ = os.Create(t.fileName)
-	fmt.Fprintf(t.file, "Time \t Ratio \t Delta \t Target \t N \t T \n")
+	fmt.Fprintf(t.file, "Time \t CWND")
 	return
 }
 

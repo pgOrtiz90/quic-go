@@ -292,6 +292,8 @@ func (p *packetPacker) getFecHeader() *wire.Header {
 	//header.FecType = 0xE0
 	header.FecType = 0xC0 | p.encod.GetFecType(num)
 
+	p.encod.SetLastPacketNumber(pnum)
+
 	return header
 }
 //END PAblo
