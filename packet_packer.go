@@ -254,7 +254,6 @@ func (p *packetPacker) PackFecPacket() (*packedPacket, error) {
 	if size := protocol.ByteCount(buffer.Len()); size > protocol.MaxPacketSize {
 		fmt.Printf("error: %d\n", protocol.ByteCount(buffer.Len()))
 		return nil, fmt.Errorf("PacketPacker BUG: packet too large (%d bytes, allowed %d bytes)", size, protocol.MaxPacketSize)
-
 	}
 	p.hasSentPacket = true
 
@@ -483,7 +482,7 @@ func (p *packetPacker) writeAndSealPacket(
 	}
 
 	if size := protocol.ByteCount(buffer.Len() + sealer.Overhead()); size > protocol.MaxPacketSize {
-		return nil, fmt.Errorf("PacketPacker BUG: packet too large (%d bytes, allowed %d bytes)", size, protocol.MaxPacketSize)
+		//return nil, fmt.Errorf("PacketPacker BUG: packet too large (%d bytes, allowed %d bytes)", size, protocol.MaxPacketSize)
 	}
 
 	raw = raw[0:buffer.Len()]

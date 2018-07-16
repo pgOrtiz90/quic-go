@@ -6,7 +6,6 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 )
 
-
 var trace traceLevels
 
 //Defines the tracing levels
@@ -28,6 +27,7 @@ type traceLevels struct{
 
 	//Application level trace
 	application_option bool
+	app_tx *trace_app_transmitter
 
 
 	//File name for the output file -> fileName_LEVEL.tr
@@ -36,6 +36,15 @@ type traceLevels struct{
 
 	timeStart time.Time
 }
+
+
+func SetTraceFileName(fileName string){
+	trace.timeStart = time.Now()
+	trace.fileName = fileName
+}
+
+
+//CWN TRACER
 
 func CWNDTraceInit (){
 
@@ -57,6 +66,14 @@ func PrintCWND(cwnd protocol.PacketNumber){
 }
 
 
+func SetCWNDTraceLevel(){
+	trace.cwnd_option = true
+	CWNDTraceInit ()
+}
+
+
+// FEC ENCODER TRACER
+
 func FecEncoderTraceInit ( ratio uint8 , delta float32, target float32, N uint, T time.Duration){
 
 	if(trace.fec_encoder_option){
@@ -69,6 +86,20 @@ func FecEncoderTraceInit ( ratio uint8 , delta float32, target float32, N uint, 
 	return
 }
 
+func PrintFecEncoder(ratio uint8){
+	if(trace.fec_encoder != nil){
+		trace.fec_encoder.Print(ratio)
+	}
+	return
+}
+
+func SetFecEncoderTraceLevel(){
+	trace.fec_encoder_option = true
+}
+
+
+// FEC DECODER TRACER
+
 func FecDecoderTraceInit( ){
 
 	if(trace.fec_decoder_option){
@@ -77,13 +108,6 @@ func FecDecoderTraceInit( ){
 		trace_decoder := &trace_fec_decoder{FileName: fileName}
 		trace_decoder.OpenFile()
 		trace.fec_decoder = trace_decoder
-	}
-	return
-}
-
-func PrintFecEncoder(ratio uint8){
-	if(trace.fec_encoder != nil){
-		trace.fec_encoder.Print(ratio)
 	}
 	return
 }
@@ -101,24 +125,35 @@ func  StoreFecDecoder (blocks uint, decoded uint, fails uint, redundant uint){
 }
 
 
-func SetTraceFileName(fileName string){
-	trace.timeStart = time.Now()
-	trace.fileName = fileName
-}
-
-func SetFecEncoderTraceLevel(){
-	trace.fec_encoder_option = true
-}
-
 func SetFecDecoderTraceLevel(){
 	trace.fec_decoder_option = true
 	FecDecoderTraceInit()
 }
 
+// APP TRACER
 
-func SetCWNDTraceLevel(){
-	trace.cwnd_option = true
-	CWNDTraceInit ()
+func APP_TX_TraceInit( id uint, delta float64, target float64, N uint, T time.Duration){
+	if(trace.application_option){
+		fileName := fmt.Sprintf("%s_app_tx.tr", trace.fileName)
+
+		app_tx := &trace_app_transmitter{FileName: fileName}
+		app_tx.OpenFile(id, delta, target, N, T )
+		trace.app_tx = app_tx
+	}
+	return
+}
+
+
+
+func  PrintAPP ( tx_t time.Duration, tx_bytes int){
+	if(trace.app_tx != nil){
+		trace.app_tx.Print(tx_t, tx_bytes)
+	}
+}
+
+
+func SetAPPTraceLevel(){
+	trace.application_option = true
 }
 
 
@@ -129,6 +164,14 @@ func CloseAll(){
 
 	if(trace.cwnd != nil){
 		trace.cwnd.close()
+	}
+
+	if(trace.fec_decoder != nil){
+		trace.fec_decoder.close()
+	}
+
+	if(trace.app_tx != nil){
+		trace.app_tx.close()
 	}
 }
 

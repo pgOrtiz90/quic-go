@@ -10,6 +10,7 @@ import (
 
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/traces"
+	"log"
 )
 //  SINK_CLIENT.GO
 //
@@ -29,7 +30,7 @@ func main() {
 	buf := make([]byte, packet_size)
 	flag.Parse()
 
-	traces.SetFecDecoderTraceLevel()
+	//traces.SetFecDecoderTraceLevel()
 
 	start := time.Now()
 	bytesReceived := 0
@@ -51,12 +52,13 @@ func main() {
 
 	if (*tcp){   // IF TCP -> Start a connection with TLS/TCP Socket
 		start = time.Now()
-		conn, _ := tls.Dial("tcp", *ip, &tls.Config{InsecureSkipVerify: true})
-
-		fmt.Printf("Connection TCP/TLS established \n")
-
-		conn.SetReadDeadline(time.Now().Add(10*time.Second))
+		conn, err := tls.Dial("tcp", *ip, &tls.Config{InsecureSkipVerify: true})
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		fmt.Printf("Client listening... \n")
+
 		end := time.Now()
 		for{
 			end = time.Now()

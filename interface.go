@@ -187,8 +187,8 @@ type Config struct {
 	KeepAlive bool
 
 	//PABLO
-	//FEC Parameters configuration
-	FecRatio uint8
+	Encoder *FecEncoder
+	Decoder *FecDecoder
 	//END PABLO
 }
 

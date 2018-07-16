@@ -28,6 +28,7 @@ func main() {
 	N := flag.Uint("N",3, "T=N*RTT")
 	delta := flag.Float64("delta",0.33, "T=N*RTT")
 	target := flag.Float64("target",0.01, "Target of Dynamic FEC algorithm")
+	id := flag.Uint("ID",0, "RUN IDENTIFIER")
 	//dynamic := flag.Bool("dynamic",false, "Target of Dynamic FEC algorithm")
 	flag.Parse()
 
@@ -38,8 +39,9 @@ func main() {
 
 
 	traces.SetTraceFileName(*trace)
-	traces.SetFecEncoderTraceLevel()
-	traces.SetCWNDTraceLevel()
+	//traces.SetFecEncoderTraceLevel()
+	//traces.SetCWNDTraceLevel()
+	traces.SetAPPTraceLevel()
 
 
 
@@ -72,6 +74,8 @@ func main() {
 	config := &quic.Config{
 		Encoder: encoder,
 		Decoder: decoder}
+
+		traces.APP_TX_TraceInit( *id , *delta , *target , *N ,  3*time.Duration(*rtt)*time.Millisecond)
 
 	//Listens on the given network address for QUIC conexion
 	tlsconf := generateTLSConfig()
@@ -175,11 +179,14 @@ func main() {
 
 	}
 
+	traces.PrintAPP(end.Sub(start), bytesSent)
+
 	t := float64(end.Sub(start)/1000) // Duration is in nanoseconds -> I get microseconds to get Mbps
 	thput := float64(bytesSent*8)/t
 	fmt.Printf("Server - Sent: %d  bytes, Thput: %f Mbps, %f us\n", bytesSent, thput, t)
 	//fmt.Printf("Start: %s, End: %s\n", start.String(), end.String())
 
+	traces.CloseAll()
 	time.Sleep(time.Second)
 	return
 }

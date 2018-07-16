@@ -219,7 +219,8 @@ func populateServerConfig(config *Config) *Config {
 	}
 
 	//PABLO
-	fecRatio := config.FecRatio
+	encoder := config.Encoder
+	decoder := config.Decoder
 
 	return &Config{
 		Versions:                              versions,
@@ -231,7 +232,8 @@ func populateServerConfig(config *Config) *Config {
 		MaxReceiveConnectionFlowControlWindow: maxReceiveConnectionFlowControlWindow,
 		MaxIncomingStreams:                    maxIncomingStreams,
 		MaxIncomingUniStreams:                 maxIncomingUniStreams,
-		FecRatio: 														 fecRatio,
+		Encoder: 															 encoder,
+		Decoder:															 decoder,
 	}
 	//END PABLO
 	/*

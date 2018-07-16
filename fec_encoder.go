@@ -66,7 +66,7 @@ func (f *FecEncoder) ParsePacket(raw []byte, header *wire.Header) int{
 				target: f.Target,
 				n: 0,
 				encoder: f}
-			traces.FecEncoderTraceInit(f.Ratio, 0.33, 0.01, f.N, f.Timer)
+			traces.FecEncoderTraceInit(f.Ratio, float32(f.Delta), float32(f.Target), f.N, f.Timer)
 			traces.PrintFecEncoder(f.Ratio)
 			f.ratio_aux = f.Ratio
 			go f.dynamicRatio.StartTimer()

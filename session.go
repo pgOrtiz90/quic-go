@@ -193,10 +193,17 @@ func newSession(
 	//fecHandler := &FecHandler{0,3, 0, 0,nil, 0,nil, 0, nil ,  nil, time.Now(), 0} // Initiliaze a FecHandler with ratio equals to
 	//s.fecHandler = fecHandler
 	//encoder :=  &FecEncoder{0,config.FecRatio, 0, nil, 0, 0, nil, config}
-	s.encoder = config.Encoder
+	if (config.Encoder != nil) {
+		s.encoder = config.Encoder
+	}else {
+		s.encoder = nil
+	}
 
 	//decoder :=  &FecDecoder{0,0, 0, 0,0,nil, nil,0, nil, 4}
-	s.decoder = config.Decoder
+	if (config.Decoder != nil){
+		s.decoder = nil
+	}
+
 	//END
 
 	return s, s.postSetup(1)
@@ -426,39 +433,40 @@ runLoop:
 				utils.DebugfFEC("Received NORMAL packet - Type: %d, PN: %d, LEN: %d \n",p.header.FecType , p.header.PacketNumber, len(p.data))
 			}
 
-			n, packets := s.decoder.HandlePacket2(p)
+			if (s.decoder != nil) {
+				n, packets := s.decoder.HandlePacket2(p)
 
-			if n == 0 {
-				continue
-			}
-
-			var err error
-			for i := 0; i < n; i++ {
-				packet := packets[i]
-				utils.DebugfFEC("HandlePacket IMPL: %d, %d\n", i, packet.header.PacketNumber)
-
-				err = s.handlePacketImpl(packet)
-
-				if err != nil {
-					if qErr, ok := err.(*qerr.QuicError); ok && qErr.ErrorCode == qerr.DecryptionFailure {
-						s.tryQueueingUndecryptablePacket(p)
-						utils.DebugfFEC("ERROR DECRYPT PACKET PN: %d", packet.header.PacketNumber)
-						continue
-					}
-					s.closeLocal(err)
+				if n == 0 {
 					continue
 				}
-				utils.DebugfFEC("HandlePacket IMPL END: %d, %d\n", i, packet.header.PacketNumber)
-			}
 
-			if err != nil {
-				continue
-			}
+				var err error
+				for i := 0; i < n; i++ {
+					packet := packets[i]
+					utils.DebugfFEC("HandlePacket IMPL: %d, %d\n", i, packet.header.PacketNumber)
+
+					err = s.handlePacketImpl(packet)
+
+					if err != nil {
+						if qErr, ok := err.(*qerr.QuicError); ok && qErr.ErrorCode == qerr.DecryptionFailure {
+							s.tryQueueingUndecryptablePacket(p)
+							utils.DebugfFEC("ERROR DECRYPT PACKET PN: %d", packet.header.PacketNumber)
+							continue
+						}
+						s.closeLocal(err)
+						continue
+					}
+					utils.DebugfFEC("HandlePacket IMPL END: %d, %d\n", i, packet.header.PacketNumber)
+				}
+
+				if err != nil {
+					continue
+				}
+			}else {
+
+				//End Pablo
 
 
-			//End Pablo
-
-			/*
 			err := s.handlePacketImpl(p)
 
 			if err != nil {
@@ -470,9 +478,10 @@ runLoop:
 				continue
 			}
 			utils.DebugfFEC("Handle packet IMPL -  %d", p.header.PacketNumber)
-			*/
-			// This is a bit unclean, but works properly, since the packet always
-			// begins with the public header and we never copy it.
+
+				// This is a bit unclean, but works properly, since the packet always
+				// begins with the public header and we never copy it.
+			}
 			putPacketBuffer(&p.header.Raw)
 
 		case p := <-s.paramsChan:
@@ -972,7 +981,7 @@ func (s *session) sendPacket() (bool, error) {
 		if len(retransmitPacket.GetFramesForRetransmission()) > 0{
 			s.rtx = s.rtx + 1
 			lossRate := s.rtx/s.tx
-			fmt.Printf("PN: %d, Loss RATE: %f\n", retransmitPacket.PacketNumber, lossRate)
+			utils.DebugfFEC("PN: %d, Loss RATE: %f\n", retransmitPacket.PacketNumber, lossRate)
 
 			//Pablo
 			if (s.encoder != nil) {
