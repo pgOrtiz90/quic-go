@@ -28,7 +28,7 @@ type traceLevels struct{
 	//Application level trace
 	application_option bool
 	app_tx *trace_app_transmitter
-
+	app_rx *trace_app_receiver
 
 	//File name for the output file -> fileName_LEVEL.tr
 	//The system will generate as many files as levels are activate
@@ -144,10 +144,24 @@ func APP_TX_TraceInit( id uint, delta float64, target float64, N uint, T time.Du
 }
 
 
+func APP_RX_TraceInit( id uint){
+	if(trace.application_option){
+		fileName := fmt.Sprintf("%s_app_rx.tr", trace.fileName)
 
-func  PrintAPP ( tx_t time.Duration, tx_bytes int){
+		app_rx := &trace_app_receiver{FileName: fileName}
+		app_rx.OpenFile(id)
+		trace.app_rx = app_rx
+	}
+	return
+}
+
+
+func  PrintAPP ( tx_t time.Duration, tx_bytes int, objects int){
 	if(trace.app_tx != nil){
 		trace.app_tx.Print(tx_t, tx_bytes)
+	}
+	if(trace.app_rx != nil){
+		trace.app_rx.Print(tx_t, tx_bytes, objects)
 	}
 }
 
@@ -176,4 +190,15 @@ func CloseAll(){
 }
 
 
+func UpdateLossRate(lossRate float32){
+	if (trace.app_tx!= nil){
+		trace.app_tx.LossRateUpdate(lossRate)
+	}
+}
 
+
+func UpdateRedundancy(Redundancy float32){
+	if (trace.app_tx!= nil){
+		trace.app_tx.redundancyUpdate(Redundancy)
+	}
+}

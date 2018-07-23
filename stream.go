@@ -8,7 +8,6 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/flowcontrol"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/wire"
-	"fmt"
 )
 
 const (
@@ -106,7 +105,6 @@ func newStream(streamID protocol.StreamID,
 	flowController flowcontrol.StreamFlowController,
 	version protocol.VersionNumber,
 ) *stream {
-	fmt.Printf("New Stream2\n")
 	s := &stream{sender: sender}
 	senderForSendStream := &uniStreamSender{
 		streamSender: sender,

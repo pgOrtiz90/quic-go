@@ -29,7 +29,8 @@ func main() {
 	delta := flag.Float64("delta",0.33, "T=N*RTT")
 	target := flag.Float64("target",0.01, "Target of Dynamic FEC algorithm")
 	id := flag.Uint("ID",0, "RUN IDENTIFIER")
-	//dynamic := flag.Bool("dynamic",false, "Target of Dynamic FEC algorithm")
+	cwnd := flag.Bool("cwnd",false, "CWND PRINT")
+
 	flag.Parse()
 
 	if(*v) {
@@ -39,8 +40,12 @@ func main() {
 
 
 	traces.SetTraceFileName(*trace)
-	//traces.SetFecEncoderTraceLevel()
-	//traces.SetCWNDTraceLevel()
+
+	if (*cwnd ) {
+		traces.SetFecEncoderTraceLevel()
+		traces.SetCWNDTraceLevel()
+	}
+
 	traces.SetAPPTraceLevel()
 
 
@@ -179,7 +184,7 @@ func main() {
 
 	}
 
-	traces.PrintAPP(end.Sub(start), bytesSent)
+	traces.PrintAPP(end.Sub(start), bytesSent, 0)
 
 	t := float64(end.Sub(start)/1000) // Duration is in nanoseconds -> I get microseconds to get Mbps
 	thput := float64(bytesSent*8)/t

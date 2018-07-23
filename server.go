@@ -221,6 +221,7 @@ func populateServerConfig(config *Config) *Config {
 	//PABLO
 	encoder := config.Encoder
 	decoder := config.Decoder
+	fmt.Printf("FEEEEEEEEEC")
 
 	return &Config{
 		Versions:                              versions,

@@ -63,10 +63,10 @@ const ConnectionFlowControlMultiplier = 1.5
 const WindowUpdateThreshold = 0.25
 
 // DefaultMaxIncomingStreams is the maximum number of streams that a peer may open
-const DefaultMaxIncomingStreams = 100
+const DefaultMaxIncomingStreams = 200
 
 // DefaultMaxIncomingUniStreams is the maximum number of unidirectional streams that a peer may open
-const DefaultMaxIncomingUniStreams = 100
+const DefaultMaxIncomingUniStreams = 200
 
 // MaxStreamsMultiplier is the slack the client is allowed for the maximum number of streams per connection, needed e.g. when packets are out of order or dropped. The minimum of this procentual increase and the absolute increment specified by MaxStreamsMinimumIncrement is used.
 const MaxStreamsMultiplier = 1.1
@@ -123,7 +123,8 @@ const DefaultHandshakeTimeout = 10 * time.Second
 
 // ClosedSessionDeleteTimeout the server ignores packets arriving on a connection that is already closed
 // after this time all information about the old connection will be deleted
-const ClosedSessionDeleteTimeout = time.Minute
+//const ClosedSessionDeleteTimeout = time.Minute
+const ClosedSessionDeleteTimeout = 10*time.Second
 
 // NumCachedCertificates is the number of cached compressed certificate chains, each taking ~1K space
 const NumCachedCertificates = 128

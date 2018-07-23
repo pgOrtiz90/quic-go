@@ -25,12 +25,21 @@ func main() {
 	ip := flag.String("ip", "localhost:4242", "IP:Port Addres")
 	tcp := flag.Bool("tcp", false, "Use a TCP/QUIC connection")
 	v := flag.Bool("v", false, "FEC Debug Information")
+	trace := flag.String("trace","sink_client", "Trace File Name")
+	id := flag.Uint("ID",0, "RUN IDENTIFIER")
+	fecTrace := flag.Bool("fecTrace",false, "FEC TRACES")
+
 
 	packet_size := 1452//Maximum packet size
 	buf := make([]byte, packet_size)
 	flag.Parse()
 
-	//traces.SetFecDecoderTraceLevel()
+	traces.SetTraceFileName(*trace)
+	traces.SetAPPTraceLevel()
+	if(*fecTrace){
+		traces.SetFecDecoderTraceLevel()
+	}
+	traces.APP_RX_TraceInit(*id)
 
 	start := time.Now()
 	bytesReceived := 0
@@ -123,6 +132,7 @@ func main() {
 		session.Close(nil)
 
 		traces.PrintFecDecoder()
+		traces.PrintAPP(end.Sub(start), bytesReceived, 0)
 	}
 	return
 }

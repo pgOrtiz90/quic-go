@@ -18,6 +18,7 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/qerr"
+	"github.com/lucas-clemente/quic-go/traces"
 )
 
 type unpacker interface {
@@ -134,6 +135,7 @@ type session struct {
 	//Count the tx and rtx packets
 	tx float32
 	rtx float32
+	redundancy float32
 	//packetsSent uint32
 	//fecHandler *FecHandler
 	encoder *FecEncoder
@@ -962,7 +964,20 @@ func (s *session) sendPacket() (bool, error) {
 		utils.Debugf("\tDequeueing retransmission for packet 0x%x", retransmitPacket.PacketNumber)
 
 
+		if len(retransmitPacket.GetFramesForRetransmission()) > 0{
+			s.rtx = s.rtx + 1
+			lossRate := s.rtx/s.tx
+			utils.DebugfFEC("PN: %d, Loss RATE: %f\n", retransmitPacket.PacketNumber, lossRate)
+			traces.UpdateLossRate(lossRate)
 
+			//Pablo
+			if (s.encoder != nil) {
+				s.encoder.AddRetransmissionCount()
+			}
+
+			utils.DebugfFEC("P_UC - Stream Frame reTransmission from PN: %d", retransmitPacket.PacketNumber)
+			//End Pablo
+		}
 
 
 		// resend the frames that were in the packet
@@ -978,19 +993,7 @@ func (s *session) sendPacket() (bool, error) {
 			}
 		}
 
-		if len(retransmitPacket.GetFramesForRetransmission()) > 0{
-			s.rtx = s.rtx + 1
-			lossRate := s.rtx/s.tx
-			utils.DebugfFEC("PN: %d, Loss RATE: %f\n", retransmitPacket.PacketNumber, lossRate)
 
-			//Pablo
-			if (s.encoder != nil) {
-				s.encoder.AddRetransmissionCount()
-			}
-
-			utils.DebugfFEC("P_UC - Stream Frame reTransmission from PN: %d", retransmitPacket.PacketNumber)
-			//End Pablo
-		}
 	}
 
 	hasRetransmission := s.streamFramer.HasFramesForRetransmission()
@@ -1075,6 +1078,8 @@ func (s *session) sendPackedPacket(packet *packedPacket) error {
 	if ((packet.header.FecType & 0xC0)== 0xC0 )  {
 		utils.DebugfFEC("Transmitted FEC packet - Type: %d, Block: %d,PN: %d, LEN: %d \n", packet.header.FecType, packet.header.FecId,packet.header.PacketNumber, len(packet.raw))
 		//return s.conn.Write(packet.raw)
+		s.redundancy +=1
+		traces.UpdateRedundancy(s.redundancy/s.tx)
 	}else if ((packet.header.FecType & 0xC0)== 0x80 ) {
 		utils.DebugfFEC("Transmitted PROTECTED packet - Type:%d, Block: %d, Ratio: %d, Count: %d, PN: %d, LEN: %d \n", packet.header.FecType,packet.header.FecId, packet.header.FecRatio, packet.header.FecCount, packet.header.PacketNumber, len(packet.raw))
 	}else {

@@ -16,10 +16,14 @@ import (
 	quic "github.com/lucas-clemente/quic-go"
 	"github.com/lucas-clemente/quic-go/h2quic"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
+	"flag"
+	"github.com/lucas-clemente/quic-go/traces"
 )
 
 var wg sync.WaitGroup
 var downloading_time time.Duration
+var bytes_sent int
+var objects int
 
 func check(e error) {
 	if e != nil {
@@ -65,6 +69,7 @@ func httpRequest(addr string, client *http.Client) {
 	rsp, err := client.Get(addr)
 	body := &bytes.Buffer{}
 	_, err = io.Copy(body, rsp.Body)
+	bytes_sent += len(body.Bytes())
 	fmt.Printf(" %s, %d \n", addr, len(body.Bytes()))
 	if err != nil {
 		panic(err)
@@ -75,6 +80,19 @@ func httpRequest(addr string, client *http.Client) {
 
 
 func main() {
+
+	harFile  := flag.String("har","quic.clemente.io.har", "Har FIle Path")
+	trace := flag.String("trace","web_requests", "Trace File Name")
+	id := flag.Uint("ID",0, "RUN IDENTIFIER")
+
+	flag.Parse()
+
+
+	traces.SetTraceFileName(*trace)
+	//traces.SetFecEncoderTraceLevel()
+	//traces.SetCWNDTraceLevel()
+	traces.SetAPPTraceLevel()
+	traces.APP_RX_TraceInit( *id)
 
 	decoder := &quic.FecDecoder{Ratio: 0,
 		Id: 0,
@@ -105,9 +123,9 @@ func main() {
 	//}
 
 	//harFile := "/Users/Pablo/Desktop/quic.clemente.io.har"
-	harFile := "/Users/Pablo/Desktop/justwatch.har"
+	//harFile := "/Users/Pablo/Desktop/justwatch.har"
 
-	file, err := os.Open(harFile)
+	file, err := os.Open(*harFile)
 	check(err)
 
 	r := newReader(file)
@@ -126,7 +144,9 @@ func main() {
 	time_start1, err  := time.Parse(time.RFC3339,entry.StartedDateTime)
 	check(err)
 	wg.Add(1)
+	fmt.Printf(" %s \n", entry.Request.URL)
 	go httpRequest(entry.Request.URL, httpClient)
+	objects +=1
 	it = it + 1
 
 	for it < (len(har.Log.Entries)){
@@ -136,10 +156,11 @@ func main() {
 		elapsed := time_start2.Sub(time_start1)
 
 
-		if (strings.Contains(entry.Request.URL, "localhost")){
+		if (strings.Contains(entry.Request.URL, "pablo.io")){
 			fmt.Printf(" %s \n", entry.Request.URL)
 			wg.Add(1)
 			go httpRequest(entry.Request.URL, httpClient)
+			objects +=1
 		}
 
 
@@ -149,6 +170,6 @@ func main() {
 		time_start1 = time_start2
 	}
 	wg.Wait()
-
+	traces.PrintAPP(downloading_time, bytes_sent, objects)
 	fmt.Printf("Total Downloading Time: %d", int64(downloading_time/time.Millisecond))
 }

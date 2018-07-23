@@ -14,9 +14,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-
-	_ "net/http/pprof"
-
 	quic "github.com/lucas-clemente/quic-go"
 	"github.com/lucas-clemente/quic-go/h2quic"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
@@ -114,7 +111,7 @@ func getBuildDir() string {
 func main() {
 	// defer profile.Start().Stop()
 	go func() {
-		log.Println(http.ListenAndServe("localhost:6061", nil))
+		log.Println(http.ListenAndServe("10.0.0.2:6061", nil))
 		//log.Println(http.ListenAndServe("10.1.1.2:6060", nil))
 	}()
 	// runtime.SetBlockProfileRate(1)
@@ -124,7 +121,7 @@ func main() {
 	flag.Var(&bs, "bind", "bind to")
 	certPath := flag.String("certpath", getBuildDir(), "certificate directory")
 	www := flag.String("www", "/var/www", "www data")
-	tcp := flag.Bool("tcp", true, "also listen on TCP")
+	tcp := flag.Bool("tcp", false, "also listen on TCP")
 
 	fecRatio := flag.Int("ratio", 4, "Fec Ratio")
 //	trace := flag.String("trace","bulk_server", "Trace File Name")
@@ -132,16 +129,24 @@ func main() {
 	N := flag.Uint("N",3, "T=N*RTT")
 	delta := flag.Float64("delta",0.33, "T=N*RTT")
 	target := flag.Float64("target",0.01, "Target of Dynamic FEC algorithm")
-//	id := flag.Uint("ID",0, "RUN IDENTIFIER")
+	//	id := flag.Uint("ID",0, "RUN IDENTIFIER")
 
 	flag.Parse()
 
 	if *verbose {
 		utils.SetLogLevel(utils.LogLevelDebug)
-	} else {
-		utils.SetLogLevel(utils.LogLevelInfo)
 	}
+	//else {
+	//	utils.SetLogLevel(utils.LogLevelInfo)
+	//}
 	utils.SetLogTimeFormat("")
+
+	//traces.SetTraceFileName(*trace)
+	//traces.SetFecEncoderTraceLevel()
+	//traces.SetCWNDTraceLevel()
+	//traces.SetAPPTraceLevel()
+	//traces.APP_RX_TraceInit( *id)
+
 
 	versions := protocol.SupportedVersions
 
@@ -155,20 +160,20 @@ func main() {
 
 	if len(bs) == 0 {
 		//bs = binds{"localhost:443"}
-		bs = binds{"localhost:6121"}
+		bs = binds{"10.0.0.2:6121"}
 	}
 
 
 	//Generate QUIC Config
 	encoder := &quic.FecEncoder{Id: 0,
-		Ratio: uint8(*fecRatio),
-		Count: 0,
-		FECData: nil,
-		Timer: 3*time.Duration(*rtt)*time.Millisecond,
-		N: *N,
-		Dynamic: true,
-		Delta: *delta,
-		Target: *target}
+			Ratio: uint8(*fecRatio),
+			Count: 0,
+			FECData: nil,
+			Timer: 3 * time.Duration(*rtt) * time.Millisecond,
+			N: *N,
+			Dynamic: true,
+			Delta: *delta,
+			Target: *target}
 
 	decoder := &quic.FecDecoder{Ratio: 0,
 		Id: 0,
@@ -186,11 +191,20 @@ func main() {
 			if *tcp {
 				err = h2quic.ListenAndServe(bCap, certFile, keyFile, nil)
 			} else {
-				server := h2quic.Server{
-					Server:     &http.Server{Addr: bCap},
-					QuicConfig: &quic.Config{		Encoder: encoder, Decoder: decoder,Versions: versions},
-					//QuicConfig: &quic.Config{	Versions: versions},
+
+				var config *quic.Config
+
+				if *fecRatio != 0{
+					config = &quic.Config{Encoder: encoder, Decoder: decoder,Versions: versions}
+				}else{
+					config = &quic.Config{Versions: versions}
 				}
+
+				server := h2quic.Server{
+					Server:     &http.Server{Addr: bCap, IdleTimeout: 10*time.Second},
+					QuicConfig: config,
+				}
+
 				err = server.ListenAndServeTLS(certFile, keyFile)
 			}
 			if err != nil {
