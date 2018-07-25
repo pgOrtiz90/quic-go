@@ -128,8 +128,8 @@ func main() {
 		//Send a packet to end the communication to the
 		fmt.Fprintf(stream, "Se han recibido %d\n", bytesReceived)
 
-		stream.Close()
-		session.Close(nil)
+		//stream.Close()
+		//session.Close(nil)
 
 		traces.PrintFecDecoder()
 		traces.PrintAPP(end.Sub(start), bytesReceived, 0)

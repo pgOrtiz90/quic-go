@@ -3,6 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="8b24b421-4d6d-4d4b-866f-7e2538ff1a1f" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/binaries/web_requests" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/example/mosaic-tests/sink_client.go" afterPath="$PROJECT_DIR$/example/mosaic-tests/sink_client.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,11 +25,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="bulk_server.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="bulk_server.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/example/mosaic-tests/bulk_server.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2363">
-              <caret line="196" column="1" lean-forward="false" selection-start-line="196" selection-start-column="1" selection-end-line="196" selection-end-column="1" />
+            <state relative-caret-position="170">
+              <caret line="37" column="39" lean-forward="false" selection-start-line="37" selection-start-column="39" selection-end-line="37" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -36,18 +38,18 @@
       <file leaf-file-name="sink_client.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/example/mosaic-tests/sink_client.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="476">
-              <caret line="39" column="20" lean-forward="false" selection-start-line="39" selection-start-column="20" selection-end-line="39" selection-end-column="20" />
+            <state relative-caret-position="1751">
+              <caret line="114" column="48" lean-forward="false" selection-start-line="114" selection-start-column="44" selection-end-line="114" selection-end-column="48" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="session.go" pinned="false" current-in-tab="false">
+      <file leaf-file-name="session.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/session.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18054">
-              <caret line="1081" column="22" lean-forward="false" selection-start-line="1081" selection-start-column="22" selection-end-line="1081" selection-end-column="22" />
+            <state relative-caret-position="165">
+              <caret line="1073" column="42" lean-forward="false" selection-start-line="1073" selection-start-column="42" selection-end-line="1073" selection-end-column="42" />
               <folding />
             </state>
           </provider>
@@ -66,7 +68,7 @@
       <file leaf-file-name="web_requests2.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/example/mosaic-tests/web_requests2.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
+            <state relative-caret-position="1785">
               <caret line="124" column="2" lean-forward="false" selection-start-line="124" selection-start-column="2" selection-end-line="124" selection-end-column="2" />
               <folding>
                 <element signature="e#14#347#0" expanded="true" />
@@ -154,8 +156,8 @@
       <find>tx</find>
       <find>tx_r</find>
       <find>Fec</find>
-      <find>redundancy</find>
       <find>Transmitted</find>
+      <find>redundancy</find>
     </findStrings>
   </component>
   <component name="GOROOT" path="C:\Go" />
@@ -175,12 +177,12 @@
         <option value="$PROJECT_DIR$/example/mosaic-tests/web_requests2.go" />
         <option value="$PROJECT_DIR$/example/mosaic-tests/server_web.go" />
         <option value="$PROJECT_DIR$/example/mosaic-tests/bulk_server.go" />
-        <option value="$PROJECT_DIR$/example/mosaic-tests/sink_client.go" />
         <option value="$PROJECT_DIR$/traces/trace.go" />
         <option value="$PROJECT_DIR$/session.go" />
         <option value="$PROJECT_DIR$/traces/trace_app_transmitter.go" />
         <option value="$PROJECT_DIR$/internal/protocol/server_parameters.go" />
         <option value="$PROJECT_DIR$/internal/congestion/cubic_sender.go" />
+        <option value="$PROJECT_DIR$/example/mosaic-tests/sink_client.go" />
       </list>
     </option>
   </component>
@@ -190,7 +192,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="261" />
     <option name="y" value="85" />
     <option name="width" value="1399" />
@@ -212,6 +214,7 @@
     </navigator>
     <panes>
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -227,31 +230,18 @@
             <path>
               <item name="quic-go" type="b2602c69:ProjectViewProjectNode" />
               <item name="quic-go" type="462c0819:PsiDirectoryNode" />
-              <item name="internal" type="462c0819:PsiDirectoryNode" />
+              <item name="example" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="quic-go" type="b2602c69:ProjectViewProjectNode" />
               <item name="quic-go" type="462c0819:PsiDirectoryNode" />
-              <item name="internal" type="462c0819:PsiDirectoryNode" />
-              <item name="congestion" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="quic-go" type="b2602c69:ProjectViewProjectNode" />
-              <item name="quic-go" type="462c0819:PsiDirectoryNode" />
-              <item name="internal" type="462c0819:PsiDirectoryNode" />
-              <item name="protocol" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="quic-go" type="b2602c69:ProjectViewProjectNode" />
-              <item name="quic-go" type="462c0819:PsiDirectoryNode" />
-              <item name="internal" type="462c0819:PsiDirectoryNode" />
-              <item name="testdata" type="462c0819:PsiDirectoryNode" />
+              <item name="example" type="462c0819:PsiDirectoryNode" />
+              <item name="mosaic-tests" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -281,10 +271,10 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1186" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.09488273" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17750533" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -361,7 +351,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1445">
           <caret line="85" column="4" lean-forward="false" selection-start-line="85" selection-start-column="2" selection-end-line="85" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -416,7 +405,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1462">
           <caret line="86" column="69" lean-forward="false" selection-start-line="86" selection-start-column="69" selection-end-line="86" selection-end-column="69" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -539,7 +527,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="595">
           <caret line="104" column="30" lean-forward="false" selection-start-line="104" selection-start-column="24" selection-end-line="104" selection-end-column="30" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -582,6 +569,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="6783">
           <caret line="414" column="9" lean-forward="false" selection-start-line="414" selection-start-column="8" selection-end-line="414" selection-end-column="9" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -630,30 +618,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fec_encoder.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="26" column="11" lean-forward="false" selection-start-line="26" selection-start-column="2" selection-end-line="26" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/example/mosaic-tests/sink_client.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret line="39" column="20" lean-forward="false" selection-start-line="39" selection-start-column="20" selection-end-line="39" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/session.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18054">
-          <caret line="1081" column="22" lean-forward="false" selection-start-line="1081" selection-start-column="22" selection-end-line="1081" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/traces/trace.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3315">
@@ -696,7 +660,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/example/mosaic-tests/web_requests2.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
+        <state relative-caret-position="1785">
           <caret line="124" column="2" lean-forward="false" selection-start-line="124" selection-start-column="2" selection-end-line="124" selection-end-column="2" />
           <folding>
             <element signature="e#14#347#0" expanded="true" />
@@ -704,10 +668,34 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/example/mosaic-tests/sink_client.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1751">
+          <caret line="114" column="48" lean-forward="false" selection-start-line="114" selection-start-column="44" selection-end-line="114" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/example/mosaic-tests/bulk_server.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2363">
-          <caret line="196" column="1" lean-forward="false" selection-start-line="196" selection-start-column="1" selection-end-line="196" selection-end-column="1" />
+        <state relative-caret-position="170">
+          <caret line="37" column="39" lean-forward="false" selection-start-line="37" selection-start-column="39" selection-end-line="37" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fec_encoder.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="26" column="11" lean-forward="false" selection-start-line="26" selection-start-column="2" selection-end-line="26" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/session.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="1073" column="42" lean-forward="false" selection-start-line="1073" selection-start-column="42" selection-end-line="1073" selection-end-column="42" />
           <folding />
         </state>
       </provider>
