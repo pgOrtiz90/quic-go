@@ -1,0 +1,3956 @@
+{
+   "n_download_no_trigger" : 1,
+   "start_activity" : "download_0",
+   "name" : "www.huffingtonpost.com_",
+   "objs" : [
+      {
+         "when_comp_start" : 1,
+         "url" : "http://www.huffingtonpost.com/",
+         "path" : "/pages/huffingtonpost.com/www.huffingtonpost.com/index.html",
+         "id" : "r1",
+         "comps" : [
+            {
+               "s_time" : 927.368999924511,
+               "time" : 655.052999965849,
+               "type" : "evalhtml",
+               "id" : "r1_c1",
+               "e_time" : 1582.42199989036
+            },
+            {
+               "s_time" : 1691.50399975479,
+               "time" : 0.072000082580189,
+               "type" : "evalhtml",
+               "id" : "r1_c2",
+               "e_time" : 1691.57599983737
+            },
+            {
+               "s_time" : 1694.91499988362,
+               "time" : 0.092000234869829,
+               "type" : "evalhtml",
+               "id" : "r1_c3",
+               "e_time" : 1695.00700011849
+            },
+            {
+               "s_time" : 1753.96999996156,
+               "time" : 83.17200001329,
+               "type" : "evalhtml",
+               "id" : "r1_c4",
+               "e_time" : 1837.14199997485
+            },
+            {
+               "s_time" : 1839.87900009379,
+               "time" : 2703.21099972352,
+               "type" : "evalhtml",
+               "id" : "r1_c5",
+               "e_time" : 4543.08999981731
+            },
+            {
+               "s_time" : 4559.42100007087,
+               "time" : 879.24599973485,
+               "type" : "evalhtml",
+               "id" : "r1_c6",
+               "e_time" : 5438.66699980572
+            },
+            {
+               "s_time" : 5439.4219997339,
+               "time" : 8069.8790000752,
+               "id" : "r1_c7",
+               "type" : "evalhtml",
+               "e_time" : 13509.3009998091
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 0,
+            "type" : "text/html",
+            "id" : "download_0"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://pixel.quantserve.com/seg/p-6fTutip1SMLM2.js",
+         "path" : "/pages/huffingtonpost.com/pixel.quantserve.com/seg/p-6fTutip1SMLM2.js",
+         "id" : "r10",
+         "comps" : [
+            {
+               "s_time" : 5438.69900004938,
+               "time" : 0.722999684519891,
+               "id" : "comp_522",
+               "type" : 1,
+               "e_time" : 5439.4219997339
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 971.268999855965,
+            "type" : "application/x-javascript",
+            "id" : "download_1"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/css.php?f=verticals%2Fhomepage.css%2Cfrontpage.css%2Cfonts%2Fopensans-condbold%2Fstylesheet.css%2Ctopnav_new%2Fall_pages.css%2Ctopnav_new%2Ftop_nav.css%2Ctopnav_new%2Fmodule.edition_nav.css%2Cbasic.css%2Cverticals%2Fcolor_scheme.css%2Cadd%2Ffront.css%2Cbuttons.css&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/css.php.css",
+         "id" : "r2",
+         "comps" : [
+            {
+               "s_time" : 1441.98800018057,
+               "time" : 43.4529995545799,
+               "id" : "comp_5",
+               "type" : 4,
+               "e_time" : 1485.44099973515
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 938.244000077248,
+            "type" : "text/css",
+            "id" : "download_2"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/css.php?f=user_levels.css%2Ctwitter_splash.css%2Cbing.css%2Cgrouping.css%2Cmodal_window.css%2Chp_modules%2Fmodule.bubble.css&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/css.php.css",
+         "id" : "r4",
+         "comps" : [
+            {
+               "s_time" : 1419.66400016099,
+               "time" : 16.5499998256598,
+               "id" : "comp_4",
+               "type" : 4,
+               "e_time" : 1436.21399998665
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 939.398999791592,
+            "type" : "text/css",
+            "id" : "download_3"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=jquery%2Fjquery.I18N.js%2Clocale%2Fdefault.js%2Csprintf-0.7.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r7",
+         "comps" : [
+            {
+               "s_time" : 1691.63300003856,
+               "time" : 3.28199984506,
+               "id" : "comp_18",
+               "type" : 1,
+               "e_time" : 1694.91499988362
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 952.4050001055,
+            "type" : "application/x-javascript",
+            "id" : "download_4"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/css.php?f=email_share.css%2Csocial-navbar.css%2Chp_modules%2Fmodule.bubble-tags.css%2Chp_modules%2Fmodule.fb_like_button.css%2Csearch_autocomplete.css%2Cap_wires_scroll.css%2Cmod-follow.css&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/css.php.css",
+         "id" : "r5",
+         "comps" : [
+            {
+               "s_time" : 1486.35799996555,
+               "time" : 3.45200020819993,
+               "id" : "comp_6",
+               "type" : 4,
+               "e_time" : 1489.81000017375
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 945.063000079244,
+            "type" : "text/css",
+            "id" : "download_5"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=yui_sub.js%2Cjquery.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r6",
+         "comps" : [
+            {
+               "s_time" : 1582.48199988157,
+               "time" : 109.02199987322,
+               "id" : "comp_10",
+               "type" : 1,
+               "e_time" : 1691.50399975479
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 945.483000017703,
+            "type" : "application/x-javascript",
+            "id" : "download_6"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/css.php?f=most_popular.css%2Ccommercial.css%2Chuff_promo.css%2Csnp_friends.css%2Csnn-header.css%2Chp_modules%2Fmodule.splash_slideshow.css%2Chp_modules%2Fmodule.apps_feeds.css%2Chp_modules%2Fmodule.most_popular_celebrity.css%2Chufflists.css%2Csignup_modal.css%2Cdirect_message.css%2Cbadges_v2.css%2Chp_modules%2Ffacebook.css&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/css.php.css",
+         "id" : "r3",
+         "comps" : [
+            {
+               "s_time" : 1492.04499972984,
+               "time" : 203.02100013942,
+               "id" : "comp_7",
+               "type" : 4,
+               "e_time" : 1695.06599986926
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 938.790999818593,
+            "type" : "text/css",
+            "id" : "download_7"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=huff.js%2Chp_config.js%2Cjsonmin.js%2Ccookiesmin.js%2Chp_track.js%2Chp_util.js%2Chp_browser.js%2Cget_font.js%2Cpreload_topnav_font.js%2C_tmp%2Fcommon.js%2C_tmp%2Fclick_tracker.js%2C_tmp%2Fcommon_paginator.js%2C_tmp%2Fhp_ads.js%2C_tmp%2Fquick_login.js%2Cfacebook.js%2Csnproject.js%2Csnn_module.js%2Chuff_promo.js%2Chptwitter_anywhere.js%2Ctwitter%2Ffrontpage.js%2Csearch_focus.js%2Csearch_autocomplete.js%2Cmod-follow.js%2C_front%2Ftopnav_new.js%2Cap_scroll_fastnews.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r8",
+         "comps" : [
+            {
+               "s_time" : 1702.40999991074,
+               "time" : 51.56000005082,
+               "id" : "comp_20",
+               "type" : 1,
+               "e_time" : 1753.96999996156
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 953.007000032812,
+            "type" : "application/x-javascript",
+            "id" : "download_8"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.aolcdn.com/ads/adsWrapper.js",
+         "path" : "/pages/aol.com/o.aolcdn.com/ads/adsWrapper.js",
+         "id" : "r9",
+         "comps" : [
+            {
+               "s_time" : 1826.29999984056,
+               "time" : 13.5790002532299,
+               "id" : "comp_32",
+               "type" : 1,
+               "e_time" : 1839.87900009379
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 953.410999849439,
+            "type" : "application/javascript",
+            "id" : "download_9"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=flashobjectmin.js%2Cjquery%2Fcolor.jquery.js%2C_tmp%2Ffloating_promt.js%2C_tmp%2Fquick_subscribe_user.js%2C_tmp%2Fquick_fan.js%2Cprovider.js%2Cposts.js%2Cmost_popular.js%2Clazyload-min.js%2Cuser.js%2Csocial_friends.js%2Cuser%2Frecommendations.js%2Csitemode.js%2Csplash_slideshow.js%2Cpopup_manager.js%2Cbadges_v2.js%2Cuser_levels.js%2Csharer.js%2Chuffconnect.js%2Cconnect_overview.js%2Cbing.js%2Chptwitter.js%2Cjquery%2Fui%2Fjquery.ui.core.min.js%2Cjquery%2Fui%2Fjquery.ui.widget.min.js%2Cjquery%2Fui%2Fjquery.ui.position.min.js%2Cjquery%2Fui%2Fjquery.ui.autocomplete.min.js%2Cjquery%2Fjquery.backgroundPosition.js%2Cjquery%2Fjquery.mousewheel-min.js%2C_tmp%2Fevent_module.js%2C_tmp%2Fdoc_status.js%2C_tmp%2Fview_tracker.js%2C_tmp%2Fslider.js%2C_tmp%2Fstructured_image.js%2C_tmp%2Fcurtain.js%2C_tmp%2Fpaginator.js%2C_tmp%2Fon_focus_timer.js%2C_tmp%2Ftwitter_util.js%2C_tmp%2Faol_search.js%2C_tmp%2Felection_widgets.js%2C_tmp%2Fhot_keys.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r11",
+         "comps" : [
+            {
+               "s_time" : 3420.51600012928,
+               "time" : 172.92399983853,
+               "id" : "comp_109",
+               "type" : 2,
+               "e_time" : 3593.43999996781
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1759.13000013679,
+            "type" : "application/x-javascript",
+            "id" : "download_10"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://platform.twitter.com/widgets.js",
+         "path" : "/pages/vube.com/platform.twitter.com/widgets.js",
+         "id" : "r16",
+         "comps" : [
+            {
+               "s_time" : 3594.81299994513,
+               "time" : 84.08399997279,
+               "id" : "comp_112",
+               "type" : 2,
+               "e_time" : 3678.89699991792
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1856.47299978882,
+            "type" : "application/javascript",
+            "id" : "download_11"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_conf.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r12",
+         "comps" : [
+            {
+               "s_time" : 3678.94299980253,
+               "time" : 2.86100013182022,
+               "id" : "comp_114",
+               "type" : 2,
+               "e_time" : 3681.80399993435
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1835.45600017533,
+            "type" : "application/x-javascript",
+            "id" : "download_12"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_front/balance.js,_front/blogroll.js,_front/geopromo.js,_front/refresh.js,_front.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r14",
+         "comps" : [
+            {
+               "s_time" : 3690.3619999066,
+               "time" : 10.2349999360699,
+               "id" : "comp_118",
+               "type" : 2,
+               "e_time" : 3700.59699984267
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1837.14199997485,
+            "type" : "application/x-javascript",
+            "id" : "download_13"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_modal.js,_image.js,_layout.js,_cookies.js,_user.js,_track.js,_common.js,_promo.js,_app-feeds.js,_front/quickread.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r13",
+         "comps" : [
+            {
+               "s_time" : 3700.73999976739,
+               "time" : 41.7190003208798,
+               "id" : "comp_121",
+               "type" : 2,
+               "e_time" : 3742.45900008827
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1836.383999791,
+            "type" : "application/x-javascript",
+            "id" : "download_14"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/css.php?f=hptwitter_anywhere.css&9",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/css.php.css",
+         "id" : "r18",
+         "comps" : [
+            {
+               "s_time" : 2168.09399984777,
+               "time" : 424.57500007004,
+               "id" : "comp_46",
+               "type" : 2,
+               "e_time" : 2592.66899991781
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1869.24699973315,
+            "type" : "text/css",
+            "id" : "download_15"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.aolcdn.com/os/moat/prod/moatuac.js",
+         "path" : "/pages/aol.com/o.aolcdn.com/os/moat/prod/moatuac.js",
+         "id" : "r15",
+         "comps" : [
+            {
+               "s_time" : 3742.61099984869,
+               "time" : 126.76300015301,
+               "id" : "comp_124",
+               "type" : 2,
+               "e_time" : 3869.3740000017
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1855.82999978215,
+            "type" : "application/javascript",
+            "id" : "download_16"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1329995/thumbs/r-LEAHY-huge.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1329995/thumbs/r-LEAHY-huge.jpg",
+         "id" : "r20",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1923.57899993658,
+            "type" : "image/jpeg",
+            "id" : "download_17"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://www.huffingtonpost.com/images/trans.gif",
+         "path" : "/pages/huffingtonpost.com/www.huffingtonpost.com/images/trans.gif",
+         "id" : "r23",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1951.05700008571,
+            "type" : "image/gif",
+            "id" : "download_18"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1329660/thumbs/r-ELECTRIC-ZOO-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1329660/thumbs/r-ELECTRIC-ZOO-medium.jpg",
+         "id" : "r25",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1967.50999987125,
+            "type" : "image/jpeg",
+            "id" : "download_19"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/contributors/robert-kuttner/headshot.jpg",
+         "path" : "/missing/s.huffpost.com/contributors/robert-kuttner/headshot.jpg",
+         "id" : "r22",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1975.3109999001,
+            "type" : "image/jpeg",
+            "id" : "download_20"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/v/logos/v4/homepage.gif?v9",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/v/logos/v4/homepage.gif",
+         "id" : "r19",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1974.5820001699,
+            "type" : "image/gif",
+            "id" : "download_21"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/webslice12x12.png",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/webslice12x12.png",
+         "id" : "r21",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1974.95999978855,
+            "type" : "image/png",
+            "id" : "download_22"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1329444/thumbs/r-TAYLOR-SWIFT-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1329444/thumbs/r-TAYLOR-SWIFT-medium.jpg",
+         "id" : "r26",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1967.89499977604,
+            "type" : "image/jpeg",
+            "id" : "download_23"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1329786/thumbs/r-MILEY-CYRUS-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1329786/thumbs/r-MILEY-CYRUS-medium.jpg",
+         "id" : "r28",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1968.60700007528,
+            "type" : "image/jpeg",
+            "id" : "download_24"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1329354/thumbs/r-TIM-TEBOW-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1329354/thumbs/r-TIM-TEBOW-medium.jpg",
+         "id" : "r29",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1968.94600009546,
+            "type" : "image/jpeg",
+            "id" : "download_25"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1327862/thumbs/r-NOTION-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1327862/thumbs/r-NOTION-medium.jpg",
+         "id" : "r27",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1968.25499972329,
+            "type" : "image/jpeg",
+            "id" : "download_26"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1328783/thumbs/r-STATE-SEARCH-TERMS-PORN-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1328783/thumbs/r-STATE-SEARCH-TERMS-PORN-medium.jpg",
+         "id" : "r30",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1969.28999992087,
+            "type" : "image/jpeg",
+            "id" : "download_27"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://images.huffingtonpost.com/2013-09-01-20130901DavidFrost.jpg",
+         "path" : "/missing/images.huffingtonpost.com/2013-09-01-20130901DavidFrost.jpg",
+         "id" : "r24",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1954.76400014013,
+            "type" : "image/jpeg",
+            "id" : "download_28"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1329032/thumbs/r-SWAT-TEAM-medium.jpg",
+         "path" : "/pages/huffingtonpost.com/i.huffpost.com/gen/1329032/thumbs/r-SWAT-TEAM-medium.jpg",
+         "id" : "r31",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1969.62899994105,
+            "type" : "image/jpeg",
+            "id" : "download_29"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1329306/thumbs/r-HALLE-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1329306/thumbs/r-HALLE-medium.jpg",
+         "id" : "r32",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1969.99699994922,
+            "type" : "image/jpeg",
+            "id" : "download_30"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1328770/thumbs/r-STRANGE-SOUND-HEARD-medium.jpg",
+         "path" : "/pages/huffingtonpost.com/i.huffpost.com/gen/1328770/thumbs/r-STRANGE-SOUND-HEARD-medium.jpg",
+         "id" : "r34",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1970.68100003526,
+            "type" : "image/jpeg",
+            "id" : "download_31"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1326473/thumbs/r-MARIJUANA-DISPENSARY-medium.jpg",
+         "path" : "/pages/huffingtonpost.com/i.huffpost.com/gen/1326473/thumbs/r-MARIJUANA-DISPENSARY-medium.jpg",
+         "id" : "r33",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1970.33699974418,
+            "type" : "image/jpeg",
+            "id" : "download_32"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1329508/thumbs/r-OBAMA-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1329508/thumbs/r-OBAMA-medium.jpg",
+         "id" : "r35",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1971.01600002497,
+            "type" : "image/jpeg",
+            "id" : "download_33"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1327793/thumbs/r-SCHOOL-OF-ROCK-medium.jpg",
+         "path" : "/pages/huffingtonpost.com/i.huffpost.com/gen/1327793/thumbs/r-SCHOOL-OF-ROCK-medium.jpg",
+         "id" : "r36",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1971.35599981993,
+            "type" : "image/jpeg",
+            "id" : "download_34"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1327417/thumbs/r-KRIS-JENNER-BRUCE-JENNER-SEX-TAPE-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1327417/thumbs/r-KRIS-JENNER-BRUCE-JENNER-SEX-TAPE-medium.jpg",
+         "id" : "r37",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1971.72199981287,
+            "type" : "image/jpeg",
+            "id" : "download_35"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1327311/thumbs/r-EMMANUELLE-CHRIQUI-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1327311/thumbs/r-EMMANUELLE-CHRIQUI-medium.jpg",
+         "id" : "r38",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1972.37200010568,
+            "type" : "image/jpeg",
+            "id" : "download_36"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1326993/thumbs/r-CHAPPELLE-medium.jpg",
+         "path" : "/pages/huffingtonpost.com/i.huffpost.com/gen/1326993/thumbs/r-CHAPPELLE-medium.jpg",
+         "id" : "r39",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1972.71899972111,
+            "type" : "image/jpeg",
+            "id" : "download_37"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1327596/thumbs/r-KATE-MIDDLETON-medium.jpg",
+         "path" : "/missing/i.huffpost.com/gen/1327596/thumbs/r-KATE-MIDDLETON-medium.jpg",
+         "id" : "r40",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1973.06300001219,
+            "type" : "image/jpeg",
+            "id" : "download_38"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1328185/thumbs/r-ADAK-ALASKA-medium.jpg",
+         "path" : "/pages/huffingtonpost.com/i.huffpost.com/gen/1328185/thumbs/r-ADAK-ALASKA-medium.jpg",
+         "id" : "r41",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1973.40499982238,
+            "type" : "image/jpeg",
+            "id" : "download_39"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1327869/thumbs/r-LAMAR-ODOM-ARRESTED-medium.jpg",
+         "path" : "/pages/huffingtonpost.com/i.huffpost.com/gen/1327869/thumbs/r-LAMAR-ODOM-ARRESTED-medium.jpg",
+         "id" : "r42",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1973.776999861,
+            "type" : "image/jpeg",
+            "id" : "download_40"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_util/user.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r43",
+         "comps" : [
+            {
+               "s_time" : 3869.83999982476,
+               "time" : 19.5920001715399,
+               "id" : "comp_126",
+               "type" : 2,
+               "e_time" : 3889.4319999963
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2129.45899972692,
+            "type" : "application/x-javascript",
+            "id" : "download_41"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_google.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r44",
+         "comps" : [
+            {
+               "s_time" : 6547.63599997386,
+               "time" : 0.463999807840082,
+               "id" : "comp_552",
+               "type" : 2,
+               "e_time" : 6548.0999997817
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2158.00700010732,
+            "type" : "application/x-javascript",
+            "id" : "download_42"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://www.google-analytics.com/ga.js",
+         "path" : "/pages/linkedin.com/www.google-analytics.com/ga.js",
+         "id" : "r45",
+         "comps" : [
+            {
+               "s_time" : 6548.24199993163,
+               "time" : 129.50599985198,
+               "id" : "comp_555",
+               "type" : 2,
+               "e_time" : 6677.74799978361
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2176.35500011966,
+            "type" : "text/javascript",
+            "id" : "download_43"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://connect.facebook.net/en_US/all.js",
+         "path" : "/pages/bing.com/connect.facebook.net/en_US/all.js",
+         "id" : "r17",
+         "comps" : [
+            {
+               "s_time" : 6677.7909998782,
+               "time" : 448.731000069531,
+               "id" : "comp_557",
+               "type" : 2,
+               "e_time" : 7126.52199994773
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1856.98399972171,
+            "type" : "application/x-javascript",
+            "id" : "download_44"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.aolcdn.com/os_merge/?file=/aol/beacon.min.js&file=/aol/omniture.min.js&ver1",
+         "path" : "/pages/huffingtonpost.com/o.aolcdn.com/os_merge.add.js",
+         "id" : "r46",
+         "comps" : [
+            {
+               "s_time" : 7126.74300000072,
+               "time" : 517.60999998077,
+               "id" : "comp_560",
+               "type" : 2,
+               "e_time" : 7644.35299998149
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2199.01499990374,
+            "type" : "application/javascript",
+            "id" : "download_45"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/front-page-sprite.png?v4",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/front-page-sprite.png",
+         "id" : "r48",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2595.21800000221,
+            "type" : "image/png",
+            "id" : "download_46"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/top_nav/dotted.gif",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/top_nav/dotted.gif",
+         "id" : "r49",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2595.6629998982,
+            "type" : "image/gif",
+            "id" : "download_47"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/top_nav/topnav-sprite.png",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/top_nav/topnav-sprite.png",
+         "id" : "r50",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2596.02000005543,
+            "type" : "image/png",
+            "id" : "download_48"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/top_nav/politics/bg_twits_corner.png",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/top_nav/politics/bg_twits_corner.png",
+         "id" : "r51",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2596.3829997927,
+            "type" : "image/png",
+            "id" : "download_49"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://js.adsonar.com/js/tw_dfp_adsonar.js",
+         "path" : "/pages/huffingtonpost.com/js.adsonar.com/js/tw_dfp_adsonar.js",
+         "id" : "r52",
+         "comps" : [
+            {
+               "s_time" : 4543.2219998911,
+               "time" : 16.1990001797703,
+               "id" : "comp_320",
+               "type" : 1,
+               "e_time" : 4559.42100007087
+            },
+            {
+               "s_time" : 4237.09299974144,
+               "time" : 21.34199999272,
+               "id" : "comp_133",
+               "type" : 2,
+               "e_time" : 4258.43499973416
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2594.72299972549,
+            "type" : "application/javascript",
+            "id" : "download_50"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/ajax-loader.gif",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/ajax-loader.gif",
+         "id" : "r53",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 3240.28299981728,
+            "type" : "image/gif",
+            "id" : "download_51"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://www.huffingtonpost.com/_uac/adpage.html",
+         "path" : "/pages/huffingtonpost.com/www.huffingtonpost.com/_uac/adpage.html/index.html",
+         "id" : "r54",
+         "comps" : [
+            {
+               "s_time" : 4142.97499973327,
+               "time" : 8745.03000034023,
+               "id" : "r54_c1",
+               "type" : "evalhtml",
+               "e_time" : 12888.0050000735
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 3430.55599974468,
+            "type" : "text/html",
+            "id" : "download_52"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.aolcdn.com/os/fonts/opensans/opensans-condbold-macroman.woff",
+         "path" : "/pages/huffingtonpost.com/o.aolcdn.com/os/fonts/opensans/opensans-condbold-macroman.woff",
+         "id" : "r55",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 3430.25900004432,
+            "type" : "content/unknown",
+            "id" : "download_53"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/css.php?f=_quickread.css&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/css.php.css",
+         "id" : "r56",
+         "comps" : [
+            {
+               "s_time" : 4148.36600003764,
+               "time" : 418.99499995634,
+               "id" : "comp_132",
+               "type" : 2,
+               "e_time" : 4567.36099999398
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 3710.31099976972,
+            "type" : "text/css",
+            "id" : "download_54"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/home_pixie.png?v4",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/home_pixie.png",
+         "id" : "r59",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4570.19999995828,
+            "type" : "image/png",
+            "id" : "download_55"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/hoton_sprite_blank.png?v1",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/hoton_sprite_blank.png",
+         "id" : "r60",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4570.76000003144,
+            "type" : "image/png",
+            "id" : "download_56"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/v/most-pop-left.png",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/v/most-pop-left.png",
+         "id" : "r62",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4571.16399984807,
+            "type" : "image/png",
+            "id" : "download_57"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/v/most-pop-right.png",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/v/most-pop-right.png",
+         "id" : "r63",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4571.58599980175,
+            "type" : "image/png",
+            "id" : "download_58"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/images/layouts/rail-sprite.png",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/images/layouts/rail-sprite.png",
+         "id" : "r64",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4572.13599979877,
+            "type" : "image/png",
+            "id" : "download_59"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_front/bignews.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r67",
+         "comps" : [
+            {
+               "s_time" : 7644.39400006086,
+               "time" : 0.690999906510115,
+               "id" : "comp_562",
+               "type" : 2,
+               "e_time" : 7645.08499996737
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4575.2809997648,
+            "type" : "application/x-javascript",
+            "id" : "download_60"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://ads.tw.adsonar.com/adserving/getAds.jsp?previousPlacementIds=&placementId=1522829&pid=2341767&ps=-1&zw=300&zh=250&ssl=false&url=http%3A//www.huffingtonpost.com/&v=5&dct=Breaking%20News%20and%20Opinion%20on%20The%20Huffington%20Post&metakw=news,breaking%20news,news%20blog,business,sports,politics,technology,entertainment,living",
+         "path" : "/pages/huffingtonpost.com/ads.tw.adsonar.com/adserving/getAds.jsp/index.html",
+         "id" : "r58",
+         "comps" : [
+            {
+               "s_time" : 4857.56300017238,
+               "time" : 27.3039997555297,
+               "id" : "r58_c1",
+               "type" : "evalhtml",
+               "e_time" : 4884.86699992791
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4272.24999992177,
+            "type" : "text/html",
+            "id" : "download_61"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://ads.tw.adsonar.com/adserving/getAds.jsp?previousPlacementIds=1522829&placementId=1524568&pid=2341767&ps=-1&zw=300&zh=250&ssl=false&url=http%3A//www.huffingtonpost.com/&v=5&dct=Breaking%20News%20and%20Opinion%20on%20The%20Huffington%20Post&metakw=news,breaking%20news,news%20blog,business,sports,politics,technology,entertainment,living",
+         "path" : "/pages/huffingtonpost.com/ads.tw.adsonar.com/adserving/getAds.jsp/index.html",
+         "id" : "r65",
+         "comps" : [
+            {
+               "s_time" : 4908.17999979481,
+               "time" : 34.0599999763099,
+               "id" : "r65_c1",
+               "type" : "evalhtml",
+               "e_time" : 4942.23999977112
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4561.476000119,
+            "type" : "text/html",
+            "id" : "download_62"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://at.atwola.com/addyn/3.0/5113.1/221794/0/-1/size=300x250;noperf=1;alias=93320423;cfp=1;noaddonpl=y;kvpagetype=homepage%3Aatf;kvvert=premium;kvspon=y;kvpg=huffingtonpost;kvugc=0;kvmn=93320423;kvgrp=92457779;kvismob=2;extmirroring=0;target=_blank;aduho=-420;grp=92457779",
+         "path" : "/missing/at.atwola.com/addyn/3.0/5113.1/221794/0/-1/size_300x250_noperf_1_alias_93320423_cfp_1_noaddonpl_y_kvpagetype_homepage_3Aatf_kvvert_premium_kvspon_y_kvpg_huffingtonpost_kvugc_0_kvmn_93320423_kvgrp_92457779_kvismob_2_extmirroring_0_target__blank_aduho_-420_grp_92457779",
+         "id" : "r66",
+         "comps" : [
+            {
+               "s_time" : 4946.37000001967,
+               "time" : 1.55999977141983,
+               "id" : "comp_394",
+               "type" : null,
+               "e_time" : 4947.92999979109
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4567.08599999547,
+            "type" : "application/x-javascript",
+            "id" : "download_63"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://cdn.tacoda.at.atwola.com/an/qseg.html",
+         "path" : "/pages/cnn.com/cdn.tacoda.at.atwola.com/an/qseg.html/index.html",
+         "id" : "r71",
+         "comps" : [
+            {
+               "s_time" : 5308.41800011694,
+               "time" : 26.1559998616603,
+               "id" : "r71_c1",
+               "type" : "evalhtml",
+               "e_time" : 5334.5739999786
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4868.26799996197,
+            "type" : "text/html",
+            "id" : "download_64"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.aolcdn.com/os/SponsoredListings//AdGallery/27838581/65x65/3735001.jpg",
+         "path" : "/pages/huffingtonpost.com/o.aolcdn.com/os/SponsoredListings.add",
+         "id" : "r68",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4867.6249999553,
+            "type" : "image/jpeg",
+            "id" : "download_65"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://ads.tw.adsonar.com/adserving/createASLId.jsp",
+         "path" : "/missing/ads.tw.adsonar.com/adserving/createASLId.jsp",
+         "id" : "r72",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4886.17100007832,
+            "type" : "text/html",
+            "id" : "download_66"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://at.atwola.com/addyn/3.0/5113.1/221794/0/-1/allowedSizes=728x90,948x250,970x66,970x90,950x252,970x250,940x230,101x1;cfp=1;rndc=1378092459;noperf=1;alias=93317943;kvpagetype=homepage%3Aatf;kvvert=premium;kvspon=y;kvpg=huffingtonpost;kvugc=0;kvmn=93317943;kvgrp=92457779;kvismob=2;extmirroring=0;target=_blank;aduho=-420;grp=92457779",
+         "path" : "/missing/at.atwola.com/addyn/3.0/5113.1/221794/0/-1/allowedSizes_728x90_948x250_970x66_970x90_950x252_970x250_940x230_101x1_cfp_1_rndc_1378092459_noperf_1_alias_93317943_kvpagetype_homepage_3Aatf_kvvert_premium_kvspon_y_kvpg_huffingtonpost_kvugc_0_kvmn_93317943_kvgrp_92457779_kvismob_2_extmirroring_0_target__blank_aduho_-420_grp_92457779",
+         "id" : "r57",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4846.34299995378,
+            "type" : "application/x-javascript",
+            "id" : "download_67"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://b.scorecardresearch.com/beacon.js",
+         "path" : "/pages/linkedin.com/b.scorecardresearch.com/beacon.js",
+         "id" : "r73",
+         "comps" : [
+            {
+               "s_time" : 5409.92800006643,
+               "time" : 1.37499999254942,
+               "id" : "comp_517",
+               "type" : 2,
+               "e_time" : 5411.30300005898
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5144.03600012884,
+            "type" : "application/x-javascript",
+            "id" : "download_68"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.aolcdn.com/os/SponsoredListings//AdGallery/1850901/65x65/4469026.jpg",
+         "path" : "/pages/huffingtonpost.com/o.aolcdn.com/os/SponsoredListings.add",
+         "id" : "r69",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5144.52200010419,
+            "type" : "image/jpeg",
+            "id" : "download_69"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.aolcdn.com/os/SponsoredListings//AdGallery/27891464/65x65/4647012.jpg",
+         "path" : "/missing/o.aolcdn.com/os/SponsoredListings",
+         "id" : "r70",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5144.92599992082,
+            "type" : "image/jpeg",
+            "id" : "download_70"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://js.adsonar.com/js/pass.html?cb=4438#TID=&TData=",
+         "path" : "/missing/js.adsonar.com/js/pass.html",
+         "id" : "r74",
+         "comps" : [
+            {
+               "s_time" : 7779.06400011852,
+               "time" : 3.13999969512952,
+               "id" : "r74_c1",
+               "type" : "evalhtml",
+               "e_time" : 7782.20399981365
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5333.74799974263,
+            "type" : "text/html",
+            "id" : "download_71"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://at.atwola.com/adcount/3.0/5113/2213484/0/594/AdId=1979307;BnId=1;ct=664318185;st=4075;adcid=1;itime=92460363;reqtype=5;impref=13780924602433241085;;kvpagetype=homepage:atf;kvvert=premium;kvspon=y;kvpg=huffingtonpost;kvugc=0;kvmn=93317943;kvgrp=92457779;kvismob=2",
+         "path" : "/missing/at.atwola.com/adcount/3.0/5113/2213484/0/594/AdId_1979307_BnId_1_ct_664318185_st_4075_adcid_1_itime_92460363_reqtype_5_impref_13780924602433241085__kvpagetype_homepage_atf_kvvert_premium_kvspon_y_kvpg_huffingtonpost_kvugc_0_kvmn_93317943_kvgrp_92457779_kvismob_2",
+         "id" : "r75",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5409.70399975777,
+            "type" : "application/x-javascript",
+            "id" : "download_72"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://secure-us.imrworldwide.com/cgi-bin/m?ci=us-703240h&cg=0&cc=1&si=http%3A//www.huffingtonpost.com/&rp=&ts=compact&rnd=1378092461390",
+         "path" : "/missing/secure-us.imrworldwide.com/cgi-bin/m",
+         "id" : "r78",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5446.66599994525,
+            "type" : "image/gif",
+            "id" : "download_73"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://edge.quantserve.com/quant.js",
+         "path" : "/pages/linkedin.com/edge.quantserve.com/quant.js",
+         "id" : "r77",
+         "comps" : [
+            {
+               "s_time" : 10560.5069999583,
+               "time" : 61.4689998329013,
+               "id" : "comp_667",
+               "type" : 2,
+               "e_time" : 10621.9759997912
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5445.99999999627,
+            "type" : "application/x-javascript",
+            "id" : "download_74"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://platform.twitter.com/widgets/follow_button.1375828408.html#_=1378092462435&id=twitter-widget-0&lang=en&screen_name=HuffingtonPost&show_count=false&show_screen_name=false&size=m",
+         "path" : "/missing/platform.twitter.com/widgets/follow_button.1375828408.html___1378092462435_id_twitter-widget-0_lang_en_screen_name_HuffingtonPost_show_count_false_show_screen_name_false_size_m",
+         "id" : "r80",
+         "comps" : [
+            {
+               "s_time" : 8067.2089997679,
+               "time" : 191.84900028631,
+               "id" : "r80_c1",
+               "type" : "evalhtml",
+               "e_time" : 8259.05800005421
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6491.25899979845,
+            "type" : "text/html",
+            "id" : "download_75"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://platform.twitter.com/widgets/follow_button.1375828408.html#_=1378092462438&id=twitter-widget-1&lang=en&screen_name=HuffingtonPost&show_count=false&show_screen_name=true&size=m",
+         "path" : "/missing/platform.twitter.com/widgets/follow_button.1375828408.html___1378092462438_id_twitter-widget-1_lang_en_screen_name_HuffingtonPost_show_count_false_show_screen_name_true_size_m",
+         "id" : "r81",
+         "comps" : [
+            {
+               "s_time" : 8424.57700008526,
+               "time" : 341.30400000141,
+               "id" : "r81_c1",
+               "type" : "evalhtml",
+               "e_time" : 8765.88100008667
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6493.06500004604,
+            "type" : "text/html",
+            "id" : "download_76"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://b.scorecardresearch.com/b?c1=2&c2=6723616&c3=&c4=&c5=front&c6=&c15=&comscorekw=front&ns__t=1378092461373&ns_c=UTF-8&c8=Breaking%20News%20and%20Opinion%20on%20The%20Huffington%20Post&c7=http%3A%2F%2Fwww.huffingtonpost.com%2F&c9=",
+         "path" : "/missing/b.scorecardresearch.com/b",
+         "id" : "r76",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6504.80500003323,
+            "type" : "image/gif",
+            "id" : "download_77"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://www.huffingtonpost.com/_uac/adpage.html",
+         "path" : "/pages/huffingtonpost.com/www.huffingtonpost.com/_uac/adpage.html/index.html",
+         "id" : "r84",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6540.03500007093,
+            "type" : "text/html",
+            "id" : "download_78"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_common_paginator.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r82",
+         "comps" : [
+            {
+               "s_time" : 10622.0550001599,
+               "time" : 25.9979995898993,
+               "id" : "comp_669",
+               "type" : 2,
+               "e_time" : 10648.0529997498
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6520.78699972481,
+            "type" : "application/x-javascript",
+            "id" : "download_79"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=stylelist/module.jquerydl.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r85",
+         "comps" : [
+            {
+               "s_time" : 10648.3330000192,
+               "time" : 20.3970000148001,
+               "id" : "comp_672",
+               "type" : 2,
+               "e_time" : 10668.730000034
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6560.61000004411,
+            "type" : "application/x-javascript",
+            "id" : "download_80"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://www.google-analytics.com/__utm.gif?utmwv=5.4.4&utms=1&utmn=2062995903&utmhn=www.huffingtonpost.com&utme=8(Vertical*Page*User*JoinedOn)9(Homepage*front*A*0)11(3!1*1)&utmcs=UTF-8&utmsr=2048x1152&utmvp=946x999&utmsc=24-bit&utmul=en-us&utmje=1&utmfl=11.8%20r800&utmdt=Breaking%20News%20and%20Opinion%20on%20The%20Huffington%20Post&utmhid=1444635477&utmr=-&utmp=%2F&utmht=1378092462604&utmac=UA-71081-1&utmcc=__utma%3D265287574.82164726.1378092463.1378092463.1378092463.1%3B%2B__utmz%3D265287574.1378092463.1.1.utmcsr%3D(direct)%7Cutmccn%3D(direct)%7Cutmcmd%3D(none)%3B&utmu=qQ~",
+         "path" : "/missing/www.google-analytics.com/__utm.gif",
+         "id" : "r86",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6657.14399982244,
+            "type" : "image/gif",
+            "id" : "download_81"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://apx.moatads.com/pixel.gif?e=17&i=AOL2&bq=2&f=0&o=3&t=1378092462464&de=20070325&m=0&ar=66773fd-clean&q=0&cb=0&cu=1378092459813&di=1&d=417596%3A1&bd=93317943&bo=&ac=1&cs=0",
+         "path" : "/missing/apx.moatads.com/pixel.gif",
+         "id" : "r83",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6534.61199998856,
+            "type" : "image/gif",
+            "id" : "download_82"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://www.google-analytics.com/__utm.gif?utmwv=5.4.4&utms=2&utmn=954933613&utmhn=www.huffingtonpost.com&utme=8(Vertical*Page*User*JoinedOn)9(Homepage*front*A*0)11(3!1*1)&utmcs=UTF-8&utmsr=2048x1152&utmvp=946x999&utmsc=24-bit&utmul=en-us&utmje=1&utmfl=11.8%20r800&utmdt=Breaking%20News%20and%20Opinion%20on%20The%20Huffington%20Post&utmhid=1444635477&utmr=-&utmp=%2Ft%2Fm%2Fsb_social&utmht=1378092462618&utmac=UA-71081-1&utmcc=__utma%3D265287574.82164726.1378092463.1378092463.1378092463.1%3B%2B__utmz%3D265287574.1378092463.1.1.utmcsr%3D(direct)%7Cutmccn%3D(direct)%7Cutmcmd%3D(none)%3B&utmu=qQC~",
+         "path" : "/missing/www.google-analytics.com/__utm.gif",
+         "id" : "r87",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 8045.81299982965,
+            "type" : "image/gif",
+            "id" : "download_84"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://p.twitter.com/f.gif?_=1378092462435&id=twitter-widget-0&lang=en&screen_name=HuffingtonPost&show_count=false&show_screen_name=false&size=m&twttr_variant=2.0&twttr_referrer=http%3A%2F%2Fwww.huffingtonpost.com%2F&twttr_widget=1&twttr_hask=0&twttr_li=0&twttr_pid=",
+         "path" : "/missing/p.twitter.com/f.gif",
+         "id" : "r91",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 8245.36200007424,
+            "type" : "image/gif",
+            "id" : "download_85"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://twitter.com/i/jot?l=%7B%22_category_%22%3A%22tfw_client_event%22%2C%22language%22%3A%22en%22%2C%22client_version%22%3A%222.0%3Am%22%2C%22widget_origin%22%3A%22http%3A%2F%2Fwww.huffingtonpost.com%2F%22%2C%22format_version%22%3A1%2C%22dnt%22%3Afalse%2C%22triggered_on%22%3A1378092464197%2C%22event_namespace%22%3A%7B%22client%22%3A%22tfw%22%2C%22page%22%3A%22button%22%2C%22section%22%3A%22follow%22%2C%22action%22%3A%22impression%22%7D%7D",
+         "path" : "/missing/twitter.com/i/jot",
+         "id" : "r92",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 8249.64299984276,
+            "type" : "image/gif",
+            "id" : "download_86"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://p.twitter.com/f.gif?_=1378092462438&id=twitter-widget-1&lang=en&screen_name=HuffingtonPost&show_count=false&show_screen_name=true&size=m&twttr_variant=2.0&twttr_referrer=http%3A%2F%2Fwww.huffingtonpost.com%2F&twttr_widget=1&twttr_hask=0&twttr_li=0&twttr_pid=",
+         "path" : "/missing/p.twitter.com/f.gif",
+         "id" : "r93",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 8775.30900016427,
+            "type" : "image/gif",
+            "id" : "download_87"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://twitter.com/i/jot?l=%7B%22_category_%22%3A%22tfw_client_event%22%2C%22language%22%3A%22en%22%2C%22client_version%22%3A%222.0%3Am%22%2C%22widget_origin%22%3A%22http%3A%2F%2Fwww.huffingtonpost.com%2F%22%2C%22format_version%22%3A1%2C%22dnt%22%3Afalse%2C%22triggered_on%22%3A1378092464644%2C%22event_namespace%22%3A%7B%22client%22%3A%22tfw%22%2C%22page%22%3A%22button%22%2C%22section%22%3A%22follow%22%2C%22action%22%3A%22impression%22%7D%7D",
+         "path" : "/missing/twitter.com/i/jot",
+         "id" : "r94",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 8769.86199989915,
+            "type" : "image/gif",
+            "id" : "download_88"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://at.atwola.com/addyn/3.0/5113.1/221794/0/-1/noperf=1;alias=93314234;cfp=1;noaddonpl=y;kvpagetype=homepage%3Aatf;kvvert=premium;kvspon=y;kvpg=huffingtonpost;kvugc=0;kvmn=93314234;kvgrp=92457779;kvismob=2;extmirroring=0;target=_blank;aduho=-420;grp=92457779",
+         "path" : "/missing/at.atwola.com/addyn/3.0/5113.1/221794/0/-1/noperf_1_alias_93314234_cfp_1_noaddonpl_y_kvpagetype_homepage_3Aatf_kvvert_premium_kvspon_y_kvpg_huffingtonpost_kvugc_0_kvmn_93314234_kvgrp_92457779_kvismob_2_extmirroring_0_target__blank_aduho_-420_grp_92457779",
+         "id" : "r95",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 8815.23300008848,
+            "type" : "application/x-javascript",
+            "id" : "download_89"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://uac.advertising.com/wrapper/aceUAC.js",
+         "path" : "/pages/livedoor.com/uac.advertising.com/wrapper/aceUAC.js",
+         "id" : "r96",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9137.92899996042,
+            "type" : "application/x-javascript",
+            "id" : "download_90"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.sa.aol.com/b/ss/aolhuffpo,aolsvc/1/H.25.4/s18042391187045?AQB=1&pccr=true&vidn=291202D7851D1BF2-60000127A003D7B9&&ndh=1&t=1%2F8%2F2013%2020%3A27%3A43%200%20420&fid=13FB117FFD624518-274065708DA79A8D&ns=aolllc&cl=63072000&pageName=hpo%20%3A%20Breaking%20News%20and%20Opinion%20on%20The%20Huffington%20Post&g=http%3A%2F%2Fwww.huffingtonpost.com%2F&cc=USD&ch=us.hpmg&events=event10%2Cevent12&c1=hpo%20%3A%20front&c2=hpo%20%3A%20&c3=gmt_5&c7=D%3DDNT&c10=external%20web%20browser&c12=http%3A%2F%2Fwww.huffingtonpost.com%2F&c13=non-authenticated&c14=no%20referrer&c15=unavailable&c16=page&c24=D%3Dv52&c49=H.25.4-May2013%7Cmmx_0&v52=uaid_na&c54=huffpost&c55=92457779&c56=www.huffingtonpost.com&c61=D%3Dpccr&s=2048x1152&c=24&j=1.6&v=Y&k=Y&bw=961&bh=1014&p=Remoting%20Viewer%3BNative%20Client%3BShockwave%20Flash%3BiPhotoPhotocast%3BJava%20Applet%20Plug-in%3BQuickTime%20Plug-in%207.6.6%3B&AQE=1",
+         "path" : "/missing/o.sa.aol.com/b/ss/aolhuffpo_aolsvc/1/H.25.4/s18042391187045",
+         "id" : "r89",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9088.42300018296,
+            "type" : "image/gif",
+            "id" : "download_91"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://aka-cdn-ns.adtechus.com/media/advisibility/AdtechAdVisibility_v_2_1.js",
+         "path" : "/missing/aka-cdn-ns.adtechus.com/media/advisibility/AdtechAdVisibility_v_2_1.js",
+         "id" : "r97",
+         "comps" : [
+            {
+               "s_time" : 10548.8879997283,
+               "time" : 8.53200024000034,
+               "id" : "comp_662",
+               "type" : 2,
+               "e_time" : 10557.4199999683
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9195.85700007156,
+            "type" : "application/x-javascript",
+            "id" : "download_92"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://www.google-analytics.com/__utm.gif?utmwv=5.4.4&utms=3&utmn=1799502832&utmhn=www.huffingtonpost.com&utme=8(Vertical*Page*User*JoinedOn)9(Homepage*front*A*0)11(3!1*1)&utmcs=UTF-8&utmsr=2048x1152&utmvp=946x999&utmsc=24-bit&utmul=en-us&utmje=1&utmfl=11.8%20r800&utmdt=Breaking%20News%20and%20Opinion%20on%20The%20Huffington%20Post&utmhid=1444635477&utmr=-&utmp=%2Ft%2Fm%2Ffollow&utmht=1378092465159&utmac=UA-71081-1&utmcc=__utma%3D265287574.82164726.1378092463.1378092463.1378092463.1%3B%2B__utmz%3D265287574.1378092463.1.1.utmcsr%3D(direct)%7Cutmccn%3D(direct)%7Cutmcmd%3D(none)%3B&utmu=qQC~",
+         "path" : "/missing/www.google-analytics.com/__utm.gif",
+         "id" : "r101",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9217.79599972069,
+            "type" : "image/gif",
+            "id" : "download_93"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://o.aolcdn.com/os/moat/prod/MessageSenderV2.swf",
+         "path" : "/pages/aol.com/o.aolcdn.com/os/moat/prod/MessageSenderV2.swf",
+         "id" : "r99",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9197.01500004157,
+            "type" : "application/x-shockwave-flash",
+            "id" : "download_94"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://platform.twitter.com/js/tfw/hub/client.js",
+         "path" : "/pages/huffingtonpost.com/platform.twitter.com/js/tfw/hub/client.js",
+         "id" : "r102",
+         "comps" : [
+            {
+               "s_time" : 10977.5930000469,
+               "time" : 44.003000017301,
+               "id" : "comp_696",
+               "type" : 2,
+               "e_time" : 11021.5960000642
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9241.17999989539,
+            "type" : "application/javascript",
+            "id" : "download_95"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://i.huffpost.com/gen/1328686/thumbs/s-MILITARY-SUICIDES-large300.jpg?7",
+         "path" : "/missing/i.huffpost.com/gen/1328686/thumbs/s-MILITARY-SUICIDES-large300.jpg",
+         "id" : "r103",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9271.85299992561,
+            "type" : "image/jpeg",
+            "id" : "download_96"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://b.huffingtonpost.com/vanity/?ts=1378092463112&h=www.huffingtonpost.com&v=28&r=&l=0&k=1&m=2048x1152&bd=946x999&tz=420&ms=4&t=Breaking%20News%20and%20Opinion%20on%20The%20Huffington%20Post&dL_ch=us.hpmg&dL_dpt=front&cobrand=HuffPost&fv=11.8&ads_grp=92457779&UNAUTHID=1.9acd49fa90a04fd3bd42428f04ba1724.346a&dL_nu=3&dL_v=1&dL_pv=1&dL_vtsf=1378092465&dL_vtsl=0&dL_vtsc=1378092465",
+         "path" : "/missing/b.huffingtonpost.com/vanity",
+         "id" : "r88",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9657.75399981067,
+            "type" : "image/gif",
+            "id" : "download_97"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://r1.ace.advertising.com/site=804147/size=300250/u=2/bnum=55220493/xsxdata=1:93314234/wkhr=20/hr=20/hl=13/scres=5/swh=2048x1152/tile=1/f=1/r=1/optn=1/fv=11/aolexp=0/aolexp=0/dref=http%253A%252F%252Fwww.huffingtonpost.com%252F",
+         "path" : "/missing/r1.ace.advertising.com/site_804147/size_300250/u_2/bnum_55220493/xsxdata_1_93314234/wkhr_20/hr_20/hl_13/scres_5/swh_2048x1152/tile_1/f_1/r_1/optn_1/fv_11/aolexp_0/aolexp_0/dref_http_253A_252F_252Fwww.huffingtonpost.com_252F",
+         "id" : "r104",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9332.08800014108,
+            "type" : "application/x-javascript",
+            "id" : "download_98"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_util/util.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r105",
+         "comps" : [
+            {
+               "s_time" : 11085.0789998658,
+               "time" : 18.5380000621008,
+               "id" : "comp_703",
+               "type" : 2,
+               "e_time" : 11103.6169999279
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9888.53200012818,
+            "type" : "application/x-javascript",
+            "id" : "download_99"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=_br_fp.js&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r106",
+         "comps" : [
+            {
+               "s_time" : 11104.0900000371,
+               "time" : 1.3099997303998,
+               "id" : "comp_706",
+               "type" : 2,
+               "e_time" : 11105.3999997675
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9906.3249998726,
+            "type" : "application/x-javascript",
+            "id" : "download_100"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://apx.moatads.com/pixel.gif?e=17&i=AOL2&bq=2&f=0&o=3&t=1378092465872&de=39169361&m=0&ar=66773fd-clean&q=1&cb=0&cu=1378092459813&di=1&d=2513436%3A2&bd=93314234&bo=&ac=1&cs=0",
+         "path" : "/missing/apx.moatads.com/pixel.gif",
+         "id" : "r108",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9930.90899987146,
+            "type" : "image/gif",
+            "id" : "download_101"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://plus.google.com/js/client:plusone.js?onload=start",
+         "path" : "/pages/huffingtonpost.com/plus.google.com/js/client_plusone.js",
+         "id" : "r107",
+         "comps" : [
+            {
+               "s_time" : 11224.6659998782,
+               "time" : 46.7329998501009,
+               "id" : "comp_721",
+               "type" : 2,
+               "e_time" : 11271.3989997283
+            },
+            {
+               "s_time" : 11105.5700001307,
+               "time" : 118.948999792301,
+               "id" : "comp_709",
+               "type" : 2,
+               "e_time" : 11224.518999923
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 9928.22800017893,
+            "type" : "application/javascript",
+            "id" : "download_102"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://fw.adsafeprotected.com/rjss/dc/15736/1336719/adj/N7443.147350.VIVAKIAOD/B7252980.210;sz=300x250;pc=aolN0001529248;click=http://servedby.advertising.com/click/site=0000804147/mnum=0001529248/cstr=55220493=_522405b1,7026534188,804147_1529248_81_0,1_/xsxdata=1:93314234/bnum=55220493/optn=64?trg=;ord=7026534188?",
+         "path" : "/missing/fw.adsafeprotected.com/rjss/dc/15736/1336719/adj/N7443.147350.VIVAKIAOD/B7252980.210_sz_300x250_pc_aolN0001529248_click_http_",
+         "id" : "r109",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 10004.5759999193,
+            "type" : "text/javascript",
+            "id" : "download_103"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://fw.adsafeprotected.com/rjss/c.betrad.com/15736/9004/surly.js?;ad_w=300;ad_h=250;coid=273;nid=9582;crid=667;",
+         "path" : "/missing/fw.adsafeprotected.com/rjss/c.betrad.com/15736/9004/surly.js",
+         "id" : "r110",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 10005.1079997793,
+            "type" : "text/javascript",
+            "id" : "download_104"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://pixel.quantserve.com/pixel;r=1773929735;a=p-6fTutip1SMLM2;labels=Home;fpan=1;fpa=P0-1332543577-1378092466534;ns=0;ce=1;cm=;je=1;sr=2048x1152x24;enc=n;dst=1;et=1378092466525;tzo=420;ref=;url=http%3A%2F%2Fwww.huffingtonpost.com%2F;ogl=site_name.The%20Huffington%20Post%2Ctype.blog",
+         "path" : "/missing/pixel.quantserve.com/pixel_r_1773929735_a_p-6fTutip1SMLM2_labels_Home_fpan_1_fpa_P0-1332543577-1378092466534_ns_0_ce_1_cm__je_1_sr_2048x1152x24_enc_n_dst_1_et_1378092466525_tzo_420_ref__url_http_3A_2F_2Fwww.huffingtonpost.com_2F_ogl_site_name.The_20Huffington_20Post_2Ctype.blog",
+         "id" : "r116",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 10619.3450000137,
+            "type" : "image/gif",
+            "id" : "download_105"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://static.ak.facebook.com/connect/xd_arbiter.php?version=26#channel=f2a073e54&channel_path=%2Ffacebook%2Fchannel.html%3Ffb_xd_fragment%23xd_sig%3Df12c820e28%26&origin=http%3A%2F%2Fwww.huffingtonpost.com",
+         "path" : "/missing/static.ak.facebook.com/connect/xd_arbiter.php",
+         "id" : "r114",
+         "comps" : [
+            {
+               "s_time" : 11324.4960000739,
+               "time" : 1415.4659998603,
+               "id" : "r114_c1",
+               "type" : "evalhtml",
+               "e_time" : 12739.9619999342
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 10558.7809998542,
+            "type" : "text/html",
+            "id" : "download_106"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ad.doubleclick.net/adj/N7443.147350.VIVAKIAOD/B7252980.210;sz=300x250;pc=aolN0001529248;click=http://servedby.advertising.com/click/site=0000804147/mnum=0001529248/cstr=55220493=_522405b1,7026534188,804147_1529248_81_0,1_/xsxdata=1:93314234/bnum=55220493/optn=64?trg=;ord=7026534188?",
+         "path" : "/missing/ad.doubleclick.net/adj/N7443.147350.VIVAKIAOD/B7252980.210_sz_300x250_pc_aolN0001529248_click_http_",
+         "id" : "r113",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 10548.7270001322,
+            "type" : "application/x-javascript",
+            "id" : "download_107"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "https://s-static.ak.facebook.com/connect/xd_arbiter.php?version=26#channel=f2a073e54&channel_path=%2Ffacebook%2Fchannel.html%3Ffb_xd_fragment%23xd_sig%3Df12c820e28%26&origin=http%3A%2F%2Fwww.huffingtonpost.com",
+         "path" : "/missing/s-static.ak.facebook.com/connect/xd_arbiter.php",
+         "id" : "r115",
+         "comps" : [
+            {
+               "s_time" : 11660.4729997925,
+               "time" : 84.1890000738986,
+               "id" : "r115_c1",
+               "type" : "evalhtml",
+               "e_time" : 11744.6619998664
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 10559.444999788,
+            "type" : "text/html",
+            "id" : "download_108"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://platform.twitter.com/widgets/hub.html",
+         "path" : "/pages/huffingtonpost.com/platform.twitter.com/widgets/hub.html/index.html",
+         "id" : "r117",
+         "comps" : [
+            {
+               "s_time" : 11753.8939998485,
+               "time" : 41.4400002918992,
+               "id" : "r117_c1",
+               "type" : "evalhtml",
+               "e_time" : 11795.3340001404
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 11035.6359998696,
+            "type" : "text/html",
+            "id" : "download_109"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s0.2mdn.net/3717615/Boost_Promo_LaborDay_300x250.jpg",
+         "path" : "/missing/s0.2mdn.net/3717615/Boost_Promo_LaborDay_300x250.jpg",
+         "id" : "r123",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 11331.0670000501,
+            "type" : "image/jpeg",
+            "id" : "download_110"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "https://platform.twitter.com/widgets/hub.html",
+         "path" : "/pages/huffingtonpost.com/platform.twitter.com/widgets/hub.html/index.html",
+         "id" : "r118",
+         "comps" : [
+            {
+               "s_time" : 11888.4879997931,
+               "time" : 61.8960000574989,
+               "id" : "r118_c1",
+               "type" : "evalhtml",
+               "e_time" : 11950.3839998506
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 11075.5500001833,
+            "type" : "text/html",
+            "id" : "download_111"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://apis.google.com/_/scs/apps-static/_/js/k=oz.gapi.en_US.7cPSuHVtCCI.O/m=auth/exm=client,follow,plusone/rt=j/sv=1/d=1/ed=1/am=IQ/rs=AItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw/cb=gapi.loaded_1",
+         "path" : "/pages/huffingtonpost.com/apis.google.com/_/scs/apps-static/_/js/k_oz.gapi.en_US.7cPSuHVtCCI.O/m_auth/exm_client_follow_plusone/rt_j/sv_1/d_1/ed_1/am_IQ/rs_AItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw/cb_gapi.loaded_1.js",
+         "id" : "r120",
+         "comps" : [
+            {
+               "s_time" : 13072.0020001754,
+               "time" : 0.524999573799505,
+               "id" : "comp_821",
+               "type" : 2,
+               "e_time" : 13072.5269997492
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 11206.7579999566,
+            "type" : "text/javascript",
+            "id" : "download_112"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://apis.google.com/_/scs/apps-static/_/js/k=oz.gapi.en_US.7cPSuHVtCCI.O/m=client,follow,plusone/rt=j/sv=1/d=1/ed=1/am=IQ/rs=AItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw/cb=gapi.loaded_0",
+         "path" : "/pages/huffingtonpost.com/apis.google.com/_/scs/apps-static/_/js/k_oz.gapi.en_US.7cPSuHVtCCI.O/m_client_follow_plusone/rt_j/sv_1/d_1/ed_1/am_IQ/rs_AItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw/cb_gapi.loaded_0.js",
+         "id" : "r119",
+         "comps" : [
+            {
+               "s_time" : 13072.5670000538,
+               "time" : 470.747999847001,
+               "id" : "comp_823",
+               "type" : 2,
+               "e_time" : 13543.3149999008
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 11162.0979998261,
+            "type" : "text/javascript",
+            "id" : "download_113"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "https://apis.google.com/_/+1/fastbutton?bsv=o&usegapi=1&annotation=bubble&size=medium&width=32&hl=en-US&origin=http%3A%2F%2Fwww.huffingtonpost.com&url=http%3A%2F%2Fwww.huffingtonpost.com%2F&gsrc=3p&ic=1&jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en_US.7cPSuHVtCCI.O%2Fm%3D__features__%2Fam%3DIQ%2Frt%3Dj%2Fd%3D1%2Frs%3DAItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw#_methods=onPlusOne%2C_ready%2C_close%2C_open%2C_resizeMe%2C_renderstart%2Concircled%2Cdrefresh%2Cerefresh%2Conload&id=I1_1378092467170&parent=http%3A%2F%2Fwww.huffingtonpost.com&pfname=&rpctoken=14892609",
+         "path" : "/missing/apis.google.com/_/_1/fastbutton",
+         "id" : "r122",
+         "comps" : [
+            {
+               "s_time" : 12026.33100003,
+               "time" : 169.265999924399,
+               "id" : "r122_c1",
+               "type" : "evalhtml",
+               "e_time" : 12195.5969999544
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 11226.4680000953,
+            "type" : "text/html",
+            "id" : "download_114"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://d.agkn.com/pixel/2407/?che=3448283&plaid=102009095&creid=55613259&adgid=275246624&sid=1241720&camid=7252980",
+         "path" : "/missing/d.agkn.com/pixel/2407",
+         "id" : "r124",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 11331.9159997627,
+            "type" : "image/gif",
+            "id" : "download_115"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "https://apis.google.com/_/widget/render/follow?annotation=bubble&height=20&rel=publisher&hl=en-US&origin=http%3A%2F%2Fwww.huffingtonpost.com&url=https%3A%2F%2Fplus.google.com%2F101423092138897438495&gsrc=3p&ic=1&jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en_US.7cPSuHVtCCI.O%2Fm%3D__features__%2Fam%3DIQ%2Frt%3Dj%2Fd%3D1%2Frs%3DAItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw#_methods=onPlusOne%2C_ready%2C_close%2C_open%2C_resizeMe%2C_renderstart%2Concircled%2Cdrefresh%2Cerefresh%2Conload&id=I0_1378092467156&parent=http%3A%2F%2Fwww.huffingtonpost.com&pfname=&rpctoken=15678599",
+         "path" : "/missing/apis.google.com/_/widget/render/follow",
+         "id" : "r121",
+         "comps" : [
+            {
+               "s_time" : 12417.6659998484,
+               "time" : 1240.0199999101,
+               "type" : "evalhtml",
+               "id" : "r121_c1",
+               "e_time" : 13657.6859997585
+            },
+            {
+               "s_time" : 14076.5200001188,
+               "time" : 0.878999941000075,
+               "type" : "evalhtml",
+               "id" : "r121_c2",
+               "e_time" : 14077.3990000598
+            },
+            {
+               "s_time" : 14410.5520001613,
+               "time" : 248.776999767799,
+               "id" : "r121_c3",
+               "type" : "evalhtml",
+               "e_time" : 14659.3289999291
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 11213.5209999979,
+            "type" : "text/html",
+            "id" : "download_116"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://ssl.gstatic.com/s2/oz/images/stars/po/Publisher/sprite4-a67f741843ffc4220554c34bd01bb0bb.png",
+         "path" : "/pages/xnxx.com/ssl.gstatic.com/s2/oz/images/stars/po/Publisher/sprite4-a67f741843ffc4220554c34bd01bb0bb.png",
+         "id" : "r126",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12060.4659998789,
+            "type" : "image/png",
+            "id" : "download_117"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://apis.google.com/_/scs/apps-static/_/js/k=oz.gapi.en_US.7cPSuHVtCCI.O/m=googleapis_client,iframes_styles_bubble_internal,gapi_iframes_style_common,gapi_iframes_iframer/rt=j/sv=1/d=1/ed=1/am=IQ/rs=AItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw/cb=gapi.loaded_0",
+         "path" : "/pages/huffingtonpost.com/apis.google.com/_/scs/apps-static/_/js/k_oz.gapi.en_US.7cPSuHVtCCI.O/m_googleapis_client_iframes_styles_bubble_internal_gapi_iframes_style_common_gapi_iframes_iframer/rt_j/sv_1/d_1/ed_1/am_IQ/rs_AItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw/cb_gapi.loaded_0.js",
+         "id" : "r127",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12120.7880000584,
+            "type" : "text/javascript",
+            "id" : "download_118"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://apis.google.com/_/scs/apps-static/_/js/k=oz.plusone.en_US.paC4a_aPClQ.O/m=p1b,p1p/rt=j/sv=1/d=1/ed=1/am=jAI/rs=AItRSTNTOQ60ne5eR6rkGn2o0yK1Dp7QIQ/cb=gapi.loaded_1",
+         "path" : "/pages/huffingtonpost.com/apis.google.com/_/scs/apps-static/_/js/k_oz.plusone.en_US.paC4a_aPClQ.O/m_p1b_p1p/rt_j/sv_1/d_1/ed_1/am_jAI/rs_AItRSTNTOQ60ne5eR6rkGn2o0yK1Dp7QIQ/cb_gapi.loaded_1.js",
+         "id" : "r128",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12122.2089999355,
+            "type" : "text/javascript",
+            "id" : "download_119"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://apis.google.com/_/scs/apps-static/_/ss/k=oz.cpw.-ibuo01vk3obt.L.W.O/am=MAY/rs=AItRSTPBs6_5th7_e8U1M88hJB7VdHZQRw",
+         "path" : "/pages/huffingtonpost.com/apis.google.com/_/scs/apps-static/_/ss/k_oz.cpw.-ibuo01vk3obt.L.W.O/am_MAY/rs_AItRSTPBs6_5th7_e8U1M88hJB7VdHZQRw.add.css",
+         "id" : "r129",
+         "comps" : [
+            {
+               "s_time" : 12626.8259999342,
+               "time" : 31.3050001859992,
+               "id" : "comp_798",
+               "type" : 4,
+               "e_time" : 12658.1310001202
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12431.7589998245,
+            "type" : "text/css",
+            "id" : "download_120"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://apis.google.com/_/scs/apps-static/_/js/k=oz.gapi.en_US.7cPSuHVtCCI.O/m=googleapis_client,iframes_styles_bubble_internal,iframes/am=IQ/rt=j/d=1/rs=AItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw",
+         "path" : "/pages/huffingtonpost.com/apis.google.com/_/scs/apps-static/_/js/k_oz.gapi.en_US.7cPSuHVtCCI.O/m_googleapis_client_iframes_styles_bubble_internal_iframes/am_IQ/rt_j/d_1/rs_AItRSTNQi5OAAUsIVPV-bjZtHfNGWCzynw.add.js",
+         "id" : "r130",
+         "comps" : [
+            {
+               "s_time" : 13657.7369999141,
+               "time" : 418.783000204701,
+               "id" : "comp_861",
+               "type" : 1,
+               "e_time" : 14076.5200001188
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12437.4549998902,
+            "type" : "text/javascript",
+            "id" : "download_121"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://apis.google.com/_/scs/apps-static/_/js/k=oz.cpw.en_US.ONaEpf5wlXs.O/m=cpw,wf/am=MAY/rt=j/d=1/rs=AItRSTPjJK1hF8Pe0ntrcB5Q0TtB0pNwMw",
+         "path" : "/pages/huffingtonpost.com/apis.google.com/_/scs/apps-static/_/js/k_oz.cpw.en_US.ONaEpf5wlXs.O/m_cpw_wf/am_MAY/rt_j/d_1/rs_AItRSTPjJK1hF8Pe0ntrcB5Q0TtB0pNwMw.add.js",
+         "id" : "r131",
+         "comps" : [
+            {
+               "s_time" : 14077.461999841,
+               "time" : 333.090000320301,
+               "id" : "comp_864",
+               "type" : 1,
+               "e_time" : 14410.5520001613
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12437.9650000483,
+            "type" : "text/javascript",
+            "id" : "download_122"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s.huffpost.com/assets/js.php?f=sha1.js,&v=1377630675",
+         "path" : "/pages/huffingtonpost.com/s.huffpost.com/assets/js.php.js",
+         "id" : "r132",
+         "comps" : [
+            {
+               "s_time" : 13543.3559999801,
+               "time" : 0.946999993200734,
+               "id" : "comp_837",
+               "type" : null,
+               "e_time" : 13544.3029999733
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12664.553000126,
+            "type" : "application/x-javascript",
+            "id" : "download_123"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://c.betrad.com/surly.js?;ad_w=300;ad_h=250;coid=273;nid=9582;crid=667;",
+         "path" : "/missing/c.betrad.com/surly.js",
+         "id" : "r125",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12438.4929998778,
+            "type" : "application/x-javascript",
+            "id" : "download_124"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://fw.adsafeprotected.com/dt?asId=a299cec9-137f-11e3-b913-0025904ea2d8&tv={c:mZBI3M,pingTime:-2,time:2390,type:a,fc:0,rt:1,cb:0,np:1,em:true,fr:true,slTimes:{i:0,o:2390,n:0,pp:0,pm:0,gpp:0,gpm:0,gi:0,go:2390,gn:0,fi:0,fo:0,fn:2390},slEvents:[{sl:o,fsl:fn,gsl:go,t:48,wc:0.0.961.1014,ac:674.971.300.250,am:i,cc:0.0.1.0,piv:16,obst:na,th:0,reas:l}],slEventCount:1,uf:0,tt:jss,fm:ogftxVD+11|1211|122|13*.15736-1336719|14|15|16|17|18,sinceFw:2316,readyFired:false}&br=c&adsafePrivacyPolicy=http://integr.al/privacy-policy",
+         "path" : "/missing/fw.adsafeprotected.com/dt",
+         "id" : "r133",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12754.8279999755,
+            "type" : "image/gif",
+            "id" : "download_125"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://c.betrad.com/ba.html?1159",
+         "path" : "/pages/softonic.com/c.betrad.com/ba.html/index.html",
+         "id" : "r136",
+         "comps" : [
+            {
+               "s_time" : 13618.4279997833,
+               "time" : 3.74800013380082,
+               "id" : "r136_c1",
+               "type" : "evalhtml",
+               "e_time" : 13622.1759999171
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12877.6259999722,
+            "type" : "text/html",
+            "id" : "download_126"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://apx.moatads.com/pixel.gif?e=0&q=0&ak=http%3A%2F%2Fs0.2mdn.net%2F3717615%2FBoost_Promo_LaborDay_300x250.jpg&i=AOL2&bq=2&g=0&h=250&f=0&o=3&t=1378092465872&de=39169361&cu=1378092459813&m=2896&ar=66773fd-clean&w=300&cb=0&r=11.8&ch=0&as=0&ag=0&an=0&aj=0&cc=0&bw=0&bx=0&dj=0&dl=0&dm=1000&dn=72&ah=0&am=0&bu=0&cd=0&cl=0&au=-1&av=-1&by=-1&at=0&d=2513436%3A2&bd=93314234&bo=&ab=1&ac=1&cs=0",
+         "path" : "/missing/apx.moatads.com/pixel.gif",
+         "id" : "r134",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 12850.6979998201,
+            "type" : "image/gif",
+            "id" : "download_127"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://c.betrad.com/a/4.gif",
+         "path" : "/pages/softonic.com/c.betrad.com/a/4.gif",
+         "id" : "r135",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 13060.6990000233,
+            "type" : "image/gif",
+            "id" : "download_128"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://ssl.gstatic.com/s2/oz/images/sprites/plus-button-e63a56248fe873b92b3cab26945f7793.png",
+         "path" : "/pages/huffingtonpost.com/ssl.gstatic.com/s2/oz/images/sprites/plus-button-e63a56248fe873b92b3cab26945f7793.png",
+         "id" : "r137",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 13086.6509997286,
+            "type" : "image/png",
+            "id" : "download_129"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://c.betrad.com/geo/ba.js?1159",
+         "path" : "/pages/softonic.com/c.betrad.com/geo/ba.js",
+         "id" : "r140",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 13634.0399999171,
+            "type" : "application/x-javascript",
+            "id" : "download_130"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://leadback.advertising.com/cs.ashx?site=804147",
+         "path" : "/pages/huffingtonpost.com/leadback.advertising.com/cs.ashx/index.html",
+         "id" : "r143",
+         "comps" : [
+            {
+               "s_time" : 14470.5880000256,
+               "time" : 0.469999853499758,
+               "id" : "r143_c1",
+               "type" : "evalhtml",
+               "e_time" : 14471.0579998791
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 13635.2909998968,
+            "type" : "text/html",
+            "id" : "download_131"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://static.adsafeprotected.com/detector2.pix",
+         "path" : "/pages/indiatimes.com/static.adsafeprotected.com/detector2.pix",
+         "id" : "r142",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 13634.519000072,
+            "type" : "application/x-shockwave-flash",
+            "id" : "download_132"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "https://accounts.google.com/o/oauth2/postmessageRelay?parent=http%3A%2F%2Fwww.huffingtonpost.com#rpctoken=666787976&forcesecure=1",
+         "path" : "/missing/accounts.google.com/o/oauth2/postmessageRelay",
+         "id" : "r139",
+         "comps" : [
+            {
+               "s_time" : 14508.721999824,
+               "time" : 575.968000106601,
+               "type" : "evalhtml",
+               "id" : "r139_c1",
+               "e_time" : 15084.6899999306
+            },
+            {
+               "s_time" : 15087.020999752,
+               "time" : 0.181999988801181,
+               "id" : "r139_c2",
+               "type" : "evalhtml",
+               "e_time" : 15087.2029997408
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 13403.9679998532,
+            "type" : "text/html",
+            "id" : "download_133"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://uac.advertising.com/cs/beacon.js",
+         "path" : "/pages/livedoor.com/uac.advertising.com/cs/beacon.js",
+         "id" : "r144",
+         "comps" : [
+            {
+               "s_time" : 14780.6810000911,
+               "time" : 3.4309998155004,
+               "id" : "comp_889",
+               "type" : null,
+               "e_time" : 14784.1119999066
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 14485.7330000959,
+            "type" : "application/x-javascript",
+            "id" : "download_134"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://ssl.gstatic.com/accounts/o/327579480-postmessagerelay.js",
+         "path" : "/pages/huffingtonpost.com/ssl.gstatic.com/accounts/o/327579480-postmessagerelay.js",
+         "id" : "r146",
+         "comps" : [
+            {
+               "s_time" : 15084.7569997422,
+               "time" : 2.26400000979993,
+               "id" : "comp_907",
+               "type" : 1,
+               "e_time" : 15087.020999752
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 14522.1380000003,
+            "type" : "text/javascript",
+            "id" : "download_135"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://ssl.gstatic.com/fonts/roboto/v9/xypMPkk3qWn0aVtKdo69mQLUuEpTyoUstqEm5AMlJo4.woff",
+         "path" : "/pages/huffingtonpost.com/ssl.gstatic.com/fonts/roboto/v9/xypMPkk3qWn0aVtKdo69mQLUuEpTyoUstqEm5AMlJo4.woff",
+         "id" : "r147",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 14547.9069999419,
+            "type" : "font/woff",
+            "id" : "download_136"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://ssl.gstatic.com/fonts/roboto/v9/xZQOmYg4x3YaWkTJi1kErvesZW2xOQ-xsNqO47m55DA.woff",
+         "path" : "/pages/huffingtonpost.com/ssl.gstatic.com/fonts/roboto/v9/xZQOmYg4x3YaWkTJi1kErvesZW2xOQ-xsNqO47m55DA.woff",
+         "id" : "r148",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 14549.5070000179,
+            "type" : "font/woff",
+            "id" : "download_137"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://ssl.gstatic.com/fonts/roboto/v9/wdhR8z_EejC7uAMUf1gPYgLUuEpTyoUstqEm5AMlJo4.woff",
+         "path" : "/pages/huffingtonpost.com/ssl.gstatic.com/fonts/roboto/v9/wdhR8z_EejC7uAMUf1gPYgLUuEpTyoUstqEm5AMlJo4.woff",
+         "id" : "r149",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 14549.9140000902,
+            "type" : "font/woff",
+            "id" : "download_138"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://c.betrad.com/a/n/273/9582.js",
+         "path" : "/missing/c.betrad.com/a/n/273/9582.js",
+         "id" : "r151",
+         "comps" : [
+            {
+               "s_time" : 14825.4379997961,
+               "time" : 0.968000385899359,
+               "id" : "comp_902",
+               "type" : null,
+               "e_time" : 14826.406000182
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 14705.9749998152,
+            "type" : "application/x-javascript",
+            "id" : "download_139"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://apx.moatads.com/pixel.gif?e=9&q=0&ak=http%3A%2F%2Fs0.2mdn.net%2F3717615%2FBoost_Promo_LaborDay_300x250.jpg&i=AOL2&bq=2&g=1&h=250&f=0&o=3&t=1378092465872&de=39169361&cu=1378092459813&m=4726&ar=66773fd-clean&w=300&cb=0&r=11.8&ch=0&as=0&ag=0&an=0&aj=0&cc=0&bw=0&bx=0&dj=0&dl=0&dm=1000&dn=72&ah=1851&am=0&bu=1851&cd=0&cl=0&au=-1&av=-1&by=-1&at=0&d=2513436%3A2&bd=93314234&bo=&ab=1&ac=1&cs=0",
+         "path" : "/missing/apx.moatads.com/pixel.gif",
+         "id" : "r150",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 14655.5860000663,
+            "type" : "image/gif",
+            "id" : "download_140"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "https://oauth.googleusercontent.com/gadgets/js/core:rpc:shindig.random:shindig.sha1.js?c=2",
+         "path" : "/pages/huffingtonpost.com/oauth.googleusercontent.com/gadgets/js/core_rpc_shindig.random_shindig.sha1.js",
+         "id" : "r145",
+         "comps" : [
+            {
+               "s_time" : 15026.5159998089,
+               "time" : 58.040000032599,
+               "id" : "comp_906",
+               "type" : null,
+               "e_time" : 15084.5559998415
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 14521.5159999207,
+            "type" : "text/javascript",
+            "id" : "download_141"
+         }
+      }
+   ],
+   "load_activity" : -1,
+   "deps" : [
+      {
+         "a2" : "r1_c2",
+         "time" : -1,
+         "id" : "dep1",
+         "a1" : "comp_10"
+      },
+      {
+         "a2" : "r1_c3",
+         "time" : -1,
+         "id" : "dep2",
+         "a1" : "comp_18"
+      },
+      {
+         "a2" : "r1_c4",
+         "time" : -1,
+         "id" : "dep3",
+         "a1" : "comp_20"
+      },
+      {
+         "a2" : "r1_c5",
+         "time" : -1,
+         "id" : "dep4",
+         "a1" : "comp_32"
+      },
+      {
+         "a2" : "r1_c6",
+         "time" : -1,
+         "id" : "dep5",
+         "a1" : "comp_320"
+      },
+      {
+         "a2" : "r1_c7",
+         "time" : -1,
+         "id" : "dep6",
+         "a1" : "comp_522"
+      },
+      {
+         "a2" : "comp_18",
+         "time" : -1,
+         "id" : "dep7",
+         "a1" : "comp_10"
+      },
+      {
+         "a2" : "comp_20",
+         "time" : -1,
+         "id" : "dep8",
+         "a1" : "comp_18"
+      },
+      {
+         "a2" : "r121_c2",
+         "time" : -1,
+         "id" : "dep9",
+         "a1" : "comp_861"
+      },
+      {
+         "a2" : "r121_c3",
+         "time" : -1,
+         "id" : "dep10",
+         "a1" : "comp_864"
+      },
+      {
+         "a2" : "r139_c2",
+         "time" : -1,
+         "id" : "dep11",
+         "a1" : "comp_907"
+      },
+      {
+         "a2" : "download_141",
+         "time" : 12.794000096701,
+         "id" : "dep12",
+         "a1" : "r139_c1"
+      },
+      {
+         "a2" : "download_141",
+         "time" : 110.9639997594,
+         "id" : "dep13",
+         "a1" : "r121_c3"
+      },
+      {
+         "a2" : "download_140",
+         "time" : 146.8640002423,
+         "id" : "dep14",
+         "a1" : "r139_c1"
+      },
+      {
+         "a2" : "download_140",
+         "time" : 245.033999904999,
+         "id" : "dep15",
+         "a1" : "r121_c3"
+      },
+      {
+         "a2" : "download_139",
+         "time" : 197.2529999912,
+         "id" : "dep16",
+         "a1" : "r139_c1"
+      },
+      {
+         "a2" : "download_138",
+         "time" : 41.1920002662009,
+         "id" : "dep17",
+         "a1" : "r139_c1"
+      },
+      {
+         "a2" : "download_138",
+         "time" : 139.3619999289,
+         "id" : "dep18",
+         "a1" : "r121_c3"
+      },
+      {
+         "a2" : "download_137",
+         "time" : 40.7850001939005,
+         "id" : "dep19",
+         "a1" : "r139_c1"
+      },
+      {
+         "a2" : "download_137",
+         "time" : 138.9549998566,
+         "id" : "dep20",
+         "a1" : "r121_c3"
+      },
+      {
+         "a2" : "download_136",
+         "time" : 39.1850001179009,
+         "id" : "dep21",
+         "a1" : "r139_c1"
+      },
+      {
+         "a2" : "download_136",
+         "time" : 137.3549997806,
+         "id" : "dep22",
+         "a1" : "r121_c3"
+      },
+      {
+         "a2" : "download_135",
+         "time" : 13.4160001762993,
+         "id" : "dep23",
+         "a1" : "r139_c1"
+      },
+      {
+         "a2" : "download_135",
+         "time" : 111.585999838999,
+         "id" : "dep24",
+         "a1" : "r121_c3"
+      },
+      {
+         "a2" : "download_134",
+         "time" : 75.1809999345987,
+         "id" : "dep25",
+         "a1" : "r121_c3"
+      },
+      {
+         "a2" : "download_133",
+         "time" : 986.3020000048,
+         "id" : "dep26",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_133",
+         "time" : 7964.5460001193,
+         "id" : "dep27",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_132",
+         "time" : 1216.8530002236,
+         "id" : "dep28",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_131",
+         "time" : 1217.6250000484,
+         "id" : "dep29",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_130",
+         "time" : 1216.3740000687,
+         "id" : "dep30",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_129",
+         "time" : 668.9849998802,
+         "id" : "dep31",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_129",
+         "time" : 7647.2289999947,
+         "id" : "dep32",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_128",
+         "time" : 643.033000174901,
+         "id" : "dep33",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_128",
+         "time" : 7621.2770002894,
+         "id" : "dep34",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_127",
+         "time" : 7411.2760000862,
+         "id" : "dep35",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_126",
+         "time" : 459.960000123801,
+         "id" : "dep36",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_126",
+         "time" : 8734.65100023893,
+         "id" : "dep37",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_126",
+         "time" : 7438.2040002383,
+         "id" : "dep38",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_125",
+         "time" : 337.1620001271,
+         "id" : "dep39",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_125",
+         "time" : 8611.85300024223,
+         "id" : "dep40",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_125",
+         "time" : 7315.4060002416,
+         "id" : "dep41",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_124",
+         "time" : 20.8270000294015,
+         "id" : "dep42",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_124",
+         "time" : 1113.9969998039,
+         "id" : "dep43",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_124",
+         "time" : 8295.51800014453,
+         "id" : "dep44",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_124",
+         "time" : 6999.0710001439,
+         "id" : "dep45",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_123",
+         "time" : 246.8870002776,
+         "id" : "dep46",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_123",
+         "time" : 1340.0570000521,
+         "id" : "dep47",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_123",
+         "time" : 8521.57800039273,
+         "id" : "dep48",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_123",
+         "time" : 7225.1310003921,
+         "id" : "dep49",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_122",
+         "time" : 20.2990001999005,
+         "id" : "dep50",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_122",
+         "time" : 1113.4689999744,
+         "id" : "dep51",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_122",
+         "time" : 8294.99000031503,
+         "id" : "dep52",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_122",
+         "time" : 6998.5430003144,
+         "id" : "dep53",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_121",
+         "time" : 19.789000041801,
+         "id" : "dep54",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_121",
+         "time" : 1112.9589998163,
+         "id" : "dep55",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_121",
+         "time" : 8294.48000015693,
+         "id" : "dep56",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_121",
+         "time" : 6998.0330001563,
+         "id" : "dep57",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_120",
+         "time" : 14.0929999761011,
+         "id" : "dep58",
+         "a1" : "r121_c1"
+      },
+      {
+         "a2" : "download_120",
+         "time" : 1107.2629997506,
+         "id" : "dep59",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_120",
+         "time" : 8288.78400009123,
+         "id" : "dep60",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_120",
+         "time" : 6992.3370000906,
+         "id" : "dep61",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_119",
+         "time" : 95.8779999054987,
+         "id" : "dep62",
+         "a1" : "r122_c1"
+      },
+      {
+         "a2" : "download_119",
+         "time" : 797.7129998616,
+         "id" : "dep63",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_119",
+         "time" : 7979.23400020223,
+         "id" : "dep64",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_119",
+         "time" : 6682.7870002016,
+         "id" : "dep65",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_118",
+         "time" : 94.4570000283984,
+         "id" : "dep66",
+         "a1" : "r122_c1"
+      },
+      {
+         "a2" : "download_118",
+         "time" : 796.2919999845,
+         "id" : "dep67",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_118",
+         "time" : 7977.81300032513,
+         "id" : "dep68",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_118",
+         "time" : 6681.3660003245,
+         "id" : "dep69",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_117",
+         "time" : 34.1349998488986,
+         "id" : "dep70",
+         "a1" : "r122_c1"
+      },
+      {
+         "a2" : "download_117",
+         "time" : 735.969999805,
+         "id" : "dep71",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_117",
+         "time" : 7917.49100014563,
+         "id" : "dep72",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_117",
+         "time" : 6621.044000145,
+         "id" : "dep73",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_116",
+         "time" : 7070.54600026463,
+         "id" : "dep74",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_116",
+         "time" : 5774.099000264,
+         "id" : "dep75",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_115",
+         "time" : 7.41999968880009,
+         "id" : "dep76",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_115",
+         "time" : 7188.94100002943,
+         "id" : "dep77",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_115",
+         "time" : 5892.4940000288,
+         "id" : "dep78",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_114",
+         "time" : 7083.49300036203,
+         "id" : "dep79",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_114",
+         "time" : 5787.0460003614,
+         "id" : "dep80",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_113",
+         "time" : 7019.12300009283,
+         "id" : "dep81",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_113",
+         "time" : 5722.6760000922,
+         "id" : "dep82",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_112",
+         "time" : 7063.78300022333,
+         "id" : "dep83",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_112",
+         "time" : 5767.3360002227,
+         "id" : "dep84",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_111",
+         "time" : 6932.57500045003,
+         "id" : "dep85",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_111",
+         "time" : 5636.1280004494,
+         "id" : "dep86",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_110",
+         "time" : 6.57099997620026,
+         "id" : "dep87",
+         "a1" : "r114_c1"
+      },
+      {
+         "a2" : "download_110",
+         "time" : 7188.09200031683,
+         "id" : "dep88",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_110",
+         "time" : 5891.6450003162,
+         "id" : "dep89",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_109",
+         "time" : 6892.66100013633,
+         "id" : "dep90",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_109",
+         "time" : 5596.2140001357,
+         "id" : "dep91",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_108",
+         "time" : 6416.47000005473,
+         "id" : "dep92",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_108",
+         "time" : 5120.0230000541,
+         "id" : "dep93",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_107",
+         "time" : 6405.75200039893,
+         "id" : "dep94",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_107",
+         "time" : 5109.3050003983,
+         "id" : "dep95",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_106",
+         "time" : 6415.80600012093,
+         "id" : "dep96",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_106",
+         "time" : 5119.3590001203,
+         "id" : "dep97",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_105",
+         "time" : 6476.37000028043,
+         "id" : "dep98",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_105",
+         "time" : 5179.9230002798,
+         "id" : "dep99",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_104",
+         "time" : 5862.13300004603,
+         "id" : "dep100",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_104",
+         "time" : 4565.6860000454,
+         "id" : "dep101",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_103",
+         "time" : 5861.60100018603,
+         "id" : "dep102",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_103",
+         "time" : 4565.1540001854,
+         "id" : "dep103",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_102",
+         "time" : 5785.25300044566,
+         "id" : "dep104",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_102",
+         "time" : 4488.80600044503,
+         "id" : "dep105",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_101",
+         "time" : 5787.93400013819,
+         "id" : "dep106",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_101",
+         "time" : 4491.48700013756,
+         "id" : "dep107",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_100",
+         "time" : 5763.35000013933,
+         "id" : "dep108",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_100",
+         "time" : 4466.9030001387,
+         "id" : "dep109",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_99",
+         "time" : 5745.55700039491,
+         "id" : "dep110",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_99",
+         "time" : 4449.11000039428,
+         "id" : "dep111",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_98",
+         "time" : 5189.11300040781,
+         "id" : "dep112",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_98",
+         "time" : 3892.66600040718,
+         "id" : "dep113",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_97",
+         "time" : 5514.7790000774,
+         "id" : "dep114",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_97",
+         "time" : 4218.33200007677,
+         "id" : "dep115",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_96",
+         "time" : 5128.87800019234,
+         "id" : "dep116",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_96",
+         "time" : 3832.43100019171,
+         "id" : "dep117",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_95",
+         "time" : 5098.20500016212,
+         "id" : "dep118",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_95",
+         "time" : 3801.75800016149,
+         "id" : "dep119",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_94",
+         "time" : 5054.0400003083,
+         "id" : "dep120",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_94",
+         "time" : 3757.59300030767,
+         "id" : "dep121",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_93",
+         "time" : 5074.82099998742,
+         "id" : "dep122",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_93",
+         "time" : 3778.37399998679,
+         "id" : "dep123",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_92",
+         "time" : 5052.88200033829,
+         "id" : "dep124",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_92",
+         "time" : 3756.43500033766,
+         "id" : "dep125",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_91",
+         "time" : 4945.44800044969,
+         "id" : "dep126",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_91",
+         "time" : 3649.00100044906,
+         "id" : "dep127",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_90",
+         "time" : 4994.95400022715,
+         "id" : "dep128",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_90",
+         "time" : 3698.50700022652,
+         "id" : "dep129",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_89",
+         "time" : 4672.25800035521,
+         "id" : "dep130",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_89",
+         "time" : 3375.81100035458,
+         "id" : "dep131",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_88",
+         "time" : 4626.88700016588,
+         "id" : "dep132",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_88",
+         "time" : 3330.44000016525,
+         "id" : "dep133",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_87",
+         "time" : 4632.334000431,
+         "id" : "dep134",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_87",
+         "time" : 3335.88700043037,
+         "id" : "dep135",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_86",
+         "time" : 182.434000074859,
+         "id" : "dep136",
+         "a1" : "r80_c1"
+      },
+      {
+         "a2" : "download_86",
+         "time" : 4106.66800010949,
+         "id" : "dep137",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_86",
+         "time" : 2810.22100010886,
+         "id" : "dep138",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_85",
+         "time" : 178.153000306339,
+         "id" : "dep139",
+         "a1" : "r80_c1"
+      },
+      {
+         "a2" : "download_85",
+         "time" : 4102.38700034097,
+         "id" : "dep140",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_85",
+         "time" : 2805.94000034034,
+         "id" : "dep141",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_84",
+         "time" : 3902.83800009638,
+         "id" : "dep142",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_84",
+         "time" : 2606.39100009575,
+         "id" : "dep143",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_82",
+         "time" : 2391.63700025529,
+         "id" : "dep144",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_82",
+         "time" : 1095.19000025466,
+         "id" : "dep145",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_81",
+         "time" : 2514.16900008917,
+         "id" : "dep146",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_81",
+         "time" : 1217.72200008854,
+         "id" : "dep147",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_80",
+         "time" : 2417.63500031084,
+         "id" : "dep148",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_80",
+         "time" : 1121.18800031021,
+         "id" : "dep149",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_79",
+         "time" : 2377.81199999154,
+         "id" : "dep150",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_79",
+         "time" : 1081.36499999091,
+         "id" : "dep151",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_78",
+         "time" : 2397.06000033766,
+         "id" : "dep152",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_78",
+         "time" : 1100.61300033703,
+         "id" : "dep153",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_77",
+         "time" : 2361.83000029996,
+         "id" : "dep154",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_77",
+         "time" : 1065.38300029933,
+         "id" : "dep155",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_76",
+         "time" : 2350.09000031277,
+         "id" : "dep156",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_76",
+         "time" : 1053.64300031214,
+         "id" : "dep157",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_75",
+         "time" : 2348.28400006518,
+         "id" : "dep158",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_75",
+         "time" : 1051.83700006455,
+         "id" : "dep159",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_74",
+         "time" : 1303.025000263,
+         "id" : "dep160",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_74",
+         "time" : 6.57800026237055,
+         "id" : "dep161",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_73",
+         "time" : 1303.69100021198,
+         "id" : "dep162",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_73",
+         "time" : 7.24400021135079,
+         "id" : "dep163",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_72",
+         "time" : 1266.7290000245,
+         "id" : "dep164",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_72",
+         "time" : 850.2829996869,
+         "id" : "dep165",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_71",
+         "time" : 25.3299996256901,
+         "id" : "dep166",
+         "a1" : "r71_c1"
+      },
+      {
+         "a2" : "download_71",
+         "time" : 1190.77300000936,
+         "id" : "dep167",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_71",
+         "time" : 774.32699967176,
+         "id" : "dep168",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_70",
+         "time" : 1001.95100018755,
+         "id" : "dep169",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_70",
+         "time" : 585.50499984995,
+         "id" : "dep170",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_69",
+         "time" : 1001.54700037092,
+         "id" : "dep171",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_69",
+         "time" : 585.10100003332,
+         "id" : "dep172",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_68",
+         "time" : 584.61500005797,
+         "id" : "dep173",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_68",
+         "time" : 1001.06100039557,
+         "id" : "dep174",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_68",
+         "time" : 584.61500005797,
+         "id" : "dep175",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_67",
+         "time" : 703.36800022051,
+         "id" : "dep176",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_67",
+         "time" : 286.92199988291,
+         "id" : "dep177",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_66",
+         "time" : 743.196000345049,
+         "id" : "dep178",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_66",
+         "time" : 326.75000000745,
+         "id" : "dep179",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_65",
+         "time" : 10.0619997829199,
+         "id" : "dep180",
+         "a1" : "r58_c1"
+      },
+      {
+         "a2" : "download_65",
+         "time" : 724.65000022203,
+         "id" : "dep181",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_65",
+         "time" : 308.20399988443,
+         "id" : "dep182",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_64",
+         "time" : 10.7049997895901,
+         "id" : "dep183",
+         "a1" : "r58_c1"
+      },
+      {
+         "a2" : "download_64",
+         "time" : 725.2930002287,
+         "id" : "dep184",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_64",
+         "time" : 308.8469998911,
+         "id" : "dep185",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_63",
+         "time" : 7.66499992460012,
+         "id" : "dep186",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_63",
+         "time" : 424.1110002622,
+         "id" : "dep187",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_63",
+         "time" : 7.66499992460012,
+         "id" : "dep188",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_62",
+         "time" : 418.50100038573,
+         "id" : "dep189",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_62",
+         "time" : 2.05500004812984,
+         "id" : "dep190",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_61",
+         "time" : 129.2750001885,
+         "id" : "dep191",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_61",
+         "time" : 2432.37099982798,
+         "id" : "dep192",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_60",
+         "time" : 432.30600003153,
+         "id" : "dep193",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_60",
+         "time" : 15.8599996939301,
+         "id" : "dep194",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_59",
+         "time" : 429.1610000655,
+         "id" : "dep195",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_59",
+         "time" : 12.7149997279002,
+         "id" : "dep196",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_58",
+         "time" : 428.61100006848,
+         "id" : "dep197",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_58",
+         "time" : 12.1649997308805,
+         "id" : "dep198",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_57",
+         "time" : 428.189000114799,
+         "id" : "dep199",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_57",
+         "time" : 11.7429997771997,
+         "id" : "dep200",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_56",
+         "time" : 427.78500029817,
+         "id" : "dep201",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_56",
+         "time" : 11.3389999605697,
+         "id" : "dep202",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_55",
+         "time" : 427.22500022501,
+         "id" : "dep203",
+         "a1" : "r54_c1"
+      },
+      {
+         "a2" : "download_55",
+         "time" : 10.7789998874105,
+         "id" : "dep204",
+         "a1" : "r1_c6"
+      },
+      {
+         "a2" : "download_54",
+         "time" : 1870.43199967593,
+         "id" : "dep205",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_53",
+         "time" : 1590.37999995053,
+         "id" : "dep206",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_52",
+         "time" : 1590.67699965089,
+         "id" : "dep207",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_51",
+         "time" : 1400.40399972349,
+         "id" : "dep208",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_50",
+         "time" : 754.8439996317,
+         "id" : "dep209",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_49",
+         "time" : 756.50399969891,
+         "id" : "dep210",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_48",
+         "time" : 756.14099996164,
+         "id" : "dep211",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_47",
+         "time" : 755.78399980441,
+         "id" : "dep212",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_46",
+         "time" : 755.33899990842,
+         "id" : "dep213",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_45",
+         "time" : 359.13599980995,
+         "id" : "dep214",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_44",
+         "time" : 17.1049996279201,
+         "id" : "dep215",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_43",
+         "time" : 336.47600002587,
+         "id" : "dep216",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_42",
+         "time" : 318.12800001353,
+         "id" : "dep217",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_41",
+         "time" : 289.57999963313,
+         "id" : "dep218",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_40",
+         "time" : 133.89799976721,
+         "id" : "dep219",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_39",
+         "time" : 133.52599972859,
+         "id" : "dep220",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_38",
+         "time" : 133.1839999184,
+         "id" : "dep221",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_37",
+         "time" : 132.83999962732,
+         "id" : "dep222",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_36",
+         "time" : 132.49300001189,
+         "id" : "dep223",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_35",
+         "time" : 131.84299971908,
+         "id" : "dep224",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_34",
+         "time" : 131.47699972614,
+         "id" : "dep225",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_33",
+         "time" : 131.13699993118,
+         "id" : "dep226",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_32",
+         "time" : 130.45799965039,
+         "id" : "dep227",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_31",
+         "time" : 130.80199994147,
+         "id" : "dep228",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_30",
+         "time" : 130.11799985543,
+         "id" : "dep229",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_29",
+         "time" : 129.74999984726,
+         "id" : "dep230",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_28",
+         "time" : 114.88500004634,
+         "id" : "dep231",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_27",
+         "time" : 129.41099982708,
+         "id" : "dep232",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_26",
+         "time" : 128.3759996295,
+         "id" : "dep233",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_25",
+         "time" : 129.06700000167,
+         "id" : "dep234",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_24",
+         "time" : 128.72799998149,
+         "id" : "dep235",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_23",
+         "time" : 128.01599968225,
+         "id" : "dep236",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_22",
+         "time" : 135.08099969476,
+         "id" : "dep237",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_21",
+         "time" : 134.70300007611,
+         "id" : "dep238",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_20",
+         "time" : 135.43199980631,
+         "id" : "dep239",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_19",
+         "time" : 127.63099977746,
+         "id" : "dep240",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_18",
+         "time" : 111.17799999192,
+         "id" : "dep241",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_17",
+         "time" : 83.69999984279,
+         "id" : "dep242",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_16",
+         "time" : 15.9509996883601,
+         "id" : "dep243",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_15",
+         "time" : 29.3679996393601,
+         "id" : "dep244",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_14",
+         "time" : -1,
+         "id" : "dep245",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_13",
+         "time" : -1,
+         "id" : "dep246",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_12",
+         "time" : 81.48600021377,
+         "id" : "dep247",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_11",
+         "time" : 16.5939996950301,
+         "id" : "dep248",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_10",
+         "time" : 5.16000017522992,
+         "id" : "dep249",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_9",
+         "time" : 26.0419999249281,
+         "id" : "dep250",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_8",
+         "time" : 25.6380001083011,
+         "id" : "dep251",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_7",
+         "time" : 11.4219998940821,
+         "id" : "dep252",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_6",
+         "time" : 18.1140000931921,
+         "id" : "dep253",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_5",
+         "time" : 17.6940001547331,
+         "id" : "dep254",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_4",
+         "time" : 25.036000180989,
+         "id" : "dep255",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_3",
+         "time" : 12.0299998670811,
+         "id" : "dep256",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_2",
+         "time" : 10.875000152737,
+         "id" : "dep257",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_1",
+         "time" : 43.8999999314541,
+         "id" : "dep258",
+         "a1" : "r1_c1"
+      }
+   ]
+}

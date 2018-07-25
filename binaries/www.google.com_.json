@@ -1,0 +1,2442 @@
+{
+   "n_download_no_trigger" : 1,
+   "start_activity" : "download_0",
+   "name" : "espn.go.com_",
+   "objs" : [
+      {
+         "when_comp_start" : 1,
+         "url" : "http://espn.go.com/",
+         "path" : "/pages/espn.go.com/espn.go.com/index.html",
+         "id" : "r1",
+         "comps" : [
+            {
+               "s_time" : 591.847999952734,
+               "time" : 1059.49700018391,
+               "type" : "evalhtml",
+               "id" : "r1_c1",
+               "e_time" : 1651.34500013664
+            },
+            {
+               "s_time" : 1686.43300002441,
+               "time" : 6.43000006676016,
+               "type" : "evalhtml",
+               "id" : "r1_c2",
+               "e_time" : 1692.86300009117
+            },
+            {
+               "s_time" : 1701.45900035277,
+               "time" : 56.25499971211,
+               "type" : "evalhtml",
+               "id" : "r1_c3",
+               "e_time" : 1757.71400006488
+            },
+            {
+               "s_time" : 2157.37100038677,
+               "time" : 2045.30999995769,
+               "type" : "evalhtml",
+               "id" : "r1_c4",
+               "e_time" : 4202.68100034446
+            },
+            {
+               "s_time" : 4280.76200000942,
+               "time" : 776.60800004378,
+               "type" : "evalhtml",
+               "id" : "r1_c5",
+               "e_time" : 5057.3700000532
+            },
+            {
+               "s_time" : 5084.45500023663,
+               "time" : 5.96500001847926,
+               "type" : "evalhtml",
+               "id" : "r1_c6",
+               "e_time" : 5090.42000025511
+            },
+            {
+               "s_time" : 5095.97400017083,
+               "time" : 11.0590001568207,
+               "type" : "evalhtml",
+               "id" : "r1_c7",
+               "e_time" : 5107.03300032765
+            },
+            {
+               "s_time" : 5366.1240004003,
+               "time" : 53.1779997982094,
+               "type" : "evalhtml",
+               "id" : "r1_c8",
+               "e_time" : 5419.30200019851
+            },
+            {
+               "s_time" : 5714.48900038376,
+               "time" : 18.7489995732903,
+               "type" : "evalhtml",
+               "id" : "r1_c9",
+               "e_time" : 5733.23799995705
+            },
+            {
+               "s_time" : 6317.07500014454,
+               "time" : 91.9570000842195,
+               "type" : "evalhtml",
+               "id" : "r1_c10",
+               "e_time" : 6409.03200022876
+            },
+            {
+               "s_time" : 6410.55800020695,
+               "time" : 2192.82400002703,
+               "id" : "r1_c11",
+               "type" : "evalhtml",
+               "e_time" : 8603.38200023398
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 0,
+            "type" : "text/html",
+            "id" : "download_0"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/c?v=20130312567&css=global_reset.r1.css,base.r236.css,modules.r453.css,global_header.r42.css,modules/global_nav.r53.css,modules/insider_enhanced.r1.css,modules/mem/mem.r9a.css,modules/mem/watchmem-espnews.css,modules/mem/mem_espn360.r6.css,modules/facebook/button.r2.css,modules/btn-toggle-tablet.css,sprites/sn_icon_sprite.r2.css,/espn/espn/styles/frontpage_scoreboard_10,universal_overlay/universal_overlay.css,universal_overlay/media_overlay.css,universal_overlay/video_overlay.css,universal_overlay/photo_overlay.css,universal_overlay/dyk_overlay.css,overlay/win8_overlay.css,overlay/frontpageVideoCarousel.r2.css,overlay/launchVideoOverlay.r3.css",
+         "path" : "/pages/espn.go.com/a.espncdn.com/combiner/c.add.css",
+         "id" : "r2",
+         "comps" : [
+            {
+               "s_time" : 891.394000034779,
+               "time" : 152.788000181321,
+               "id" : "comp_6",
+               "type" : 4,
+               "e_time" : 1044.1820002161
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 670.981999952346,
+            "type" : "text/css",
+            "id" : "download_1"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/c/201303290924?css=sprites/teamlogos.r18.css",
+         "path" : "/pages/espn.go.com/a.espncdn.com/combiner/c/201303290924.add.css",
+         "id" : "r3",
+         "comps" : [
+            {
+               "s_time" : 858.698999974877,
+               "time" : 29.088000301271,
+               "id" : "comp_5",
+               "type" : 4,
+               "e_time" : 887.787000276148
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 673.902000300586,
+            "type" : "text/css",
+            "id" : "download_2"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/c/3?js=analytics/espn.pluginTracking.js,overlay/win8.js",
+         "path" : "/pages/espn.go.com/a.espncdn.com/combiner/c/3.add.js",
+         "id" : "r7",
+         "comps" : [
+            {
+               "s_time" : 6409.05400039628,
+               "time" : 1.50399981067039,
+               "id" : "comp_210",
+               "type" : 1,
+               "e_time" : 6410.55800020695
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 764.969000127167,
+            "type" : "application/x-javascript",
+            "id" : "download_3"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/prod/scripts/mbox.20.r2.js",
+         "path" : "/pages/espn.go.com/a.espncdn.com/prod/scripts/mbox.20.r2.js",
+         "id" : "r5",
+         "comps" : [
+            {
+               "s_time" : 1686.8370003067,
+               "time" : 14.6220000460701,
+               "id" : "comp_11",
+               "type" : 1,
+               "e_time" : 1701.45900035277
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 682.237999979407,
+            "type" : "application/x-javascript",
+            "id" : "download_4"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/c?v=201308271217&js=jquery-1.7.1.js,plugins/json2.r3.js,plugins/teacrypt.js,plugins/jquery.metadata.js,plugins/jquery.bgiframe.r3.js,plugins/jquery.easing.1.3.js,plugins/jquery.hoverIntent.js,plugins/jquery.jcarousel.0.2.9.js,plugins/jquery.tinysort.r4.js,plugins%2FjQuery.bxSlider.js,plugins/jquery.pubsub.r5.js,ui/1.8.16/jquery.ui.core.js,ui/1.8.16/jquery.ui.widget.js,ui/1.8.16/jquery.ui.tabs.js,plugins/ba-debug-0.4.js,espn.l10n.r12.js,swfobject/2.2/swfobject.js,flashObjWrapper.r7.js,plugins/jquery.colorbox.1.3.14.js,plugins/jquery.ba-postmessage.js,espn.core.duo.r55.js,espn.mem.r37b.js,stub.search.r9.js,espn.nav.mega.r35.js,espn.storage.r6.js,espn.p13n.r16.js,espn.video.r81.js,registration/staticLogin.r11.js,espn.universal.overlay.r16.js,insider/espn.insider.201212131.js,espn.watchespn.r8.js,espn.myHeadlines.stub.r14.js,espn.myfaves.stub.r3.js,espn.scoreboard.r83.1.js,ie9pinning.r3.js,%2Fforesee%2Fv7%2Fforesee-alive.js,espn.geo.r1.js,espn.internationalredirect.r5.geo.js,overlay%2FlaunchVideoOverlay.r4.js&debug=false",
+         "path" : "/pages/espn.go.com/a.espncdn.com/combiner/c.add.js",
+         "id" : "r4",
+         "comps" : [
+            {
+               "s_time" : 1057.88300000131,
+               "time" : 628.5500000231,
+               "id" : "comp_7",
+               "type" : 1,
+               "e_time" : 1686.43300002441
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 679.232000373304,
+            "type" : "application/x-javascript",
+            "id" : "download_5"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://content.dl-rms.com/rms/11107/nodetag.js",
+         "path" : "/pages/espn.go.com/content.dl-rms.com/rms/11107/nodetag.js",
+         "id" : "r6",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 760.294000152498,
+            "type" : "application/javascript",
+            "id" : "download_6"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/bg_v2/bg_frontpage_red.jpg",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/bg_v2/bg_frontpage_red.jpg",
+         "id" : "r10",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1715.87600000203,
+            "type" : "image/jpeg",
+            "id" : "download_7"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=espn360%2fimages%2fbb%2fmlb%2f1105455.jpg&w=110&h=62",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r14",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1735.16100039706,
+            "type" : "image/jpeg",
+            "id" : "download_8"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=espn360%2fimages%2ffbncaaf%2f1105460.jpg&w=110&h=62",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r15",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1735.52200011909,
+            "type" : "image/jpeg",
+            "id" : "download_9"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=espn360%2fimages%2far%2fnascar_sprint_cup_series%2f1104793.jpg&w=110&h=62",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r13",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1734.7870003432,
+            "type" : "image/jpeg",
+            "id" : "download_10"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=espn360%2fimages%2fshowassets%2fSRDW%2d20121221111705.jpg&w=110&h=62",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r17",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1736.2700002268,
+            "type" : "image/jpeg",
+            "id" : "download_11"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=espn360%2fimages%2ffbncaaf%2f1094118.jpg&w=110&h=62",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r18",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1736.64200026542,
+            "type" : "image/jpeg",
+            "id" : "download_12"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=espn360%2fimages%2ffbncaaf%2f1080979.jpg&w=110&h=62",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r16",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1735.88800011203,
+            "type" : "image/jpeg",
+            "id" : "download_13"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://tredir.go.com/capmon/GetDE?set=j&param=country&param=countryisocode&param=state&param=metro&param=metrocode&param=postcode&param=offset&param=dst&xhr=1",
+         "path" : "/pages/espn.go.com/tredir.go.com/capmon/GetDE.add.js",
+         "id" : "r9",
+         "comps" : [
+            {
+               "s_time" : 2024.35500035062,
+               "time" : 0.463000033060098,
+               "id" : "comp_20",
+               "type" : 2,
+               "e_time" : 2024.81800038368
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1692.86300009117,
+            "type" : "application/x-javascript",
+            "id" : "download_14"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/bg_v2/bg_frontpage_elements.jpg",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/bg_v2/bg_frontpage_elements.jpg",
+         "id" : "r11",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1731.22100019827,
+            "type" : "image/jpeg",
+            "id" : "download_15"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0901/rpm_u_busch_gb1_110.jpg",
+         "path" : "/missing/a.espncdn.com/photo/2013/0901/rpm_u_busch_gb1_110.jpg",
+         "id" : "r22",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1742.7509999834,
+            "type" : "image/jpeg",
+            "id" : "download_16"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0901/ten_a_swill2_110.jpg",
+         "path" : "/missing/a.espncdn.com/photo/2013/0901/ten_a_swill2_110.jpg",
+         "id" : "r23",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1743.25100006536,
+            "type" : "image/jpeg",
+            "id" : "download_17"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0901/rpm_u_busch_gb1_576.jpg",
+         "path" : "/missing/a.espncdn.com/photo/2013/0901/rpm_u_busch_gb1_576.jpg",
+         "id" : "r19",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1737.00099997222,
+            "type" : "image/jpeg",
+            "id" : "download_18"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0901/nfl_afc_d1_110.jpg",
+         "path" : "/missing/a.espncdn.com/photo/2013/0901/nfl_afc_d1_110.jpg",
+         "id" : "r24",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1743.62100008875,
+            "type" : "image/jpeg",
+            "id" : "download_19"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0901/ncf_u_vadams_cr_110.jpg",
+         "path" : "/missing/a.espncdn.com/photo/2013/0901/ncf_u_vadams_cr_110.jpg",
+         "id" : "r25",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1744.00100018829,
+            "type" : "image/jpeg",
+            "id" : "download_20"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0901/soc_g_bale_gb2_110.jpg",
+         "path" : "/missing/a.espncdn.com/photo/2013/0901/soc_g_bale_gb2_110.jpg",
+         "id" : "r26",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1744.36700018123,
+            "type" : "image/jpeg",
+            "id" : "download_21"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/icons/in.gif",
+         "path" : "/pages/espn.go.com/a.espncdn.com/icons/in.gif",
+         "id" : "r30",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1745.09400036186,
+            "type" : "image/gif",
+            "id" : "download_22"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/i/logo_facebook_gray_12.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/i/logo_facebook_gray_12.png",
+         "id" : "r27",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1744.74300025031,
+            "type" : "image/png",
+            "id" : "download_23"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/i/columnists/simmons_bill_80fp.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/i/columnists/simmons_bill_80fp.png",
+         "id" : "r32",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1745.45900011435,
+            "type" : "image/png",
+            "id" : "download_24"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/prod/assets/logo-grantland-78x10.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/prod/assets/logo-grantland-78x10.png",
+         "id" : "r33",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1745.82200031728,
+            "type" : "image/png",
+            "id" : "download_25"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/i/columnists/reilly_rick_80fp.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/i/columnists/reilly_rick_80fp.png",
+         "id" : "r35",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1746.55500007793,
+            "type" : "image/png",
+            "id" : "download_26"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/photo/2013/0830/mcgrady_tracy_g_mp_134.jpg",
+         "path" : "/pages/espn.go.com/a.espncdn.com/combiner/i.add",
+         "id" : "r34",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1746.19200034067,
+            "type" : "image/jpeg",
+            "id" : "download_27"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/prod/assets/clear.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/prod/assets/clear.png",
+         "id" : "r36",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1746.93999998271,
+            "type" : "image/png",
+            "id" : "download_28"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/media/motion/2013/0901/dm_130901_nascar_truck/dm_130901_nascar_truck.jpg&w=454",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r37",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1747.3210003227,
+            "type" : "image/jpeg",
+            "id" : "download_29"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/media/motion/2013/0901/dm_130901_ncf_ohio_louisville/dm_130901_ncf_ohio_louisville.jpg&w=219",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r38",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1747.70499998704,
+            "type" : "image/jpeg",
+            "id" : "download_30"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/media/motion/2013/0901/dm_130901_nfl_peterson_sunday_convo/dm_130901_nfl_peterson_sunday_convo.jpg&w=219",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r39",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1748.08400031179,
+            "type" : "image/jpeg",
+            "id" : "download_31"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/media/motion/2013/0901/dm_130901_The_Point_After_Week_1/dm_130901_The_Point_After_Week_1.jpg&w=219",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r41",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1748.86100040749,
+            "type" : "image/jpeg",
+            "id" : "download_32"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/media/motion/2013/0901/dm_130901_ncf_famu_band/dm_130901_ncf_famu_band.jpg&w=219",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r40",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1748.45500010997,
+            "type" : "image/jpeg",
+            "id" : "download_33"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/photo/2013/0901/mlb_g_bharps_cr_134.jpg",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r42",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1749.23000019044,
+            "type" : "image/jpeg",
+            "id" : "download_34"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/photo/2013/0831/mma_e_pettis11_134.jpg",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r43",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1749.59000013769,
+            "type" : "image/jpeg",
+            "id" : "download_35"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/photo/2013/0831/ncf_rice_texasam_b5_134.jpg",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r45",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1749.96600020677,
+            "type" : "image/jpeg",
+            "id" : "download_36"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0828/nfl_nflnation_13x113a.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/photo/2013/0828/nfl_nflnation_13x113a.png",
+         "id" : "r49",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1755.79700013623,
+            "type" : "image/png",
+            "id" : "download_37"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0630/as_skate_ColeTOP_134.jpg",
+         "path" : "/missing/a.espncdn.com/photo/2013/0630/as_skate_ColeTOP_134.jpg",
+         "id" : "r48",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1750.35400036722,
+            "type" : "image/jpeg",
+            "id" : "download_38"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/photo/2013/0831/nfl_g_tebow_gb1_288.jpg",
+         "path" : "/missing/a.espncdn.com/photo/2013/0831/nfl_g_tebow_gb1_288.jpg",
+         "id" : "r50",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1756.23700022697,
+            "type" : "image/jpeg",
+            "id" : "download_39"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/prod/assets/pollBtn.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/prod/assets/pollBtn.png",
+         "id" : "r51",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1756.60500023514,
+            "type" : "image/png",
+            "id" : "download_40"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/prod/assets/pollViewMapBtn.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/prod/assets/pollViewMapBtn.png",
+         "id" : "r52",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1756.98900036514,
+            "type" : "image/png",
+            "id" : "download_41"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/prod/assets/btn-discuss.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/prod/assets/btn-discuss.png",
+         "id" : "r53",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1757.34900031239,
+            "type" : "image/png",
+            "id" : "download_42"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/i?img=/photo/2012/1207/sn_g_manziel1_Sy_35.jpg",
+         "path" : "/missing/a.espncdn.com/combiner/i",
+         "id" : "r54",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1757.71400006488,
+            "type" : "image/jpeg",
+            "id" : "download_43"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/icons/live.gif",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/icons/live.gif",
+         "id" : "r20",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1720.98700003698,
+            "type" : "image/gif",
+            "id" : "download_44"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/icons/video.png",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/icons/video.png",
+         "id" : "r21",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1731.73899995163,
+            "type" : "image/png",
+            "id" : "download_45"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/icons/watch_headlines.png",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/icons/watch_headlines.png",
+         "id" : "r29",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1732.6400000602,
+            "type" : "image/png",
+            "id" : "download_46"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/icons/sportscenter.png",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/icons/sportscenter.png",
+         "id" : "r28",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1732.20900027081,
+            "type" : "image/png",
+            "id" : "download_47"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/icons/photo.png",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/icons/photo.png",
+         "id" : "r44",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1733.51699998602,
+            "type" : "image/png",
+            "id" : "download_48"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/prod/assets/headlines/sc-feed-logo.png",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/prod/assets/headlines/sc-feed-logo.png",
+         "id" : "r31",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1733.07900037616,
+            "type" : "image/png",
+            "id" : "download_49"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/icons/watch.png",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/icons/watch.png",
+         "id" : "r46",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1733.93200011924,
+            "type" : "image/png",
+            "id" : "download_50"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/photo/2012/1218/as_xgames_55.jpg",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/photo/2012/1218/as_xgames_55.jpg",
+         "id" : "r47",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1734.34500023723,
+            "type" : "image/jpeg",
+            "id" : "download_51"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage;pgtyp=espnfrontpage;sp=espn;ref=other;mnr=f;pos=Background_Skin;swid=9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545;sz=1280x946,200x800,1x1;tile=1;ord=2045868136",
+         "path" : "/missing/ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage_pgtyp_espnfrontpage_sp_espn_ref_other_mnr_f_pos_Background_Skin_swid_9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545_sz_1280x946_200x800_1x1_tile_1_ord_2045868136",
+         "id" : "r12",
+         "comps" : [
+            {
+               "s_time" : 2156.68400004506,
+               "time" : 0.687000341709791,
+               "id" : "comp_23",
+               "type" : 1,
+               "e_time" : 2157.37100038677
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1719.76700006053,
+            "type" : "text/javascript",
+            "id" : "download_52"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://broadband.espn.go.com/espn3/auth/espnnetworks/user?callback=jQuery17107495892448350787_1378092588846&xhr=1",
+         "path" : "/missing/broadband.espn.go.com/espn3/auth/espnnetworks/user",
+         "id" : "r8",
+         "comps" : [
+            {
+               "s_time" : 3029.84500024468,
+               "time" : 0.38999971002022,
+               "id" : "comp_35",
+               "type" : 2,
+               "e_time" : 3030.2349999547
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 1651.34500013664,
+            "type" : "text/html",
+            "id" : "download_53"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/trans_border.png",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/trans_border.png",
+         "id" : "r55",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2166.33700020611,
+            "type" : "image/png",
+            "id" : "download_54"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/prod/assets/memberservices/social_facebook_14.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/prod/assets/memberservices/social_facebook_14.png",
+         "id" : "r56",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2177.52999998629,
+            "type" : "image/png",
+            "id" : "download_55"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/header_sprite_fp.v4.png",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/header_sprite_fp.v4.png",
+         "id" : "r57",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2178.89800015837,
+            "type" : "image/png",
+            "id" : "download_56"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/trans_border_15.png",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/trans_border_15.png",
+         "id" : "r59",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2655.37200029939,
+            "type" : "image/png",
+            "id" : "download_57"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/espn_top_nav_logo_109x27.png",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/espn_top_nav_logo_109x27.png",
+         "id" : "r58",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2654.85800011083,
+            "type" : "image/png",
+            "id" : "download_58"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/frontpage_scoreboard/fp_sb.png",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/frontpage_scoreboard/fp_sb.png",
+         "id" : "r60",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2655.77300032601,
+            "type" : "image/png",
+            "id" : "download_59"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage;pgtyp=espnfrontpage;sp=espn;ref=other;mnr=f;pos=Banner;swid=9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545;sz=728x90,970x66,924x50,1x1;tile=2;ord=2045868136",
+         "path" : "/missing/ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage_pgtyp_espnfrontpage_sp_espn_ref_other_mnr_f_pos_Banner_swid_9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545_sz_728x90_970x66_924x50_1x1_tile_2_ord_2045868136",
+         "id" : "r61",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2653.8750003092,
+            "type" : "text/javascript",
+            "id" : "download_60"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://bs.serving-sys.com/BurstingPipe/adServer.bs?cn=rsb&c=28&pli=7826073&PluID=0&w=970&h=66&ncu=$$http://adclick.g.doubleclick.net/aclk?sa=L&ai=BEU-eLgYkUtTLC4yLlALrhYH4A4Gs7ZYEAAAAEAEgADgAWJHp9vBtYMmOxo30pNAZggEXY2EtcHViLTYyMDE3ODc1Mjk5NTQwOTeyAQtlc3BuLmdvLmNvbboBCzAwZ2ZwX2ltYWdlyAEJ2gETaHR0cDovL2VzcG4uZ28uY29tL5gCkVbAAgLgAgDqAiM2NDQ0L2VzcG4udXMuY29tLmVzcG4vZXNwbmZyb250cGFnZfgCgdIekAOsApgD4AOoAwHgBAGgBhY&num=0&sig=AOD64_3HR3sOm5FcvG_uVf08PAi_m2QAAQ&client=ca-pub-6201787529954097&adurl=$$&ord=1828961955&ucm=true&z=60000",
+         "path" : "/missing/bs.serving-sys.com/BurstingPipe/adServer.bs",
+         "id" : "r62",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 2819.75700007752,
+            "type" : "text/html",
+            "id" : "download_61"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ds.serving-sys.com/BurstingCachedScripts/ebExpBanner_2_6_2_35.js",
+         "path" : "/pages/huffingtonpost.com/ds.serving-sys.com/BurstingCachedScripts/ebExpBanner_2_6_2_35.js",
+         "id" : "r64",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 3381.86900038272,
+            "type" : "application/x-javascript",
+            "id" : "download_62"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ds.serving-sys.com/BurstingRes//Site-14433/Type-11/16167395_376e20f0-eb75-4617-b7d1-0984210b8651.js",
+         "path" : "/missing/ds.serving-sys.com/BurstingRes",
+         "id" : "r65",
+         "comps" : [
+            {
+               "s_time" : 4203.11100035906,
+               "time" : 77.6509996503601,
+               "id" : "comp_45",
+               "type" : 1,
+               "e_time" : 4280.76200000942
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 3576.03400014341,
+            "type" : "application/x-javascript",
+            "id" : "download_63"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/module_header_gradient.gif",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/module_header_gradient.gif",
+         "id" : "r67",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4285.84800008684,
+            "type" : "image/gif",
+            "id" : "download_64"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/icons/watch/watchESPN_11x11.png",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/icons/watch/watchESPN_11x11.png",
+         "id" : "r69",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4286.25100012869,
+            "type" : "image/png",
+            "id" : "download_65"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a4.espncdn.com/prod/assets/bg_gradient_memv2.png",
+         "path" : "/pages/espn.go.com/a4.espncdn.com/prod/assets/bg_gradient_memv2.png",
+         "id" : "r73",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4312.25700024515,
+            "type" : "image/png",
+            "id" : "download_66"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a3.espncdn.com/prod/assets/icon_video.png",
+         "path" : "/pages/espn.go.com/a3.espncdn.com/prod/assets/icon_video.png",
+         "id" : "r76",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4318.67399998009,
+            "type" : "image/png",
+            "id" : "download_67"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/tabs-A-sprite.png",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/tabs-A-sprite.png",
+         "id" : "r68",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4508.42700013891,
+            "type" : "image/png",
+            "id" : "download_68"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/watchespn/bg-list-channel.png",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/watchespn/bg-list-channel.png",
+         "id" : "r71",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4520.67100023851,
+            "type" : "image/png",
+            "id" : "download_69"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/watchespn/sprite_networks3.png",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/watchespn/sprite_networks3.png",
+         "id" : "r72",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4525.18400037661,
+            "type" : "image/png",
+            "id" : "download_70"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/sprite_play_2.png",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/sprite_play_2.png",
+         "id" : "r74",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4526.33300004527,
+            "type" : "image/png",
+            "id" : "download_71"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/watchespn/span-arrow.png",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/watchespn/span-arrow.png",
+         "id" : "r70",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4525.9470003657,
+            "type" : "image/png",
+            "id" : "download_72"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a4.espncdn.com/prod/assets/carousel_arrow_selected.png",
+         "path" : "/pages/espn.go.com/a4.espncdn.com/prod/assets/carousel_arrow_selected.png",
+         "id" : "r75",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4527.44700014591,
+            "type" : "image/png",
+            "id" : "download_73"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ds.serving-sys.com/BurstingCachedScripts//Res/Empty_Movie.swf",
+         "path" : "/pages/indiatimes.com/ds.serving-sys.com/BurstingCachedScripts.add",
+         "id" : "r82",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4527.87000034004,
+            "type" : "application/x-shockwave-flash",
+            "id" : "download_74"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/gradient_back.jpg",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/gradient_back.jpg",
+         "id" : "r78",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4525.57800011709,
+            "type" : "image/jpeg",
+            "id" : "download_75"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/bullet_gray.gif",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/bullet_gray.gif",
+         "id" : "r79",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4527.0740003325,
+            "type" : "image/gif",
+            "id" : "download_76"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/tab_header_back.png",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/tab_header_back.png",
+         "id" : "r77",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4526.71100012958,
+            "type" : "image/png",
+            "id" : "download_77"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s0.2mdn.net/viewad/1792905/transparent-1x1.gif",
+         "path" : "/pages/espn.go.com/s0.2mdn.net/viewad/1792905/transparent-1x1.gif",
+         "id" : "r63",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4202.68100034446,
+            "type" : "image/gif",
+            "id" : "download_78"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://amch.questionmarket.com/adscgen/sta.php?survey_num=1072796&site=7826073&code=16167395&ut_sys=eb",
+         "path" : "/missing/amch.questionmarket.com/adscgen/sta.php",
+         "id" : "r66",
+         "comps" : [
+            {
+               "s_time" : 5055.17700035125,
+               "time" : 1.26100005581975,
+               "id" : "comp_152",
+               "type" : 2,
+               "e_time" : 5056.43800040707
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4285.38500005379,
+            "type" : "text/html",
+            "id" : "download_79"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage;pgtyp=espnfrontpage;sp=espn;ref=other;mnr=f;pos=InContent;swid=9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545;dcopt=ist;sz=300x600,300x250,1x1;tile=3;ord=2045868136",
+         "path" : "/missing/ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage_pgtyp_espnfrontpage_sp_espn_ref_other_mnr_f_pos_InContent_swid_9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545_dcopt_ist_sz_300x600_300x250_1x1_tile_3_ord_2045868136",
+         "id" : "r80",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4507.85000016913,
+            "type" : "text/javascript",
+            "id" : "download_80"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ds.serving-sys.com/BurstingRes//Site-14433/Type-2/73daa3b6-6de1-45f5-bd01-1fe0f115c536.swf?ebDomain=espn.go.com&ebAdID=16167395&cp=http://ds.serving-sys.com/BurstingCachedScripts//Res/ebV54_&ebIntTime=http://ds.serving-sys.com/BurstingCachedScripts//Res/ebInteractionTimeV62_12.swf&ebDCPipe=http://bs.serving-sys.com/BurstingPipe/BurstingDataCapturePipe.asp&ebResourcePath=http://ds.serving-sys.com/BurstingRes//&ebCampaignID=343214&ebStreamingAppURL=rtmp%3A//cp16207.edgefcs.net/ondemand&ebStreamVirtualPath=Res/Site-14433/&ebAdIdentifier=gEbBanners[0].displayUnit_16167395&ebResPath=http%3A//ds.serving-sys.com/BurstingRes//&ebLC=gEbBanners[0].displayUnit_ebBannerFlash_16167395",
+         "path" : "/missing/ds.serving-sys.com/BurstingRes",
+         "id" : "r84",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 4986.94900004193,
+            "type" : "application/x-shockwave-flash",
+            "id" : "download_81"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s0.2mdn.net/879366/flashwrite_1_2.js",
+         "path" : "/pages/amazon.com/s0.2mdn.net/879366/flashwrite_1_2.js",
+         "id" : "r85",
+         "comps" : [
+            {
+               "s_time" : 5081.59900037572,
+               "time" : 2.85599986091074,
+               "id" : "comp_154",
+               "type" : 1,
+               "e_time" : 5084.45500023663
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5013.62200034782,
+            "type" : "text/javascript",
+            "id" : "download_82"
+         }
+      },
+      {
+         "when_comp_start" : 1,
+         "url" : "http://amch.questionmarket.com/adscgen/st.php?survey_num=1072796&site=102523969&code=55596510&randnum=825176",
+         "path" : "/missing/amch.questionmarket.com/adscgen/st.php",
+         "id" : "r86",
+         "comps" : [
+            {
+               "s_time" : 5095.01000028104,
+               "time" : 0.963999889789193,
+               "id" : "comp_159",
+               "type" : 1,
+               "e_time" : 5095.97400017083
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5030.75700020418,
+            "type" : "text/html",
+            "id" : "download_83"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://amch.questionmarket.com/adsc/d1072796/17/500016167395/decide.php?ord=1378092592",
+         "path" : "/missing/amch.questionmarket.com/adsc/d1072796/17/500016167395/decide.php",
+         "id" : "r87",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5057.3700000532,
+            "type" : "image/gif",
+            "id" : "download_84"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage;pgtyp=espnfrontpage;sp=espn;ref=other;mnr=f;pos=Pencil_Bottom;swid=9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545;sz=924x56,1x1;tile=4;ord=2045868136",
+         "path" : "/missing/ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage_pgtyp_espnfrontpage_sp_espn_ref_other_mnr_f_pos_Pencil_Bottom_swid_9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545_sz_924x56_1x1_tile_4_ord_2045868136",
+         "id" : "r91",
+         "comps" : [
+            {
+               "s_time" : 5364.51099999249,
+               "time" : 1.61300040781043,
+               "id" : "comp_164",
+               "type" : 1,
+               "e_time" : 5366.1240004003
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5104.35100039467,
+            "type" : "text/javascript",
+            "id" : "download_85"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://amch.questionmarket.com/adsc/d1072796/1/1072796/decide.php",
+         "path" : "/missing/amch.questionmarket.com/adsc/d1072796/1/1072796/decide.php",
+         "id" : "r89",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5107.03300032765,
+            "type" : "image/gif",
+            "id" : "download_86"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/streak/SFC09_playnow.jpg",
+         "path" : "/pages/espn.go.com/a.espncdn.com/streak/SFC09_playnow.jpg",
+         "id" : "r92",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5372.23700014874,
+            "type" : "image/jpeg",
+            "id" : "download_87"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a1.espncdn.com/prod/assets/overlay/video-play.png",
+         "path" : "/pages/espn.go.com/a1.espncdn.com/prod/assets/overlay/video-play.png",
+         "id" : "r94",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5386.59700006247,
+            "type" : "image/png",
+            "id" : "download_88"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/prod/assets/master-07092009.png",
+         "path" : "/pages/espn.go.com/a.espncdn.com/prod/assets/master-07092009.png",
+         "id" : "r93",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5416.88000038266,
+            "type" : "image/png",
+            "id" : "download_89"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://s0.2mdn.net/1792905/13_BSM_LGP_300x250_40k.swf",
+         "path" : "/missing/s0.2mdn.net/1792905/13_BSM_LGP_300x250_40k.swf",
+         "id" : "r97",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5419.30200019851,
+            "type" : "application/x-shockwave-flash",
+            "id" : "download_90"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage;pgtyp=espnfrontpage;sp=espn;ref=other;mnr=f;pos=PromoBox_Marketing;swid=9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545;sz=300x100,1x1;tile=5;ord=2045868136",
+         "path" : "/missing/ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage_pgtyp_espnfrontpage_sp_espn_ref_other_mnr_f_pos_PromoBox_Marketing_swid_9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545_sz_300x100_1x1_tile_5_ord_2045868136",
+         "id" : "r95",
+         "comps" : [
+            {
+               "s_time" : 5584.09000001848,
+               "time" : 130.39900036528,
+               "id" : "comp_193",
+               "type" : 1,
+               "e_time" : 5714.48900038376
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5416.34100023657,
+            "type" : "text/javascript",
+            "id" : "download_91"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/i/Integrators/surfline_greatest_wipeout_300x100.jpg",
+         "path" : "/pages/espn.go.com/a.espncdn.com/i/Integrators/surfline_greatest_wipeout_300x100.jpg",
+         "id" : "r98",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5732.1780002676,
+            "type" : "image/jpeg",
+            "id" : "download_92"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage;pgtyp=espnfrontpage;sp=espn;ref=other;mnr=f;pos=HomePagePoll;swid=9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545;sz=298x40,1x1;tile=6;ord=2045868136",
+         "path" : "/missing/ad.doubleclick.net/adj/espn.us.com.espn/espnfrontpage_pgtyp_espnfrontpage_sp_espn_ref_other_mnr_f_pos_HomePagePoll_swid_9C65C225-2C4F-4BED-A4B7-E4D2DBDEF545_sz_298x40_1x1_tile_6_ord_2045868136",
+         "id" : "r99",
+         "comps" : [
+            {
+               "s_time" : 6313.85700032115,
+               "time" : 3.21799982339053,
+               "id" : "comp_200",
+               "type" : 1,
+               "e_time" : 6317.07500014454
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 5733.23799995705,
+            "type" : "text/javascript",
+            "id" : "download_93"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/c?js=espn.ui.shpoll.r3-4.js&xhr=1",
+         "path" : "/pages/espn.go.com/a.espncdn.com/combiner/c.add.js",
+         "id" : "r100",
+         "comps" : [
+            {
+               "s_time" : 7265.04800003022,
+               "time" : 3.73100023717052,
+               "id" : "comp_254",
+               "type" : null,
+               "e_time" : 7268.77900026739
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6346.54900012538,
+            "type" : "application/x-javascript",
+            "id" : "download_94"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/sn_icon_sprite_40.png",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/sn_icon_sprite_40.png",
+         "id" : "r101",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6347.72199997678,
+            "type" : "image/png",
+            "id" : "download_95"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/prod/scripts/foresee/v7/foresee-trigger.js?xhr=1",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/prod/scripts/foresee/v7/foresee-trigger.js",
+         "id" : "r103",
+         "comps" : [
+            {
+               "s_time" : 7279.35399999842,
+               "time" : 82.99700031057,
+               "id" : "comp_257",
+               "type" : null,
+               "e_time" : 7362.35100030899
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6408.15500030294,
+            "type" : "application/x-javascript",
+            "id" : "download_96"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://b.grvcdn.com/moth-min.js",
+         "path" : "/pages/espn.go.com/b.grvcdn.com/moth-min.js",
+         "id" : "r104",
+         "comps" : [
+            {
+               "s_time" : 7362.65100026503,
+               "time" : 2.34999973327012,
+               "id" : "comp_260",
+               "type" : null,
+               "e_time" : 7365.0009999983
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6418.18800009787,
+            "type" : "application/javascript",
+            "id" : "download_97"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/c/?js=espn3/FABridge.js&xhr=1",
+         "path" : "/pages/espn.go.com/a.espncdn.com/combiner/c.add.js",
+         "id" : "r108",
+         "comps" : [
+            {
+               "s_time" : 7365.03500025719,
+               "time" : 6.21999986469928,
+               "id" : "comp_262",
+               "type" : null,
+               "e_time" : 7371.25500012189
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6612.20900015905,
+            "type" : "application/x-javascript",
+            "id" : "download_98"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a.espncdn.com/combiner/c?js=analytics/sOmni.js,analytics/analytics.js,analytics/externalnielsen.js&xhr=1",
+         "path" : "/pages/espn.go.com/a.espncdn.com/combiner/c.add.js",
+         "id" : "r109",
+         "comps" : [
+            {
+               "s_time" : 7371.60000018775,
+               "time" : 104.96200015769,
+               "id" : "comp_265",
+               "type" : null,
+               "e_time" : 7476.56200034544
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 6708.27100006863,
+            "type" : "application/x-javascript",
+            "id" : "download_99"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/module_subheader_gradient.gif",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/module_subheader_gradient.gif",
+         "id" : "r102",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7035.81300005317,
+            "type" : "image/gif",
+            "id" : "download_100"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/universal_overlay/uOverlay_sprite.png",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/universal_overlay/uOverlay_sprite.png",
+         "id" : "r105",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7037.01700037345,
+            "type" : "image/png",
+            "id" : "download_101"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/universal_overlay/loading.gif",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/universal_overlay/loading.gif",
+         "id" : "r106",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7048.17200032994,
+            "type" : "image/gif",
+            "id" : "download_102"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://a2.espncdn.com/prod/assets/universal_overlay/btn_close.png",
+         "path" : "/pages/espn.go.com/a2.espncdn.com/prod/assets/universal_overlay/btn_close.png",
+         "id" : "r107",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7048.59300004318,
+            "type" : "image/png",
+            "id" : "download_103"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://adsatt.espn.go.com/ad/sponsors/blank/blank.gif",
+         "path" : "/pages/espn.go.com/adsatt.espn.go.com/ad/sponsors/blank/blank.gif",
+         "id" : "r90",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7178.84400021285,
+            "type" : "image/gif",
+            "id" : "download_104"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://rma-api.gravity.com/v1/beacons/initialize?u=undefined&sg=9a41401e9b7c945344e001ee7f23031e",
+         "path" : "/pages/espn.go.com/rma-api.gravity.com/v1/beacons/initialize.add.js",
+         "id" : "r114",
+         "comps" : [
+            {
+               "s_time" : 7828.17800017074,
+               "time" : 14.8200001567602,
+               "id" : "comp_271",
+               "type" : 0,
+               "e_time" : 7842.9980003275
+            }
+         ],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7365.72200013325,
+            "type" : "text/javascript",
+            "id" : "download_105"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://pagead2.googlesyndication.com/pagead/imgad/3135702/_3194269_espn_insider_fantasyFootball_30DayFreeTrial_300x100.swf",
+         "path" : "/missing/pagead2.googlesyndication.com/pagead/imgad/3135702/_3194269_espn_insider_fantasyFootball_30DayFreeTrial_300x100.swf",
+         "id" : "r111",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7214.07600026578,
+            "type" : "application/x-shockwave-flash",
+            "id" : "download_106"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://assets.espn.go.com/espn360/builds/syndicated/2.11/4/syndicated-2.11.4.swf?",
+         "path" : "/pages/espn.go.com/assets.espn.go.com/espn360/builds/syndicated/2.11/4/syndicated-2.11.4.swf",
+         "id" : "r113",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7725.1580003649,
+            "type" : "application/x-shockwave-flash",
+            "id" : "download_107"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://secure-us.imrworldwide.com/cgi-bin/m1?ci=us-903969h&cg=0&cc=1&si=http%3A//espn.go.com/&rp=&ts=compact&rnd=1378092594993&ja=1",
+         "path" : "/missing/secure-us.imrworldwide.com/cgi-bin/m1",
+         "id" : "r115",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 7821.52200024575,
+            "type" : "image/gif",
+            "id" : "download_108"
+         }
+      },
+      {
+         "when_comp_start" : -1,
+         "url" : "http://b.scorecardresearch.com/r2?c2=3000005&d.c=gif&d.o=wdgespge&d.x=229551403&d.t=page&d.u=http%3A%2F%2Fespn.go.com%2F",
+         "path" : "/missing/b.scorecardresearch.com/r2",
+         "id" : "r116",
+         "comps" : [],
+         "host" : "ultralisk.cs.washington.edu",
+         "download" : {
+            "s_time" : 8603.38200023398,
+            "type" : "image/gif",
+            "id" : "download_109"
+         }
+      }
+   ],
+   "load_activity" : -1,
+   "deps" : [
+      {
+         "a2" : "r1_c2",
+         "time" : -1,
+         "id" : "dep1",
+         "a1" : "comp_7"
+      },
+      {
+         "a2" : "r1_c3",
+         "time" : -1,
+         "id" : "dep2",
+         "a1" : "comp_11"
+      },
+      {
+         "a2" : "r1_c4",
+         "time" : -1,
+         "id" : "dep3",
+         "a1" : "comp_23"
+      },
+      {
+         "a2" : "r1_c5",
+         "time" : -1,
+         "id" : "dep4",
+         "a1" : "comp_45"
+      },
+      {
+         "a2" : "r1_c6",
+         "time" : -1,
+         "id" : "dep5",
+         "a1" : "comp_154"
+      },
+      {
+         "a2" : "r1_c7",
+         "time" : -1,
+         "id" : "dep6",
+         "a1" : "comp_159"
+      },
+      {
+         "a2" : "r1_c8",
+         "time" : -1,
+         "id" : "dep7",
+         "a1" : "comp_164"
+      },
+      {
+         "a2" : "r1_c9",
+         "time" : -1,
+         "id" : "dep8",
+         "a1" : "comp_193"
+      },
+      {
+         "a2" : "r1_c10",
+         "time" : -1,
+         "id" : "dep9",
+         "a1" : "comp_200"
+      },
+      {
+         "a2" : "r1_c11",
+         "time" : -1,
+         "id" : "dep10",
+         "a1" : "comp_210"
+      },
+      {
+         "a2" : "comp_7",
+         "time" : -1,
+         "id" : "dep11",
+         "a1" : "comp_6"
+      },
+      {
+         "a2" : "comp_7",
+         "time" : -1,
+         "id" : "dep12",
+         "a1" : "comp_5"
+      },
+      {
+         "a2" : "download_109",
+         "time" : -1,
+         "id" : "dep13",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_108",
+         "time" : 1410.9640000388,
+         "id" : "dep14",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_107",
+         "time" : 1314.60000015795,
+         "id" : "dep15",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_106",
+         "time" : 803.51800005883,
+         "id" : "dep16",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_105",
+         "time" : 0.686999876059417,
+         "id" : "dep17",
+         "a1" : "comp_262"
+      },
+      {
+         "a2" : "download_104",
+         "time" : 768.2860000059,
+         "id" : "dep18",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_103",
+         "time" : 638.03499983623,
+         "id" : "dep19",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_102",
+         "time" : 637.61400012299,
+         "id" : "dep20",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_101",
+         "time" : 626.4590001665,
+         "id" : "dep21",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_100",
+         "time" : 625.25499984622,
+         "id" : "dep22",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_99",
+         "time" : 297.71299986168,
+         "id" : "dep23",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_98",
+         "time" : 201.6509999521,
+         "id" : "dep24",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_97",
+         "time" : 7.62999989091986,
+         "id" : "dep25",
+         "a1" : "r1_c11"
+      },
+      {
+         "a2" : "download_96",
+         "time" : 91.0800001583993,
+         "id" : "dep26",
+         "a1" : "r1_c10"
+      },
+      {
+         "a2" : "download_95",
+         "time" : 30.64699983224,
+         "id" : "dep27",
+         "a1" : "r1_c10"
+      },
+      {
+         "a2" : "download_94",
+         "time" : 29.4739999808398,
+         "id" : "dep28",
+         "a1" : "r1_c10"
+      },
+      {
+         "a2" : "download_93",
+         "time" : -1,
+         "id" : "dep29",
+         "a1" : "r1_c9"
+      },
+      {
+         "a2" : "download_92",
+         "time" : 17.6889998838396,
+         "id" : "dep30",
+         "a1" : "r1_c9"
+      },
+      {
+         "a2" : "download_91",
+         "time" : -1,
+         "id" : "dep31",
+         "a1" : "r1_c8"
+      },
+      {
+         "a2" : "download_90",
+         "time" : -1,
+         "id" : "dep32",
+         "a1" : "r1_c8"
+      },
+      {
+         "a2" : "download_89",
+         "time" : 50.7559999823598,
+         "id" : "dep33",
+         "a1" : "r1_c8"
+      },
+      {
+         "a2" : "download_88",
+         "time" : 20.47299966217,
+         "id" : "dep34",
+         "a1" : "r1_c8"
+      },
+      {
+         "a2" : "download_87",
+         "time" : 6.11299974843951,
+         "id" : "dep35",
+         "a1" : "r1_c8"
+      },
+      {
+         "a2" : "download_86",
+         "time" : -1,
+         "id" : "dep36",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_85",
+         "time" : 8.3770002238407,
+         "id" : "dep37",
+         "a1" : "r1_c7"
+      },
+      {
+         "a2" : "download_84",
+         "time" : -1,
+         "id" : "dep38",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_83",
+         "time" : 749.99500019476,
+         "id" : "dep39",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_82",
+         "time" : 732.8600003384,
+         "id" : "dep40",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_82",
+         "time" : 732.8600003384,
+         "id" : "dep41",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_81",
+         "time" : 706.18700003251,
+         "id" : "dep42",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_80",
+         "time" : 227.08800015971,
+         "id" : "dep43",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_80",
+         "time" : 227.08800015971,
+         "id" : "dep44",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_79",
+         "time" : 4.62300004436929,
+         "id" : "dep45",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_78",
+         "time" : -1,
+         "id" : "dep46",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_77",
+         "time" : 245.949000120159,
+         "id" : "dep47",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_76",
+         "time" : 246.31200032308,
+         "id" : "dep48",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_75",
+         "time" : 244.816000107669,
+         "id" : "dep49",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_74",
+         "time" : 247.10800033062,
+         "id" : "dep50",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_73",
+         "time" : 246.68500013649,
+         "id" : "dep51",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_72",
+         "time" : 245.185000356279,
+         "id" : "dep52",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_71",
+         "time" : 245.571000035849,
+         "id" : "dep53",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_70",
+         "time" : 244.42200036719,
+         "id" : "dep54",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_69",
+         "time" : 239.90900022909,
+         "id" : "dep55",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_68",
+         "time" : 227.66500012949,
+         "id" : "dep56",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_67",
+         "time" : 37.91199997067,
+         "id" : "dep57",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_66",
+         "time" : 31.49500023573,
+         "id" : "dep58",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_65",
+         "time" : 5.4890001192698,
+         "id" : "dep59",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_64",
+         "time" : 5.08600007742007,
+         "id" : "dep60",
+         "a1" : "r1_c5"
+      },
+      {
+         "a2" : "download_63",
+         "time" : 1418.66299975664,
+         "id" : "dep61",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_62",
+         "time" : 1224.49799999595,
+         "id" : "dep62",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_61",
+         "time" : 662.38599969075,
+         "id" : "dep63",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_60",
+         "time" : 496.50399992243,
+         "id" : "dep64",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_59",
+         "time" : 498.40199993924,
+         "id" : "dep65",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_58",
+         "time" : 497.48699972406,
+         "id" : "dep66",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_57",
+         "time" : 498.00099991262,
+         "id" : "dep67",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_56",
+         "time" : 21.5269997716,
+         "id" : "dep68",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_55",
+         "time" : 20.15899959952,
+         "id" : "dep69",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_54",
+         "time" : 8.96599981934014,
+         "id" : "dep70",
+         "a1" : "r1_c4"
+      },
+      {
+         "a2" : "download_53",
+         "time" : -1,
+         "id" : "dep71",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_52",
+         "time" : -1,
+         "id" : "dep72",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_52",
+         "time" : 18.30799970776,
+         "id" : "dep73",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_51",
+         "time" : -1,
+         "id" : "dep74",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_50",
+         "time" : 32.4729997664699,
+         "id" : "dep75",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_49",
+         "time" : 31.6200000233898,
+         "id" : "dep76",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_48",
+         "time" : 32.0579996332499,
+         "id" : "dep77",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_47",
+         "time" : 30.74999991804,
+         "id" : "dep78",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_46",
+         "time" : 31.1809997074299,
+         "id" : "dep79",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_45",
+         "time" : 30.2799995988598,
+         "id" : "dep80",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_44",
+         "time" : 19.5279996842098,
+         "id" : "dep81",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_43",
+         "time" : -1,
+         "id" : "dep82",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_42",
+         "time" : 55.8899999596199,
+         "id" : "dep83",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_41",
+         "time" : 55.53000001237,
+         "id" : "dep84",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_40",
+         "time" : 55.14599988237,
+         "id" : "dep85",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_39",
+         "time" : 54.7779998741998,
+         "id" : "dep86",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_38",
+         "time" : 48.8950000144498,
+         "id" : "dep87",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_37",
+         "time" : 54.33799978346,
+         "id" : "dep88",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_36",
+         "time" : 48.506999854,
+         "id" : "dep89",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_35",
+         "time" : 48.1309997849198,
+         "id" : "dep90",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_34",
+         "time" : 47.7709998376699,
+         "id" : "dep91",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_33",
+         "time" : 46.9959997571998,
+         "id" : "dep92",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_32",
+         "time" : 47.40200005472,
+         "id" : "dep93",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_31",
+         "time" : 46.62499995902,
+         "id" : "dep94",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_30",
+         "time" : 46.24599963427,
+         "id" : "dep95",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_29",
+         "time" : 45.8619999699299,
+         "id" : "dep96",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_28",
+         "time" : 45.48099962994,
+         "id" : "dep97",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_27",
+         "time" : 44.7329999878998,
+         "id" : "dep98",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_26",
+         "time" : 45.0959997251598,
+         "id" : "dep99",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_25",
+         "time" : 44.36299996451,
+         "id" : "dep100",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_24",
+         "time" : 43.9999997615798,
+         "id" : "dep101",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_23",
+         "time" : 43.2839998975398,
+         "id" : "dep102",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_22",
+         "time" : 43.6350000090899,
+         "id" : "dep103",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_21",
+         "time" : 42.9079998284599,
+         "id" : "dep104",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_20",
+         "time" : 42.5419998355198,
+         "id" : "dep105",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_19",
+         "time" : 42.1619997359799,
+         "id" : "dep106",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_18",
+         "time" : 35.5419996194498,
+         "id" : "dep107",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_17",
+         "time" : 41.7919997125898,
+         "id" : "dep108",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_16",
+         "time" : 41.29199963063,
+         "id" : "dep109",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_15",
+         "time" : 29.7619998455,
+         "id" : "dep110",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_14",
+         "time" : -1,
+         "id" : "dep111",
+         "a1" : "r1_c2"
+      },
+      {
+         "a2" : "download_13",
+         "time" : 34.42899975926,
+         "id" : "dep112",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_12",
+         "time" : 35.1829999126498,
+         "id" : "dep113",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_11",
+         "time" : 34.8109998740299,
+         "id" : "dep114",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_10",
+         "time" : 33.3279999904298,
+         "id" : "dep115",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_9",
+         "time" : 34.06299976632,
+         "id" : "dep116",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_8",
+         "time" : 33.7020000442899,
+         "id" : "dep117",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_7",
+         "time" : 14.4169996492599,
+         "id" : "dep118",
+         "a1" : "r1_c3"
+      },
+      {
+         "a2" : "download_6",
+         "time" : 168.446000199764,
+         "id" : "dep119",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_6",
+         "time" : 168.446000199764,
+         "id" : "dep120",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_5",
+         "time" : 87.38400042057,
+         "id" : "dep121",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_4",
+         "time" : 90.3900000266731,
+         "id" : "dep122",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_4",
+         "time" : 90.3900000266731,
+         "id" : "dep123",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_3",
+         "time" : 173.121000174433,
+         "id" : "dep124",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_2",
+         "time" : 82.054000347852,
+         "id" : "dep125",
+         "a1" : "r1_c1"
+      },
+      {
+         "a2" : "download_1",
+         "time" : 79.133999999612,
+         "id" : "dep126",
+         "a1" : "r1_c1"
+      }
+   ]
+}
