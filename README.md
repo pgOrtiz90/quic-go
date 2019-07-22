@@ -11,7 +11,9 @@ quic-go is an implementation of the [QUIC](https://en.wikipedia.org/wiki/QUIC) p
 
 En este branch se incluye la variante de FEC fijo.
 Fatima Fernández
+
 Mihail Zverev
+
 Pablo Garrido 
 
 ## Roadmap
