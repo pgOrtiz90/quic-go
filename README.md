@@ -1,4 +1,9 @@
-# A QUIC implementation in pure Go
+# A rQUIC implementation in pure Go
+
+Implementación desarrollada por la Universidad de Cantabria
+Authors: Pablo Garrido 
+	 Ramón Agüero
+	 Mihail Zverev
 
 <img src="docs/quic.png" width=303 height=124>
 
