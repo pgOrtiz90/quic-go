@@ -9,7 +9,10 @@
 
 quic-go is an implementation of the [QUIC](https://en.wikipedia.org/wiki/QUIC) protocol in Go.
 
-En este branch se incluye la variante de FEC fijo
+En este branch se incluye la variante de FEC fijo.
+Fatima Fernández
+Mihail Zverev
+Pablo Garrido 
 
 ## Roadmap
 
