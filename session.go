@@ -1023,6 +1023,9 @@ func (s *session) sendPacket() (bool, error) {
 
 				//fmt.Printf("Change FEC Ratio to: %d\n", aux)
 				utils.DebugfFEC("Change FEC Ratio to: %d\n", s.encoder.Ratio)
+			//Fatima:
+			}else{
+				s.encoder.ChangeFecRatio(s.encoder.Ratio)
 			}
 		}
 	}

@@ -69,7 +69,7 @@ func (f *FecEncoder) ParsePacket(raw []byte, header *wire.Header) int{
 			traces.FecEncoderTraceInit(f.Ratio, float32(f.Delta), float32(f.Target), f.N, f.Timer)
 			traces.PrintFecEncoder(f.Ratio)
 			f.ratio_aux = f.Ratio
-			go f.dynamicRatio.StartTimer()
+	//Fatima	go f.dynamicRatio.StartTimer()
 		}
 	}
 	f.Count = f.Count + 1
@@ -111,6 +111,7 @@ func (f *FecEncoder) ComposeFecPacket () (*wire.FecFrame, error){
 	if (f.Count < f.Ratio){
 		utils.DebugfFEC("Lower FEC BLOCK - Ratio: %d, Count: %d \n", f.Ratio, f.Count)
 	}
+	fmt.Printf("Lower FEC BLOCK - Ratio: %d, Count: %d \n",f.Ratio, f.Count)
 
 	frame := &wire.FecFrame{}
 	frame.Data = make([]byte, f.MaxLength)
