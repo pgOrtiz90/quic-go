@@ -1,3 +1,7 @@
+# rQUIC base code
+
+Base code of rQUIC, right at the momment in which the project started.
+
 # A QUIC implementation in pure Go
 
 <img src="docs/quic.png" width=303 height=124>
