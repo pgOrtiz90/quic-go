@@ -1,6 +1,10 @@
-# rQUIC base code
+# rQUIC 2019
 
-Base code of rQUIC, right at the momment in which the project started.
+An experimental version of QUIC enhanced with FEC. This is _quic-go_ base code used for the first version of rQUIC presented at [IFIP Networking 2019](https://www.researchgate.net/publication/332802775_Poster_rQUIC_Integrating_FEC_with_QUIC_for_Robust_Wireless_Communications) and [IEEE GLOBECOM 2019](https://www.researchgate.net/publication/335096281_rQUIC_Integrating_FEC_with_QUIC_for_Robust_Wireless_Communications).
+
+[FEC](https://en.wikipedia.org/wiki/Forward_error_correction) (Forward Error Correction) makes a communication more robust (**r**obust QUIC -> rQUIC) by sending redundant information, from which the lost one can be recovered before it is retransmitted. FEC significantly reduces latency, especially in shared access media, such as WiFi.
+
+This project started as a collaboration between University of Cantabria and Simula Research Laboratory. Since then more institutions have been involved: Ikerlan Technology Research Centre and University of Oslo.
 
 # A QUIC implementation in pure Go
 
