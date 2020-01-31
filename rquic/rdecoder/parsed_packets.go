@@ -26,15 +26,15 @@ type parsedCod struct {
 }
 
 func (c *parsedCod) last() int {
-    return c.len(c.coeff)-1
+    return len(c.coeff)-1
 }
 
 func (c *parsedCod) lastId() uint8 {
-    return c.srcIds[len(c.srcids)-1]
+    return c.srcIds[len(c.srcIds)-1]
 }
 
 func (c *parsedCod) findSrcId(id uint8) (int, bool) {
-    if idLolderR(id, c.srcids[0]) || idLolderR(c.lastId(), id) {
+    if idLolderR(id, c.srcIds[0]) || idLolderR(c.lastId(), id) {
         return 0, false
     }
     // https://yourbasic.org/golang/find-search-contains-slice/
@@ -52,11 +52,11 @@ func (c *parsedCod) findSrcId(id uint8) (int, bool) {
 func (c *parsedCod) removeSrc (src *parsedSrc, ind int) {
     cf := c.coeff[ind]
     if cf == 1 {
-        for i, v := src.pld {
+        for i, v := range src.pld {
             c.pld[i] ^= v
         }
     } else {
-        for i, v := src.pld {
+        for i, v := range src.pld {
             c.pld[i] ^= gf.Mult(cf, v)
         }
     }
@@ -129,8 +129,8 @@ func (c *parsedCod) attachCod(cod *parsedCod, codInd int) {
             if j == len(cod.srcIds) {break}
         }
         if d := len(cod.srcIds) - j; d > 0 {
-            prevLen: = len(c.coeff)
-            c.srcids = append(c.srcIds, cod.srcIds[j:]...)
+            prevLen := len(c.coeff)
+            c.srcIds = append(c.srcIds, cod.srcIds[j:]...)
             c.coeff  = append(c.coeff , make([]uint8, d)...)
             for i := prevLen; i < len(c.coeff); i++ {
                 c.coeff[i] = gf.Mult(cod.coeff[j], cf)
@@ -142,7 +142,7 @@ func (c *parsedCod) attachCod(cod *parsedCod, codInd int) {
             c.pld = append(c.pld, make([]uint8, diffLen)...)
         }
         for i, v := range cod.pld { 
-            c.pld[i] ^= gf.Mult(cod.pld[i], cf)
+            c.pld[i] ^= gf.Mult(v, cf)
         } // '^=' seems faster than '=' for uint8 in go1.13 linux/amd64
         return
     } // else {
@@ -163,7 +163,7 @@ func (c *parsedCod) attachCod(cod *parsedCod, codInd int) {
             if j == len(cod.srcIds) {break}
         }
         if d := len(cod.srcIds) - j; d > 0 {
-            c.srcids = append(c.srcIds, cod.srcIds[j:]...)
+            c.srcIds = append(c.srcIds, cod.srcIds[j:]...)
             c.coeff  = append(c.coeff , cod.coeff[j:]... )
         }
         // Update payload

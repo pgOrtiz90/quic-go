@@ -5,25 +5,24 @@ import (
 )
 
 
-func MakeRedunBuilder (scheme uint8, reduns int) *RedunBuilder {
-    if redun > rquic.MaxRedun {
+func MakeRedunBuilder (scheme uint8, reduns int) RedunBuilder {
     switch scheme {
     case rquic.SchemeXor:
         return makeRedunBuilderXor() // always 1 redun
-    case rquic.SchemeSysRlc:
-        return makeRedunBuilderSysRlc(reduns)
+    case rquic.SchemeRlcSys:
+        return makeRedunBuilderRlcSys(reduns)
     default:
         return nil
     }
 }
 
 
-func MakeCoeffUnpacker (scheme uint8) *CoeffUnpacker {
+func MakeCoeffUnpacker (scheme uint8) CoeffUnpacker {
     switch scheme {
     case rquic.SchemeXor:
         return makeCoeffUnpackerXor()
-    case rquic.SchemeSysRlc:
-        return makeCoeffUnpackerSysRlc()
+    case rquic.SchemeRlcSys:
+        return makeCoeffUnpackerRlcSys()
     default:
         return nil
     }

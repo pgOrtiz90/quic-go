@@ -31,8 +31,8 @@ func (r *residualLoss) LossValue() float64 { // meas. thread
 func (r *residualLoss) reset() { // executed only when when meas. thread is starting
     r.mu.Lock()
     r.cumLoss = 0
-    for i := range r.lastLossInd {
-        r.lastLossInd[i] = 0
+    for i := range r.losses {
+        r.losses[i] = 0
     }
     r.mu.Unlock()
 }

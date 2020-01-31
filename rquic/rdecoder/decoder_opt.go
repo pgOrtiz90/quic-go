@@ -33,7 +33,7 @@ func (d *decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc,
     inds = make([]int, 0, cod.remaining)
     notFull = true
     
-    for i := 0; i < len(d.pktsSrc); i++
+    for i := 0; i < len(d.pktsSrc); i++ {
         for d.isObsolete(d.pktsSrc[i].id) {
             d.removeSrcNoOrder(i) // remove obsolete SRC
         }
@@ -45,9 +45,11 @@ func (d *decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc,
             }
         }
     }
+    
+    return
 }
 
-func (d *decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []int) codIsUseful bool {
+func (d *decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []int) (codIsUseful bool) {
     
     for i, ind := range inds {
         cod.removeSrc(srcs[i], ind)
@@ -63,4 +65,6 @@ func (d *decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []
     if ns := d.NewSrcRec(cod); ns != nil {
         d.optimizeWithSrc(ns)
     }
+    
+    return
 }

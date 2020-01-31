@@ -1,9 +1,11 @@
 package rencoder
 
-import {
+import (
     "time"
     "sync"
-}
+    
+    "github.com/lucas-clemente/quic-go/rquic"
+)
 
 
 
@@ -49,8 +51,8 @@ func (r *ratio) MakeStatic() {
 
 func (r *ratio) MakeDynamic() {
     if !r.dynamic {
-        r.stopMeas        = make(chan struct{}, 0)
-        r.stopMeasStopped = make(chan struct{}, 0)
+        r.stopMeas     = make(chan struct{}, 0)
+        r.stopMeasDone = make(chan struct{}, 0)
         go r.measureLoss()
         r.dynamic = true
     }
@@ -82,8 +84,8 @@ func (r *ratio) measureLoss() { // meas. thread
     
     for {
         select {
-        case: <- r.stopMeas:
-            close(r.stopMeasStopped)
+        case <- r.stopMeas:
+            close(r.stopMeasDone)
             return
         default:
             
@@ -128,17 +130,17 @@ func (r *ratio) update() { // meas. thread
 
 func makeRatio (
     dynamic         bool,
-    Tperiod         time.Period,
+    Tperiod         time.Duration,
     numPeriods      int,
     gammaTarget     float64,
-    deltaRatio      uint8,
+    deltaRatio      float64,
 ) *ratio {
-    r := &Ratio {
+    r := &ratio {
         MeasPeriod      : Tperiod,
         residual        : makeResidualLoss(numPeriods),
         residualTarget  : gammaTarget,
         ratioDelta      : deltaRatio,
     }
     if dynamic {r.MakeDynamic()}
-    return dr
+    return r
 }

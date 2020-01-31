@@ -5,7 +5,6 @@ import (
     
     "github.com/lucas-clemente/quic-go/rquic"
     "github.com/lucas-clemente/quic-go/rquic/gf"
-    "github.com/lucas-clemente/quic-go/rquic/rdecoder"
 )
 
 //////////////////////////////////////////////////////////////////////// redunBuilder
@@ -29,7 +28,7 @@ func (r *redunBuilderRlcSys) AddSrc (src []byte) {
     difLen := len(src) - r.codedPktLen
     if difLen > 0 {r.codedPktLen = len(src)}
     
-    for i := 0; i < r.reduns; i++ {
+    for i := 0; i < r.redun; i++ {
         // Update coded payloads' lengths
         if difLen > 0 {
             r.payloads[i] = append(r.payloads[i], make([]byte, difLen)...)
@@ -57,11 +56,11 @@ func (r *redunBuilderRlcSys) Assemble(rQuicSrcHdr []byte) [][]byte {
     return r.payloads
 }
 
-func (r *redunBuilderRlcSys) SeedMaxFieldSize() int { // TODO: limit SRC payload length
-    return r.maxGenSize
+func (r *redunBuilderRlcSys) SeedMaxFieldSize() uint8 { // TODO: limit SRC payload length
+    return rquic.MaxGenSize
 }
 
-func makeRedunBuilderRlcSys(reduns uint8) *redunBuilder {
+func makeRedunBuilderRlcSys(reduns int) *redunBuilderRlcSys {
     return &redunBuilderRlcSys {
         scheme:         rquic.SchemeRlcSys,
         coeffs:         make([][]uint8, reduns),
@@ -74,17 +73,18 @@ func makeRedunBuilderRlcSys(reduns uint8) *redunBuilder {
 
 type coeffUnpackerRlcSys struct {}
 
-func (c *coeffUnpackerRlcSys) Unpack (raw []byte, offset int) coeffs []uint8 {
-    genSize := uint8(raw[offset + rquic.FieldPosGenSize])
+func (c *coeffUnpackerRlcSys) Unpack (raw []byte, offset int) (coeffs []uint8) {
+    genSize := int(raw[offset + rquic.FieldPosGenSize])
     coeffs = make([]uint8, genSize)
     cffsStart := offset + rquic.FieldPosSeed
-    copy(coeffs, raw[cffsStart : cffStart + genSize])
+    copy(coeffs, raw[cffsStart : cffsStart + genSize])
+    return
 }
 
-func (c *coeffUnpackerRlcSys) CoeffFieldSize (p *rdecoder.parsedCoded) {
+func (c *coeffUnpackerRlcSys) CoeffFieldSize () int {
     return -1 // 1 * genSize
 }
 
-func makeCoeffUnpackerRlcSys() {
-    return coeffUnpackerRlcSys{}
+func makeCoeffUnpackerRlcSys() *coeffUnpackerRlcSys {
+    return &coeffUnpackerRlcSys{}
 }

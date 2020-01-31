@@ -5,9 +5,9 @@ import (
 )
 
 
-func (d *decoder) lenNotProtected() {return *d.lenDCID + rquic.SrcHeaderSize}
-func (d *decoder) rQuicHdrPos()     {return 1 /*1st byte*/ + *d.lenDCID}
-func (d *decoder) rQuicSrcPldPos()  {return 1 /*1st byte*/ + *d.lenDCID + rquic.SrcHeaderSize}
+func (d *decoder) lenNotProtected() int {return *d.lenDCID + rquic.SrcHeaderSize}
+func (d *decoder) rQuicHdrPos()     int {return 1 /*1st byte*/ + *d.lenDCID}
+func (d *decoder) rQuicSrcPldPos()  int {return 1 /*1st byte*/ + *d.lenDCID + rquic.SrcHeaderSize}
 
 
 func idLolderR(older, newer uint8) bool {
@@ -26,7 +26,7 @@ func (d *decoder) parseSrc(raw []byte) []byte {
     pldHdr[0] = byte(lng / 256)
     pldHdr[1] = byte(lng % 256)
     pldHdr[2] = raw[0] // 1st byte, which is partially encrypted
-    return append(pldHdr, raw[rQuicSrcPldPos():]...)
+    return append(pldHdr, raw[d.rQuicSrcPldPos():]...)
 }
 
 
@@ -65,7 +65,7 @@ func (d *decoder) updateObsoleteXhold(cod *parsedCod) {
 }
 
 
-func (d *decoder) srcAvblUpdate(id uint8) repeatedSrc bool {
+func (d *decoder) srcAvblUpdate(id uint8) (repeatedSrc bool) {
     // d.isObsolete(id) == true is meant to be done outside
     for i := len(d.srcAvbl)-1; i >= 0; i-- {
         if idLolderR(d.srcAvbl[i], id) {
@@ -79,6 +79,7 @@ func (d *decoder) srcAvblUpdate(id uint8) repeatedSrc bool {
     }
     // At this point, id must be the oldest id in the list
     d.srcAvbl = append([]uint8{id}, d.srcAvbl...)
+    return
 }
 
 
@@ -89,7 +90,7 @@ func (d *decoder) srcMissUpdate() {
     if d.isObsolete(d.srcAvbl[0]) {
         for i := 1; i < len(d.srcAvbl); i++ {
             if !d.isObsolete(d.srcAvbl[i]) {
-                srcAvbl = srcAvbl[i:]
+                d.srcAvbl = d.srcAvbl[i:]
                 break
             }
         }

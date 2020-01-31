@@ -1,10 +1,5 @@
 package rdecoder
 
-import (
-    "github.com/lucas-clemente/quic-go/rquic"
-    "github.com/lucas-clemente/quic-go/rquic/schemes"
-)
-
 func (d *decoder) Recover() {
     if len(d.pktsCod) < 2 {return} // Nothing to do
     
@@ -16,7 +11,7 @@ func (d *decoder) Recover() {
     var topRow, r, ind int
     numRows := len(d.pktsCod)
     
-    for column, id := range d.missSrc {     //  Top-down
+    for _, id := range d.srcMiss {          //  Top-down
         //    1XXX          1XXX
         //      1XX           1XX
         //        XXX          1XX
@@ -36,7 +31,7 @@ func (d *decoder) Recover() {
             r++
         }
         
-        if r < topRows {
+        if r < topRow {
             // swap
             d.pktsCod[r] = d.pktsCod[topRow]
             d.pktsCod[topRow] = cod
@@ -45,7 +40,7 @@ func (d *decoder) Recover() {
             // subtract scaled row from other rows with non-zero element
             r++
             for r < numRows{
-                pktsCod[r].attachCod(cod, 0)
+                d.pktsCod[r].attachCod(cod, 0)
                 r++
             }
             

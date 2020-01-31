@@ -50,8 +50,8 @@ const (
 
 ////////////////////////////////////////////////////////////////////////// Min & Max
 const (
-    MaxGf       uint8 = 255 // GF(2**8)
-    MaxGenSize  int = 64    // The bigger, the smaller goodput in RLNC
-    MinRate     float64 = 8 // (g+r)(1-a) >= g; a = 11% --> g/r <= 8.0909
+    MaxGf       int = 255 // GF(2**8)
+    MaxGenSize  uint8 = 64    // The bigger, the smaller goodput in RLNC
+    MinRatio    float64 = 8 // (g+r)(1-a) >= g; a = 11% --> g/r <= 8.0909
     RxRedunMarg float64 = 2 // If more COD than this --> Pollution!
 )
