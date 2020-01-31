@@ -3,6 +3,7 @@ package handshake
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"math"
 	"math/rand"
 	"net"
@@ -21,6 +22,15 @@ var _ = Describe("Transport Parameters", func() {
 		return append(data, tp...)
 	}
 
+	getRandomValue := func() uint64 {
+		maxVals := []int64{math.MaxUint8 / 4, math.MaxUint16 / 4, math.MaxUint32 / 4, math.MaxUint64 / 4}
+		return uint64(rand.Int63n(maxVals[int(rand.Int31n(4))]))
+	}
+
+	BeforeEach(func() {
+		rand.Seed(GinkgoRandomSeed())
+	})
+
 	It("has a string representation", func() {
 		p := &TransportParameters{
 			InitialMaxStreamDataBidiLocal:  0x1234,
@@ -29,14 +39,14 @@ var _ = Describe("Transport Parameters", func() {
 			InitialMaxData:                 0x4567,
 			MaxBidiStreamNum:               1337,
 			MaxUniStreamNum:                7331,
-			IdleTimeout:                    42 * time.Second,
+			MaxIdleTimeout:                 42 * time.Second,
 			OriginalConnectionID:           protocol.ConnectionID{0xde, 0xad, 0xbe, 0xef},
 			AckDelayExponent:               14,
 			MaxAckDelay:                    37 * time.Millisecond,
 			StatelessResetToken:            &[16]byte{0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00},
 			ActiveConnectionIDLimit:        123,
 		}
-		Expect(p.String()).To(Equal("&handshake.TransportParameters{OriginalConnectionID: 0xdeadbeef, InitialMaxStreamDataBidiLocal: 0x1234, InitialMaxStreamDataBidiRemote: 0x2345, InitialMaxStreamDataUni: 0x3456, InitialMaxData: 0x4567, MaxBidiStreamNum: 1337, MaxUniStreamNum: 7331, IdleTimeout: 42s, AckDelayExponent: 14, MaxAckDelay: 37ms, ActiveConnectionIDLimit: 123, StatelessResetToken: 0x112233445566778899aabbccddeeff00}"))
+		Expect(p.String()).To(Equal("&handshake.TransportParameters{OriginalConnectionID: 0xdeadbeef, InitialMaxStreamDataBidiLocal: 0x1234, InitialMaxStreamDataBidiRemote: 0x2345, InitialMaxStreamDataUni: 0x3456, InitialMaxData: 0x4567, MaxBidiStreamNum: 1337, MaxUniStreamNum: 7331, MaxIdleTimeout: 42s, AckDelayExponent: 14, MaxAckDelay: 37ms, ActiveConnectionIDLimit: 123, StatelessResetToken: 0x112233445566778899aabbccddeeff00}"))
 	})
 
 	It("has a string representation, if there's no stateless reset token", func() {
@@ -47,22 +57,16 @@ var _ = Describe("Transport Parameters", func() {
 			InitialMaxData:                 0x4567,
 			MaxBidiStreamNum:               1337,
 			MaxUniStreamNum:                7331,
-			IdleTimeout:                    42 * time.Second,
+			MaxIdleTimeout:                 42 * time.Second,
 			OriginalConnectionID:           protocol.ConnectionID{0xde, 0xad, 0xbe, 0xef},
 			AckDelayExponent:               14,
 			MaxAckDelay:                    37 * time.Second,
 			ActiveConnectionIDLimit:        89,
 		}
-		Expect(p.String()).To(Equal("&handshake.TransportParameters{OriginalConnectionID: 0xdeadbeef, InitialMaxStreamDataBidiLocal: 0x1234, InitialMaxStreamDataBidiRemote: 0x2345, InitialMaxStreamDataUni: 0x3456, InitialMaxData: 0x4567, MaxBidiStreamNum: 1337, MaxUniStreamNum: 7331, IdleTimeout: 42s, AckDelayExponent: 14, MaxAckDelay: 37s, ActiveConnectionIDLimit: 89}"))
+		Expect(p.String()).To(Equal("&handshake.TransportParameters{OriginalConnectionID: 0xdeadbeef, InitialMaxStreamDataBidiLocal: 0x1234, InitialMaxStreamDataBidiRemote: 0x2345, InitialMaxStreamDataUni: 0x3456, InitialMaxData: 0x4567, MaxBidiStreamNum: 1337, MaxUniStreamNum: 7331, MaxIdleTimeout: 42s, AckDelayExponent: 14, MaxAckDelay: 37s, ActiveConnectionIDLimit: 89}"))
 	})
 
 	It("marshals and unmarshals", func() {
-		rand.Seed(GinkgoRandomSeed())
-		getRandomValue := func() uint64 {
-			maxVals := []int64{math.MaxUint8 / 4, math.MaxUint16 / 4, math.MaxUint32 / 4, math.MaxUint64 / 4}
-			return uint64(rand.Int63n(maxVals[int(rand.Int31n(4))]))
-		}
-
 		var token [16]byte
 		rand.Read(token[:])
 		params := &TransportParameters{
@@ -70,10 +74,10 @@ var _ = Describe("Transport Parameters", func() {
 			InitialMaxStreamDataBidiRemote: protocol.ByteCount(getRandomValue()),
 			InitialMaxStreamDataUni:        protocol.ByteCount(getRandomValue()),
 			InitialMaxData:                 protocol.ByteCount(getRandomValue()),
-			IdleTimeout:                    0xcafe * time.Second,
+			MaxIdleTimeout:                 0xcafe * time.Second,
 			MaxBidiStreamNum:               protocol.StreamNum(getRandomValue()),
 			MaxUniStreamNum:                protocol.StreamNum(getRandomValue()),
-			DisableMigration:               true,
+			DisableActiveMigration:         true,
 			StatelessResetToken:            &token,
 			OriginalConnectionID:           protocol.ConnectionID{0xde, 0xad, 0xbe, 0xef},
 			AckDelayExponent:               13,
@@ -90,8 +94,8 @@ var _ = Describe("Transport Parameters", func() {
 		Expect(p.InitialMaxData).To(Equal(params.InitialMaxData))
 		Expect(p.MaxUniStreamNum).To(Equal(params.MaxUniStreamNum))
 		Expect(p.MaxBidiStreamNum).To(Equal(params.MaxBidiStreamNum))
-		Expect(p.IdleTimeout).To(Equal(params.IdleTimeout))
-		Expect(p.DisableMigration).To(Equal(params.DisableMigration))
+		Expect(p.MaxIdleTimeout).To(Equal(params.MaxIdleTimeout))
+		Expect(p.DisableActiveMigration).To(Equal(params.DisableActiveMigration))
 		Expect(p.StatelessResetToken).To(Equal(params.StatelessResetToken))
 		Expect(p.OriginalConnectionID).To(Equal(protocol.ConnectionID{0xde, 0xad, 0xbe, 0xef}))
 		Expect(p.AckDelayExponent).To(Equal(uint8(13)))
@@ -128,13 +132,13 @@ var _ = Describe("Transport Parameters", func() {
 		Expect(p.Unmarshal(prependLength(b.Bytes()), protocol.PerspectiveServer)).To(MatchError("TRANSPORT_PARAMETER_ERROR: invalid value for max_packet_size: 1199 (minimum 1200)"))
 	})
 
-	It("errors when disable_migration has content", func() {
+	It("errors when disable_active_migration has content", func() {
 		b := &bytes.Buffer{}
-		utils.BigEndian.WriteUint16(b, uint16(disableMigrationParameterID))
+		utils.BigEndian.WriteUint16(b, uint16(disableActiveMigrationParameterID))
 		utils.BigEndian.WriteUint16(b, 6)
 		b.Write([]byte("foobar"))
 		p := &TransportParameters{}
-		Expect(p.Unmarshal(prependLength(b.Bytes()), protocol.PerspectiveServer)).To(MatchError("TRANSPORT_PARAMETER_ERROR: wrong length for disable_migration: 6 (expected empty)"))
+		Expect(p.Unmarshal(prependLength(b.Bytes()), protocol.PerspectiveServer)).To(MatchError("TRANSPORT_PARAMETER_ERROR: wrong length for disable_active_migration: 6 (expected empty)"))
 	})
 
 	It("errors when the max_ack_delay is too large", func() {
@@ -325,6 +329,88 @@ var _ = Describe("Transport Parameters", func() {
 				p := &TransportParameters{}
 				Expect(p.Unmarshal(prependLength(buf.Bytes()), protocol.PerspectiveServer)).ToNot(Succeed())
 			}
+		})
+	})
+
+	Context("saving and retrieving from a session ticket", func() {
+		It("saves and retrieves the parameters", func() {
+			params := &TransportParameters{
+				InitialMaxStreamDataBidiLocal:  protocol.ByteCount(getRandomValue()),
+				InitialMaxStreamDataBidiRemote: protocol.ByteCount(getRandomValue()),
+				InitialMaxStreamDataUni:        protocol.ByteCount(getRandomValue()),
+				InitialMaxData:                 protocol.ByteCount(getRandomValue()),
+				MaxBidiStreamNum:               protocol.StreamNum(getRandomValue()),
+				MaxUniStreamNum:                protocol.StreamNum(getRandomValue()),
+			}
+			Expect(params.ValidFor0RTT(params)).To(BeTrue())
+		})
+
+		It("rejects the parameters if it can't parse them", func() {
+			var p TransportParameters
+			Expect(p.UnmarshalFromSessionTicket([]byte("foobar"))).ToNot(Succeed())
+		})
+
+		It("rejects the parameters if the version changed", func() {
+			var p TransportParameters
+			data := p.MarshalForSessionTicket()
+			b := &bytes.Buffer{}
+			utils.WriteVarInt(b, transportParameterMarshalingVersion+1)
+			b.Write(data[utils.VarIntLen(transportParameterMarshalingVersion):])
+			Expect(p.UnmarshalFromSessionTicket(b.Bytes())).To(MatchError(fmt.Sprintf("unknown transport parameter marshaling version: %d", transportParameterMarshalingVersion+1)))
+		})
+
+		Context("rejects the parameters if they changed", func() {
+			var p *TransportParameters
+			params := &TransportParameters{
+				InitialMaxStreamDataBidiLocal:  1,
+				InitialMaxStreamDataBidiRemote: 2,
+				InitialMaxStreamDataUni:        3,
+				InitialMaxData:                 4,
+				MaxBidiStreamNum:               5,
+				MaxUniStreamNum:                6,
+			}
+
+			BeforeEach(func() {
+				p = &TransportParameters{
+					InitialMaxStreamDataBidiLocal:  1,
+					InitialMaxStreamDataBidiRemote: 2,
+					InitialMaxStreamDataUni:        3,
+					InitialMaxData:                 4,
+					MaxBidiStreamNum:               5,
+					MaxUniStreamNum:                6,
+				}
+				Expect(params.ValidFor0RTT(p)).To(BeTrue())
+			})
+
+			It("rejects the parameters if the InitialMaxStreamDataBidiLocal changed", func() {
+				p.InitialMaxStreamDataBidiLocal = 0
+				Expect(params.ValidFor0RTT(p)).To(BeFalse())
+			})
+
+			It("rejects the parameters if the InitialMaxStreamDataBidiRemote changed", func() {
+				p.InitialMaxStreamDataBidiRemote = 0
+				Expect(params.ValidFor0RTT(p)).To(BeFalse())
+			})
+
+			It("rejects the parameters if the InitialMaxStreamDataUni changed", func() {
+				p.InitialMaxStreamDataUni = 0
+				Expect(params.ValidFor0RTT(p)).To(BeFalse())
+			})
+
+			It("rejects the parameters if the InitialMaxData changed", func() {
+				p.InitialMaxData = 0
+				Expect(params.ValidFor0RTT(p)).To(BeFalse())
+			})
+
+			It("rejects the parameters if the MaxBidiStreamNum changed", func() {
+				p.MaxBidiStreamNum = 0
+				Expect(params.ValidFor0RTT(p)).To(BeFalse())
+			})
+
+			It("rejects the parameters if the MaxUniStreamNum changed", func() {
+				p.MaxUniStreamNum = 0
+				Expect(params.ValidFor0RTT(p)).To(BeFalse())
+			})
 		})
 	})
 })

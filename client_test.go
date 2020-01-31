@@ -38,6 +38,7 @@ var _ = Describe("Client", func() {
 			tlsConf *tls.Config,
 			initialPacketNumber protocol.PacketNumber,
 			initialVersion protocol.VersionNumber,
+			enable0RTT bool,
 			logger utils.Logger,
 			v protocol.VersionNumber,
 		) quicSession
@@ -95,7 +96,7 @@ var _ = Describe("Client", func() {
 
 	AfterEach(func() {
 		if s, ok := cl.session.(*session); ok {
-			s.Close()
+			s.shutdown()
 		}
 		Eventually(areSessionsRunning).Should(BeFalse())
 	})
@@ -127,7 +128,7 @@ var _ = Describe("Client", func() {
 
 			manager := NewMockPacketHandlerManager(mockCtrl)
 			manager.EXPECT().Add(gomock.Any(), gomock.Any())
-			manager.EXPECT().Close()
+			manager.EXPECT().Destroy()
 			mockMultiplexer.EXPECT().AddConn(gomock.Any(), gomock.Any(), gomock.Any()).Return(manager, nil)
 
 			remoteAddrChan := make(chan string, 1)
@@ -140,6 +141,7 @@ var _ = Describe("Client", func() {
 				_ *tls.Config,
 				_ protocol.PacketNumber,
 				_ protocol.VersionNumber,
+				_ bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
@@ -157,7 +159,7 @@ var _ = Describe("Client", func() {
 		It("uses the tls.Config.ServerName as the hostname, if present", func() {
 			manager := NewMockPacketHandlerManager(mockCtrl)
 			manager.EXPECT().Add(gomock.Any(), gomock.Any())
-			manager.EXPECT().Close()
+			manager.EXPECT().Destroy()
 			mockMultiplexer.EXPECT().AddConn(gomock.Any(), gomock.Any(), gomock.Any()).Return(manager, nil)
 
 			hostnameChan := make(chan string, 1)
@@ -170,6 +172,7 @@ var _ = Describe("Client", func() {
 				tlsConf *tls.Config,
 				_ protocol.PacketNumber,
 				_ protocol.VersionNumber,
+				_ bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
@@ -200,6 +203,7 @@ var _ = Describe("Client", func() {
 				tlsConf *tls.Config,
 				_ protocol.PacketNumber,
 				_ protocol.VersionNumber,
+				_ bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
@@ -235,9 +239,11 @@ var _ = Describe("Client", func() {
 				_ *tls.Config,
 				_ protocol.PacketNumber,
 				_ protocol.VersionNumber,
+				enable0RTT bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
+				Expect(enable0RTT).To(BeFalse())
 				sess := NewMockQuicSession(mockCtrl)
 				sess.EXPECT().run().Do(func() { close(run) })
 				ctx, cancel := context.WithCancel(context.Background())
@@ -257,6 +263,52 @@ var _ = Describe("Client", func() {
 			Eventually(run).Should(BeClosed())
 		})
 
+		It("returns early sessions", func() {
+			manager := NewMockPacketHandlerManager(mockCtrl)
+			manager.EXPECT().Add(gomock.Any(), gomock.Any())
+			mockMultiplexer.EXPECT().AddConn(packetConn, gomock.Any(), gomock.Any()).Return(manager, nil)
+
+			readyChan := make(chan struct{})
+			done := make(chan struct{})
+			newClientSession = func(
+				_ connection,
+				runner sessionRunner,
+				_ protocol.ConnectionID,
+				_ protocol.ConnectionID,
+				_ *Config,
+				_ *tls.Config,
+				_ protocol.PacketNumber,
+				_ protocol.VersionNumber,
+				enable0RTT bool,
+				_ utils.Logger,
+				_ protocol.VersionNumber,
+			) quicSession {
+				Expect(enable0RTT).To(BeTrue())
+				sess := NewMockQuicSession(mockCtrl)
+				sess.EXPECT().run().Do(func() { <-done })
+				sess.EXPECT().HandshakeComplete().Return(context.Background())
+				sess.EXPECT().earlySessionReady().Return(readyChan)
+				return sess
+			}
+
+			go func() {
+				defer GinkgoRecover()
+				defer close(done)
+				s, err := DialEarly(
+					packetConn,
+					addr,
+					"localhost:1337",
+					tlsConf,
+					&Config{},
+				)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(s).ToNot(BeNil())
+			}()
+			Consistently(done).ShouldNot(BeClosed())
+			close(readyChan)
+			Eventually(done).Should(BeClosed())
+		})
+
 		It("returns an error that occurs while waiting for the handshake to complete", func() {
 			manager := NewMockPacketHandlerManager(mockCtrl)
 			manager.EXPECT().Add(gomock.Any(), gomock.Any())
@@ -272,6 +324,7 @@ var _ = Describe("Client", func() {
 				_ *tls.Config,
 				_ protocol.PacketNumber,
 				_ protocol.VersionNumber,
+				_ bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
@@ -312,6 +365,7 @@ var _ = Describe("Client", func() {
 				_ *tls.Config,
 				_ protocol.PacketNumber,
 				_ protocol.VersionNumber,
+				_ bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
@@ -333,7 +387,7 @@ var _ = Describe("Client", func() {
 				close(dialed)
 			}()
 			Consistently(dialed).ShouldNot(BeClosed())
-			sess.EXPECT().Close()
+			sess.EXPECT().shutdown()
 			cancel()
 			Eventually(dialed).Should(BeClosed())
 		})
@@ -360,6 +414,7 @@ var _ = Describe("Client", func() {
 				_ *tls.Config,
 				_ protocol.PacketNumber,
 				_ protocol.VersionNumber,
+				_ bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
@@ -385,7 +440,7 @@ var _ = Describe("Client", func() {
 			// check that the connection is not closed
 			Expect(conn.Write([]byte("foobar"))).To(Succeed())
 
-			manager.EXPECT().Close()
+			manager.EXPECT().Destroy()
 			close(run)
 			time.Sleep(50 * time.Millisecond)
 
@@ -398,7 +453,7 @@ var _ = Describe("Client", func() {
 				tokenStore := NewLRUTokenStore(10, 4)
 				config := &Config{
 					HandshakeTimeout:      1337 * time.Minute,
-					IdleTimeout:           42 * time.Hour,
+					MaxIdleTimeout:        42 * time.Hour,
 					MaxIncomingStreams:    1234,
 					MaxIncomingUniStreams: 4321,
 					ConnectionIDLength:    13,
@@ -408,7 +463,7 @@ var _ = Describe("Client", func() {
 				}
 				c := populateClientConfig(config, false)
 				Expect(c.HandshakeTimeout).To(Equal(1337 * time.Minute))
-				Expect(c.IdleTimeout).To(Equal(42 * time.Hour))
+				Expect(c.MaxIdleTimeout).To(Equal(42 * time.Hour))
 				Expect(c.MaxIncomingStreams).To(Equal(1234))
 				Expect(c.MaxIncomingUniStreams).To(Equal(4321))
 				Expect(c.ConnectionIDLength).To(Equal(13))
@@ -456,7 +511,7 @@ var _ = Describe("Client", func() {
 				c := populateClientConfig(&Config{}, false)
 				Expect(c.Versions).To(Equal(protocol.SupportedVersions))
 				Expect(c.HandshakeTimeout).To(Equal(protocol.DefaultHandshakeTimeout))
-				Expect(c.IdleTimeout).To(Equal(protocol.DefaultIdleTimeout))
+				Expect(c.MaxIdleTimeout).To(Equal(protocol.DefaultIdleTimeout))
 			})
 		})
 
@@ -479,6 +534,7 @@ var _ = Describe("Client", func() {
 				_ *tls.Config,
 				_ protocol.PacketNumber,
 				_ protocol.VersionNumber, /* initial version */
+				_ bool,
 				_ utils.Logger,
 				versionP protocol.VersionNumber,
 			) quicSession {
@@ -527,6 +583,7 @@ var _ = Describe("Client", func() {
 					_ *tls.Config,
 					_ protocol.PacketNumber,
 					_ protocol.VersionNumber,
+					_ bool,
 					_ utils.Logger,
 					_ protocol.VersionNumber,
 				) quicSession {

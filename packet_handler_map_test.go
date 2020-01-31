@@ -62,7 +62,7 @@ var _ = Describe("Packet Handler Map", func() {
 		}
 		handler.server = nil
 		handler.mutex.Unlock()
-		handler.Close()
+		handler.Destroy()
 		Eventually(handler.listening).Should(BeClosed())
 	})
 
@@ -202,7 +202,7 @@ var _ = Describe("Packet Handler Map", func() {
 			clientSess.EXPECT().getPerspective().Return(protocol.PerspectiveClient)
 			serverSess := NewMockPacketHandler(mockCtrl)
 			serverSess.EXPECT().getPerspective().Return(protocol.PerspectiveServer)
-			serverSess.EXPECT().Close()
+			serverSess.EXPECT().shutdown()
 
 			handler.Add(protocol.ConnectionID{1, 1, 1, 1}, clientSess)
 			handler.Add(protocol.ConnectionID{2, 2, 2, 2}, serverSess)

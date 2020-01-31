@@ -17,6 +17,8 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/utils"
 )
 
+const transportParameterMarshalingVersion = 1
+
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
@@ -25,7 +27,7 @@ type transportParameterID uint16
 
 const (
 	originalConnectionIDParameterID           transportParameterID = 0x0
-	idleTimeoutParameterID                    transportParameterID = 0x1
+	maxIdleTimeoutParameterID                 transportParameterID = 0x1
 	statelessResetTokenParameterID            transportParameterID = 0x2
 	maxPacketSizeParameterID                  transportParameterID = 0x3
 	initialMaxDataParameterID                 transportParameterID = 0x4
@@ -36,7 +38,7 @@ const (
 	initialMaxStreamsUniParameterID           transportParameterID = 0x9
 	ackDelayExponentParameterID               transportParameterID = 0xa
 	maxAckDelayParameterID                    transportParameterID = 0xb
-	disableMigrationParameterID               transportParameterID = 0xc
+	disableActiveMigrationParameterID         transportParameterID = 0xc
 	preferredAddressParamaterID               transportParameterID = 0xd
 	activeConnectionIDLimitParameterID        transportParameterID = 0xe
 )
@@ -61,14 +63,14 @@ type TransportParameters struct {
 	MaxAckDelay      time.Duration
 	AckDelayExponent uint8
 
-	DisableMigration bool
+	DisableActiveMigration bool
 
 	MaxPacketSize protocol.ByteCount
 
 	MaxUniStreamNum  protocol.StreamNum
 	MaxBidiStreamNum protocol.StreamNum
 
-	IdleTimeout time.Duration
+	MaxIdleTimeout time.Duration
 
 	PreferredAddress *PreferredAddress
 
@@ -123,7 +125,7 @@ func (p *TransportParameters) unmarshal(data []byte, sentBy protocol.Perspective
 			initialMaxDataParameterID,
 			initialMaxStreamsBidiParameterID,
 			initialMaxStreamsUniParameterID,
-			idleTimeoutParameterID,
+			maxIdleTimeoutParameterID,
 			maxPacketSizeParameterID,
 			activeConnectionIDLimitParameterID:
 			if err := p.readNumericTransportParameter(r, paramID, int(paramLen)); err != nil {
@@ -141,11 +143,11 @@ func (p *TransportParameters) unmarshal(data []byte, sentBy protocol.Perspective
 				if err := p.readPreferredAddress(r, int(paramLen)); err != nil {
 					return err
 				}
-			case disableMigrationParameterID:
+			case disableActiveMigrationParameterID:
 				if paramLen != 0 {
-					return fmt.Errorf("wrong length for disable_migration: %d (expected empty)", paramLen)
+					return fmt.Errorf("wrong length for disable_active_migration: %d (expected empty)", paramLen)
 				}
-				p.DisableMigration = true
+				p.DisableActiveMigration = true
 			case statelessResetTokenParameterID:
 				if sentBy == protocol.PerspectiveClient {
 					return errors.New("client sent a stateless_reset_token")
@@ -259,8 +261,8 @@ func (p *TransportParameters) readNumericTransportParameter(
 		p.MaxBidiStreamNum = protocol.StreamNum(val)
 	case initialMaxStreamsUniParameterID:
 		p.MaxUniStreamNum = protocol.StreamNum(val)
-	case idleTimeoutParameterID:
-		p.IdleTimeout = utils.MaxDuration(protocol.MinRemoteIdleTimeout, time.Duration(val)*time.Millisecond)
+	case maxIdleTimeoutParameterID:
+		p.MaxIdleTimeout = utils.MaxDuration(protocol.MinRemoteIdleTimeout, time.Duration(val)*time.Millisecond)
 	case maxPacketSizeParameterID:
 		if val < 1200 {
 			return fmt.Errorf("invalid value for max_packet_size: %d (minimum 1200)", val)
@@ -314,7 +316,7 @@ func (p *TransportParameters) Marshal() []byte {
 	// initial_max_uni_streams
 	p.marshalVarintParam(b, initialMaxStreamsUniParameterID, uint64(p.MaxUniStreamNum))
 	// idle_timeout
-	p.marshalVarintParam(b, idleTimeoutParameterID, uint64(p.IdleTimeout/time.Millisecond))
+	p.marshalVarintParam(b, maxIdleTimeoutParameterID, uint64(p.MaxIdleTimeout/time.Millisecond))
 	// max_packet_size
 	p.marshalVarintParam(b, maxPacketSizeParameterID, uint64(protocol.MaxReceivePacketSize))
 	// max_ack_delay
@@ -327,9 +329,9 @@ func (p *TransportParameters) Marshal() []byte {
 	if p.AckDelayExponent != protocol.DefaultAckDelayExponent {
 		p.marshalVarintParam(b, ackDelayExponentParameterID, uint64(p.AckDelayExponent))
 	}
-	// disable_migration
-	if p.DisableMigration {
-		utils.BigEndian.WriteUint16(b, uint16(disableMigrationParameterID))
+	// disable_active_migration
+	if p.DisableActiveMigration {
+		utils.BigEndian.WriteUint16(b, uint16(disableActiveMigrationParameterID))
 		utils.BigEndian.WriteUint16(b, 0)
 	}
 	if p.StatelessResetToken != nil {
@@ -369,10 +371,65 @@ func (p *TransportParameters) marshalVarintParam(b *bytes.Buffer, id transportPa
 	utils.WriteVarInt(b, val)
 }
 
+// MarshalForSessionTicket marshals the transport parameters we save in the session ticket.
+// When sending a 0-RTT enabled TLS session tickets, we need to save the transport parameters.
+// The client will remember the transport parameters used in the last session,
+// and apply those to the 0-RTT data it sends.
+// Saving the transport parameters in the ticket gives the server the option to reject 0-RTT
+// if the transport parameters changed.
+// Since the session ticket is encrypted, the serialization format is defined by the server.
+// For convenience, we use the same format that we also use for sending the transport parameters.
+func (p *TransportParameters) MarshalForSessionTicket() []byte {
+	b := &bytes.Buffer{}
+	utils.WriteVarInt(b, transportParameterMarshalingVersion)
+	startLen := b.Len()
+	b.Write([]byte{0, 0}) // length. Will be replaced later
+
+	// initial_max_stream_data_bidi_local
+	p.marshalVarintParam(b, initialMaxStreamDataBidiLocalParameterID, uint64(p.InitialMaxStreamDataBidiLocal))
+	// initial_max_stream_data_bidi_remote
+	p.marshalVarintParam(b, initialMaxStreamDataBidiRemoteParameterID, uint64(p.InitialMaxStreamDataBidiRemote))
+	// initial_max_stream_data_uni
+	p.marshalVarintParam(b, initialMaxStreamDataUniParameterID, uint64(p.InitialMaxStreamDataUni))
+	// initial_max_data
+	p.marshalVarintParam(b, initialMaxDataParameterID, uint64(p.InitialMaxData))
+	// initial_max_bidi_streams
+	p.marshalVarintParam(b, initialMaxStreamsBidiParameterID, uint64(p.MaxBidiStreamNum))
+	// initial_max_uni_streams
+	p.marshalVarintParam(b, initialMaxStreamsUniParameterID, uint64(p.MaxUniStreamNum))
+
+	data := b.Bytes()
+	binary.BigEndian.PutUint16(data[startLen:startLen+2], uint16(b.Len()-2-startLen))
+	return data
+}
+
+// UnmarshalFromSessionTicket unmarshals transport parameters from a session ticket.
+func (p *TransportParameters) UnmarshalFromSessionTicket(data []byte) error {
+	r := bytes.NewReader(data)
+	version, err := utils.ReadVarInt(r)
+	if err != nil {
+		return err
+	}
+	if version != transportParameterMarshalingVersion {
+		return fmt.Errorf("unknown transport parameter marshaling version: %d", version)
+	}
+	return p.Unmarshal(data[len(data)-r.Len():], protocol.PerspectiveServer)
+}
+
+// ValidFor0RTT checks if the transport parameters match those saved in the session ticket.
+func (p *TransportParameters) ValidFor0RTT(tp *TransportParameters) bool {
+	return p.InitialMaxStreamDataBidiLocal == tp.InitialMaxStreamDataBidiLocal &&
+		p.InitialMaxStreamDataBidiRemote == tp.InitialMaxStreamDataBidiRemote &&
+		p.InitialMaxStreamDataUni == tp.InitialMaxStreamDataUni &&
+		p.InitialMaxData == tp.InitialMaxData &&
+		p.MaxBidiStreamNum == tp.MaxBidiStreamNum &&
+		p.MaxUniStreamNum == tp.MaxUniStreamNum
+}
+
 // String returns a string representation, intended for logging.
 func (p *TransportParameters) String() string {
-	logString := "&handshake.TransportParameters{OriginalConnectionID: %s, InitialMaxStreamDataBidiLocal: %#x, InitialMaxStreamDataBidiRemote: %#x, InitialMaxStreamDataUni: %#x, InitialMaxData: %#x, MaxBidiStreamNum: %d, MaxUniStreamNum: %d, IdleTimeout: %s, AckDelayExponent: %d, MaxAckDelay: %s, ActiveConnectionIDLimit: %d"
-	logParams := []interface{}{p.OriginalConnectionID, p.InitialMaxStreamDataBidiLocal, p.InitialMaxStreamDataBidiRemote, p.InitialMaxStreamDataUni, p.InitialMaxData, p.MaxBidiStreamNum, p.MaxUniStreamNum, p.IdleTimeout, p.AckDelayExponent, p.MaxAckDelay, p.ActiveConnectionIDLimit}
+	logString := "&handshake.TransportParameters{OriginalConnectionID: %s, InitialMaxStreamDataBidiLocal: %#x, InitialMaxStreamDataBidiRemote: %#x, InitialMaxStreamDataUni: %#x, InitialMaxData: %#x, MaxBidiStreamNum: %d, MaxUniStreamNum: %d, MaxIdleTimeout: %s, AckDelayExponent: %d, MaxAckDelay: %s, ActiveConnectionIDLimit: %d"
+	logParams := []interface{}{p.OriginalConnectionID, p.InitialMaxStreamDataBidiLocal, p.InitialMaxStreamDataBidiRemote, p.InitialMaxStreamDataUni, p.InitialMaxData, p.MaxBidiStreamNum, p.MaxUniStreamNum, p.MaxIdleTimeout, p.AckDelayExponent, p.MaxAckDelay, p.ActiveConnectionIDLimit}
 	if p.StatelessResetToken != nil { // the client never sends a stateless reset token
 		logString += ", StatelessResetToken: %#x"
 		logParams = append(logParams, *p.StatelessResetToken)

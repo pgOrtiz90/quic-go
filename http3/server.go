@@ -22,8 +22,8 @@ import (
 
 // allows mocking of quic.Listen and quic.ListenAddr
 var (
-	quicListen     = quic.Listen
-	quicListenAddr = quic.ListenAddr
+	quicListen     = quic.ListenEarly
+	quicListenAddr = quic.ListenAddrEarly
 )
 
 const nextProtoH3 = "h3-24"
@@ -53,7 +53,7 @@ type Server struct {
 	port uint32 // used atomically
 
 	mutex     sync.Mutex
-	listeners map[*quic.Listener]struct{}
+	listeners map[*quic.EarlyListener]struct{}
 	closed    utils.AtomicBool
 
 	logger utils.Logger
@@ -119,7 +119,7 @@ func (s *Server) serveImpl(tlsConf *tls.Config, conn net.PacketConn) error {
 		}
 	}
 
-	var ln quic.Listener
+	var ln quic.EarlyListener
 	var err error
 	if conn == nil {
 		ln, err = quicListenAddr(s.Addr, tlsConf, s.QuicConfig)
@@ -144,22 +144,22 @@ func (s *Server) serveImpl(tlsConf *tls.Config, conn net.PacketConn) error {
 // We store a pointer to interface in the map set. This is safe because we only
 // call trackListener via Serve and can track+defer untrack the same pointer to
 // local variable there. We never need to compare a Listener from another caller.
-func (s *Server) addListener(l *quic.Listener) {
+func (s *Server) addListener(l *quic.EarlyListener) {
 	s.mutex.Lock()
 	if s.listeners == nil {
-		s.listeners = make(map[*quic.Listener]struct{})
+		s.listeners = make(map[*quic.EarlyListener]struct{})
 	}
 	s.listeners[l] = struct{}{}
 	s.mutex.Unlock()
 }
 
-func (s *Server) removeListener(l *quic.Listener) {
+func (s *Server) removeListener(l *quic.EarlyListener) {
 	s.mutex.Lock()
 	delete(s.listeners, l)
 	s.mutex.Unlock()
 }
 
-func (s *Server) handleConn(sess quic.Session) {
+func (s *Server) handleConn(sess quic.EarlySession) {
 	// TODO: accept control streams
 	decoder := qpack.NewDecoder(nil)
 
@@ -173,6 +173,8 @@ func (s *Server) handleConn(sess quic.Session) {
 	(&settingsFrame{}).Write(buf)
 	str.Write(buf.Bytes())
 
+	// Process all requests immediately.
+	// It's the client's responsibility to decide which requests are eligible for 0-RTT.
 	for {
 		str, err := sess.AcceptStream(context.Background())
 		if err != nil {
@@ -181,7 +183,7 @@ func (s *Server) handleConn(sess quic.Session) {
 		}
 		go func() {
 			defer ginkgo.GinkgoRecover()
-			rerr := s.handleRequest(str, decoder, func() {
+			rerr := s.handleRequest(sess, str, decoder, func() {
 				sess.CloseWithError(quic.ErrorCode(errorFrameUnexpected), "")
 			})
 			if rerr.err != nil || rerr.streamErr != 0 || rerr.connErr != 0 {
@@ -210,7 +212,7 @@ func (s *Server) maxHeaderBytes() uint64 {
 	return uint64(s.Server.MaxHeaderBytes)
 }
 
-func (s *Server) handleRequest(str quic.Stream, decoder *qpack.Decoder, onFrameError func()) requestError {
+func (s *Server) handleRequest(sess quic.Session, str quic.Stream, decoder *qpack.Decoder, onFrameError func()) requestError {
 	frame, err := parseNextFrame(str)
 	if err != nil {
 		return newStreamError(errorRequestIncomplete, err)
@@ -236,6 +238,8 @@ func (s *Server) handleRequest(str quic.Stream, decoder *qpack.Decoder, onFrameE
 		// TODO: use the right error code
 		return newStreamError(errorGeneralProtocolError, err)
 	}
+
+	req.RemoteAddr = sess.RemoteAddr().String()
 	req.Body = newRequestBody(str, onFrameError)
 
 	if s.logger.Debug() {

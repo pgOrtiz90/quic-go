@@ -2,11 +2,11 @@ package quic
 
 import (
 	"context"
-	"crypto/tls"
 	"io"
 	"net"
 	"time"
 
+	"github.com/lucas-clemente/quic-go/internal/handshake"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/quictrace"
 )
@@ -139,6 +139,8 @@ type StreamError interface {
 	ErrorCode() ErrorCode
 }
 
+type ConnectionState = handshake.ConnectionState
+
 // A Session is a QUIC connection between two peers.
 type Session interface {
 	// AcceptStream returns the next stream opened by the peer, blocking until one is available.
@@ -175,8 +177,6 @@ type Session interface {
 	LocalAddr() net.Addr
 	// RemoteAddr returns the address of the peer.
 	RemoteAddr() net.Addr
-	// Close the connection.
-	io.Closer
 	// Close the connection with an error.
 	// The error string will be sent to the peer.
 	CloseWithError(ErrorCode, string) error
@@ -184,8 +184,9 @@ type Session interface {
 	// Warning: This API should not be considered stable and might change soon.
 	Context() context.Context
 	// ConnectionState returns basic details about the QUIC connection.
+	// It blocks until the handshake completes.
 	// Warning: This API should not be considered stable and might change soon.
-	ConnectionState() tls.ConnectionState
+	ConnectionState() ConnectionState
 }
 
 // An EarlySession is a session that is handshaking.
@@ -218,11 +219,12 @@ type Config struct {
 	// If the timeout is exceeded, the connection is closed.
 	// If this value is zero, the timeout is set to 10 seconds.
 	HandshakeTimeout time.Duration
-	// IdleTimeout is the maximum duration that may pass without any incoming network activity.
+	// MaxIdleTimeout is the maximum duration that may pass without any incoming network activity.
+	// The actual value for the idle timeout is the minimum of this value and the peer's.
 	// This value only applies after the handshake has completed.
 	// If the timeout is exceeded, the connection is closed.
 	// If this value is zero, the timeout is set to 30 seconds.
-	IdleTimeout time.Duration
+	MaxIdleTimeout time.Duration
 	// AcceptToken determines if a Token is accepted.
 	// It is called with token = nil if the client didn't send a token.
 	// If not set, a default verification function is used:

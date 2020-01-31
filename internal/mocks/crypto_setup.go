@@ -5,12 +5,12 @@
 package mocks
 
 import (
-	tls "crypto/tls"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 	handshake "github.com/lucas-clemente/quic-go/internal/handshake"
 	protocol "github.com/lucas-clemente/quic-go/internal/protocol"
+	qtls "github.com/marten-seemann/qtls"
 )
 
 // MockCryptoSetup is a mock of CryptoSetup interface
@@ -63,10 +63,10 @@ func (mr *MockCryptoSetupMockRecorder) Close() *gomock.Call {
 }
 
 // ConnectionState mocks base method
-func (m *MockCryptoSetup) ConnectionState() tls.ConnectionState {
+func (m *MockCryptoSetup) ConnectionState() qtls.ConnectionState {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ConnectionState")
-	ret0, _ := ret[0].(tls.ConnectionState)
+	ret0, _ := ret[0].(qtls.ConnectionState)
 	return ret0
 }
 
@@ -74,6 +74,48 @@ func (m *MockCryptoSetup) ConnectionState() tls.ConnectionState {
 func (mr *MockCryptoSetupMockRecorder) ConnectionState() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConnectionState", reflect.TypeOf((*MockCryptoSetup)(nil).ConnectionState))
+}
+
+// DropHandshakeKeys mocks base method
+func (m *MockCryptoSetup) DropHandshakeKeys() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "DropHandshakeKeys")
+}
+
+// DropHandshakeKeys indicates an expected call of DropHandshakeKeys
+func (mr *MockCryptoSetupMockRecorder) DropHandshakeKeys() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropHandshakeKeys", reflect.TypeOf((*MockCryptoSetup)(nil).DropHandshakeKeys))
+}
+
+// Get0RTTOpener mocks base method
+func (m *MockCryptoSetup) Get0RTTOpener() (handshake.LongHeaderOpener, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get0RTTOpener")
+	ret0, _ := ret[0].(handshake.LongHeaderOpener)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get0RTTOpener indicates an expected call of Get0RTTOpener
+func (mr *MockCryptoSetupMockRecorder) Get0RTTOpener() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get0RTTOpener", reflect.TypeOf((*MockCryptoSetup)(nil).Get0RTTOpener))
+}
+
+// Get0RTTSealer mocks base method
+func (m *MockCryptoSetup) Get0RTTSealer() (handshake.LongHeaderSealer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get0RTTSealer")
+	ret0, _ := ret[0].(handshake.LongHeaderSealer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get0RTTSealer indicates an expected call of Get0RTTSealer
+func (mr *MockCryptoSetupMockRecorder) Get0RTTSealer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get0RTTSealer", reflect.TypeOf((*MockCryptoSetup)(nil).Get0RTTSealer))
 }
 
 // Get1RTTOpener mocks base method

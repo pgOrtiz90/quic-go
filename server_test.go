@@ -95,7 +95,7 @@ var _ = Describe("Server", func() {
 		server := ln.(*baseServer)
 		Expect(server.config.Versions).To(Equal(protocol.SupportedVersions))
 		Expect(server.config.HandshakeTimeout).To(Equal(protocol.DefaultHandshakeTimeout))
-		Expect(server.config.IdleTimeout).To(Equal(protocol.DefaultIdleTimeout))
+		Expect(server.config.MaxIdleTimeout).To(Equal(protocol.DefaultIdleTimeout))
 		Expect(reflect.ValueOf(server.config.AcceptToken)).To(Equal(reflect.ValueOf(defaultAcceptToken)))
 		Expect(server.config.KeepAlive).To(BeFalse())
 		// stop the listener
@@ -110,7 +110,7 @@ var _ = Describe("Server", func() {
 			Versions:          supportedVersions,
 			AcceptToken:       acceptToken,
 			HandshakeTimeout:  1337 * time.Hour,
-			IdleTimeout:       42 * time.Minute,
+			MaxIdleTimeout:    42 * time.Minute,
 			KeepAlive:         true,
 			StatelessResetKey: []byte("foobar"),
 			QuicTracer:        tracer,
@@ -121,7 +121,7 @@ var _ = Describe("Server", func() {
 		Expect(server.sessionHandler).ToNot(BeNil())
 		Expect(server.config.Versions).To(Equal(supportedVersions))
 		Expect(server.config.HandshakeTimeout).To(Equal(1337 * time.Hour))
-		Expect(server.config.IdleTimeout).To(Equal(42 * time.Minute))
+		Expect(server.config.MaxIdleTimeout).To(Equal(42 * time.Minute))
 		Expect(reflect.ValueOf(server.config.AcceptToken)).To(Equal(reflect.ValueOf(acceptToken)))
 		Expect(server.config.KeepAlive).To(BeTrue())
 		Expect(server.config.StatelessResetKey).To(Equal([]byte("foobar")))
@@ -297,8 +297,8 @@ var _ = Describe("Server", func() {
 				Expect(replyHdr.Type).To(Equal(protocol.PacketTypeRetry))
 				Expect(replyHdr.SrcConnectionID).ToNot(Equal(hdr.DestConnectionID))
 				Expect(replyHdr.DestConnectionID).To(Equal(hdr.SrcConnectionID))
-				Expect(replyHdr.OrigDestConnectionID).To(Equal(hdr.DestConnectionID))
 				Expect(replyHdr.Token).ToNot(BeEmpty())
+				Expect(write.data[len(write.data)-16:]).To(Equal(handshake.GetRetryIntegrityTag(write.data[:len(write.data)-16], hdr.DestConnectionID)[:]))
 			})
 
 			It("creates a session, if no Token is required", func() {
@@ -331,9 +331,11 @@ var _ = Describe("Server", func() {
 					_ *Config,
 					_ *tls.Config,
 					_ *handshake.TokenGenerator,
+					enable0RTT bool,
 					_ utils.Logger,
 					_ protocol.VersionNumber,
 				) quicSession {
+					Expect(enable0RTT).To(BeFalse())
 					Expect(origConnID).To(Equal(hdr.DestConnectionID))
 					Expect(destConnID).To(Equal(hdr.SrcConnectionID))
 					// make sure we're using a server-generated connection ID
@@ -381,6 +383,7 @@ var _ = Describe("Server", func() {
 					_ *Config,
 					_ *tls.Config,
 					_ *handshake.TokenGenerator,
+					_ bool,
 					_ utils.Logger,
 					_ protocol.VersionNumber,
 				) quicSession {
@@ -409,6 +412,7 @@ var _ = Describe("Server", func() {
 					_ *Config,
 					_ *tls.Config,
 					_ *handshake.TokenGenerator,
+					_ bool,
 					_ utils.Logger,
 					_ protocol.VersionNumber,
 				) quicSession {
@@ -469,6 +473,7 @@ var _ = Describe("Server", func() {
 					_ *Config,
 					_ *tls.Config,
 					_ *handshake.TokenGenerator,
+					_ bool,
 					_ utils.Logger,
 					_ protocol.VersionNumber,
 				) quicSession {
@@ -572,6 +577,7 @@ var _ = Describe("Server", func() {
 					_ *Config,
 					_ *tls.Config,
 					_ *handshake.TokenGenerator,
+					_ bool,
 					_ utils.Logger,
 					_ protocol.VersionNumber,
 				) quicSession {
@@ -624,9 +630,11 @@ var _ = Describe("Server", func() {
 				_ *Config,
 				_ *tls.Config,
 				_ *handshake.TokenGenerator,
+				enable0RTT bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
+				Expect(enable0RTT).To(BeTrue())
 				sess.EXPECT().run().Do(func() {})
 				sess.EXPECT().earlySessionReady().Return(ready)
 				sess.EXPECT().Context().Return(context.Background())
@@ -653,6 +661,7 @@ var _ = Describe("Server", func() {
 				_ *Config,
 				_ *tls.Config,
 				_ *handshake.TokenGenerator,
+				_ bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
@@ -709,6 +718,7 @@ var _ = Describe("Server", func() {
 				_ *Config,
 				_ *tls.Config,
 				_ *handshake.TokenGenerator,
+				_ bool,
 				_ utils.Logger,
 				_ protocol.VersionNumber,
 			) quicSession {
