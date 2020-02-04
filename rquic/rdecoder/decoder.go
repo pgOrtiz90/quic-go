@@ -7,7 +7,7 @@ import (
 
 
 
-type decoder struct {
+type Decoder struct {
     pktsSrc             []*parsedSrc
     pktsCod             []*parsedCod
     
@@ -22,20 +22,20 @@ type decoder struct {
     obsoleteXhold       uint8
     
     srcAvbl             []uint8 // used for building srcMiss (missing SRC)
-    srcMiss             []uint8 // used for decoder.Recover()
+    srcMiss             []uint8 // used for Decoder.Recover()
     doCheckMissingSrc   bool    // flag for updating the list of srcMiss
     
     pollutionCount      float64
 }
 
 
-func (d *decoder) ParseRPacket (raw []byte) bool {
+func (d *Decoder) ParseRPacket(raw []byte) bool {
     
-    ptype := raw[*d.lenDCID + rquic.FieldPosTypeScheme]
+    rHdrPos := d.rQuicHdrPos()
+    ptype := raw[rHdrPos + rquic.FieldPosTypeScheme]
     
     // unprotected packet
     if ptype == 0 {
-        rHdrPos := d.rQuicHdrPos()
         raw = append(raw[:rHdrPos], raw[rHdrPos+1:]...)
         return true // forward this packet to QUIC
     }
@@ -61,7 +61,7 @@ func (d *decoder) ParseRPacket (raw []byte) bool {
 
 
 
-func (d *decoder) NewSrc(raw []byte) (ps *parsedSrc) {
+func (d *Decoder) NewSrc(raw []byte) (ps *parsedSrc) {
     rHdrPos := d.rQuicHdrPos()
     
     id := raw[rHdrPos + rquic.FieldPosId]
@@ -83,7 +83,7 @@ func (d *decoder) NewSrc(raw []byte) (ps *parsedSrc) {
 
 
 
-func (d *decoder) NewSrcRec(cod *parsedCod) (ps *parsedSrc) { // cod.pld must be fully decoded
+func (d *Decoder) NewSrcRec(cod *parsedCod) (ps *parsedSrc) { // cod.pld must be fully decoded
     
     lastPos := int(cod.pld[0]) * 256 + int(cod.pld[1]) /*lng*/ - 1 /*1st byte*/ + 3 /*pld offset*/
     
@@ -103,27 +103,28 @@ func (d *decoder) NewSrcRec(cod *parsedCod) (ps *parsedSrc) { // cod.pld must be
 
 
 
-func (d *decoder) NewCod(raw []byte) {
+func (d *Decoder) NewCod(raw []byte) {
+    rHdrPos := d.rQuicHdrPos()
     
     pc := &parsedCod {
-        remaining:  int(raw[*d.lenDCID + rquic.FieldPosGenSize]),
+        remaining:  int(raw[rHdrPos + rquic.FieldPosGenSize]),
     } // till pc is optimized at the end of this method, remaining == genSize
     
     // Update scheme
     // The use of different schemes at a time is very unlikely.
-    newScheme := raw[*d.lenDCID + rquic.FieldPosTypeScheme] & rquic.MaskScheme
+    newScheme := raw[rHdrPos + rquic.FieldPosTypeScheme] & rquic.MaskScheme
     if d.lastScheme != newScheme {
         d.coeff = schemes.MakeCoeffUnpacker(newScheme)
         d.lastScheme = newScheme
     }
     
     // Get the coefficients
-    pc.coeff = d.coeff.Unpack(raw)
+    pc.coeff = d.coeff.Unpack(raw, rHdrPos)
     if d.isObsolete(pc.coeff[0]) {return}
     
     // List of SRC IDs covered by this COD
     pc.srcIds = make([]uint8, pc.remaining)
-    pcId := raw[*d.lenDCID + rquic.FieldPosId]
+    pcId := raw[rHdrPos + rquic.FieldPosId]
     pc.srcIds[0] = pcId - uint8(pc.remaining) + 1
     for i := 1; i < pc.remaining; i++ {
         pc.srcIds[i] = pc.srcIds[i-1] + 1
@@ -134,7 +135,7 @@ func (d *decoder) NewCod(raw []byte) {
     if totalOverh < 0 {
         totalOverh = (0-totalOverh) * pc.remaining
     }
-    totalOverh += *d.lenDCID + rquic.FieldPosSeed
+    totalOverh = rHdrPos + rquic.FieldPosSeed + totalOverh /*coefficients*/
     pc.pld = make([]byte, len(raw) - totalOverh)
     copy(pc.pld, raw[totalOverh:])
     
@@ -153,17 +154,15 @@ func (d *decoder) NewCod(raw []byte) {
 
 
 
-func MakeDecoder() *decoder {
-    return &decoder{
+func MakeDecoder() *Decoder {
+    return &Decoder{
         // DCID:               // TODO: Find where to get DCID & its length
         // lenDCID:
         
-        pollutionCount:   rquic.MinRatio * rquic.RxRedunMarg,
+        pollutionCount: rquic.MinRatio * rquic.RxRedunMarg,
         // TODO: implement pollution attack detection
         // if SRC --> d.pollutionCount++
         // if COD --> d.pollutionCount -= rquic.MinRate
-        // IF d.pollutionCount < 0 --> Close this path/connection
+        // if d.pollutionCount < 0 --> Close this path/connection
     }
 }
-
-

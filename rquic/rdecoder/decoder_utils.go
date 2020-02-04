@@ -5,9 +5,9 @@ import (
 )
 
 
-func (d *decoder) lenNotProtected() int {return *d.lenDCID + rquic.SrcHeaderSize}
-func (d *decoder) rQuicHdrPos()     int {return 1 /*1st byte*/ + *d.lenDCID}
-func (d *decoder) rQuicSrcPldPos()  int {return 1 /*1st byte*/ + *d.lenDCID + rquic.SrcHeaderSize}
+func (d *Decoder) lenNotProtected() int { return *d.lenDCID + rquic.SrcHeaderSize }
+func (d *Decoder) rQuicHdrPos()     int { return 1 /*1st byte*/ + *d.lenDCID }
+func (d *Decoder) rQuicSrcPldPos()  int { return 1 /*1st byte*/ + *d.lenDCID + rquic.SrcHeaderSize }
 
 
 func idLolderR(older, newer uint8) bool {
@@ -15,12 +15,12 @@ func idLolderR(older, newer uint8) bool {
 }
 
 
-func (d *decoder) isObsolete(id uint8) bool {
+func (d *Decoder) isObsolete(id uint8) bool {
     return (d.obsoleteXhold - id) > 128
 }
 
 
-func (d *decoder) parseSrc(raw []byte) []byte {
+func (d *Decoder) parseSrc(raw []byte) []byte {
     lng := len(raw) - d.lenNotProtected()
     pldHdr := make([]byte, 3)
     pldHdr[0] = byte(lng / 256)
@@ -30,7 +30,7 @@ func (d *decoder) parseSrc(raw []byte) []byte {
 }
 
 
-func (d *decoder) removeSrcNoOrder(ind int) {
+func (d *Decoder) removeSrcNoOrder(ind int) {
     // https://stackoverflow.com/a/37335777
     last := len(d.pktsSrc) - 1
     if ind != last {
@@ -41,7 +41,7 @@ func (d *decoder) removeSrcNoOrder(ind int) {
 }
 
 
-func (d *decoder) removeCodNoOrder(ind int) {
+func (d *Decoder) removeCodNoOrder(ind int) {
     // https://stackoverflow.com/a/37335777
     last := len(d.pktsCod) - 1
     if ind != last {
@@ -52,7 +52,7 @@ func (d *decoder) removeCodNoOrder(ind int) {
 }
 
 
-func (d *decoder) updateObsoleteXhold(cod *parsedCod) {
+func (d *Decoder) updateObsoleteXhold(cod *parsedCod) {
     // https://tools.ietf.org/html/draft-ietf-quic-recovery-24#appendix-B.1
     //     kLossReductionFactor:  Reduction in congestion window when a new loss
     //        event is detected.  The RECOMMENDED value is 0.5.
@@ -65,7 +65,7 @@ func (d *decoder) updateObsoleteXhold(cod *parsedCod) {
 }
 
 
-func (d *decoder) srcAvblUpdate(id uint8) (repeatedSrc bool) {
+func (d *Decoder) srcAvblUpdate(id uint8) (repeatedSrc bool) {
     // d.isObsolete(id) == true is meant to be done outside
     for i := len(d.srcAvbl)-1; i >= 0; i-- {
         if idLolderR(d.srcAvbl[i], id) {
@@ -83,7 +83,7 @@ func (d *decoder) srcAvblUpdate(id uint8) (repeatedSrc bool) {
 }
 
 
-func (d *decoder) srcMissUpdate() {
+func (d *Decoder) srcMissUpdate() {
     // If multiple redun-s per gen., do not repeat this action.
     d.doCheckMissingSrc = false // becomes true after nwstCodId update
     // Remove obsolete pkt ids from srcAvbl list

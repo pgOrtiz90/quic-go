@@ -1,6 +1,6 @@
 package rdecoder
 
-func (d *decoder) Recover() {
+func (d *Decoder) Recover() {
     if len(d.pktsCod) < 2 {return} // Nothing to do
     
     if d.doCheckMissingSrc {
@@ -39,7 +39,7 @@ func (d *decoder) Recover() {
             cod.scaleDown()
             // subtract scaled row from other rows with non-zero element
             r++
-            for r < numRows{
+            for r < numRows {
                 d.pktsCod[r].attachCod(cod, 0)
                 r++
             }

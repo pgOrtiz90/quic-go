@@ -1,7 +1,7 @@
 package rdecoder
 
 
-func (d *decoder) optimizeWithSrc(src *parsedSrc) {
+func (d *Decoder) optimizeWithSrc(src *parsedSrc) {
     var cod *parsedCod
     for i := 0; i < len(d.pktsCod); i++ {
         // Remove obsolete COD
@@ -28,7 +28,7 @@ func (d *decoder) optimizeWithSrc(src *parsedSrc) {
     }
 }
 
-func (d *decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc, inds []int, notFull bool) {
+func (d *Decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc, inds []int, notFull bool) {
     availableSrc = make([]*parsedSrc, 0, cod.remaining)
     inds = make([]int, 0, cod.remaining)
     notFull = true
@@ -49,7 +49,7 @@ func (d *decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc,
     return
 }
 
-func (d *decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []int) (codIsUseful bool) {
+func (d *Decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []int) (codIsUseful bool) {
     
     for i, ind := range inds {
         cod.removeSrc(srcs[i], ind)

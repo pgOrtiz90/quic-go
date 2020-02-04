@@ -3,13 +3,13 @@ package rencoder
 import (
     "time"
     
-    "github.com/lucas-clemente/quic-go/rquic/schemes"
     "github.com/lucas-clemente/quic-go/rquic"
+    "github.com/lucas-clemente/quic-go/rquic/schemes"
 )
 
 
 
-type encoder struct {
+type Encoder struct {
     
     rQuicId             uint8
     
@@ -19,19 +19,19 @@ type encoder struct {
     Ratio               *ratio
     
     Scheme              uint8
-    Overlap             uint8                   // overlapping generations, i.e. convolutional
+    Overlap             uint8                  // overlapping generations, i.e. convolutional
     redunBuilders       []schemes.RedunBuilder // need slice for overlapping/convolutional
 }
 
 
 
-func (e *encoder) lenNotProtected() int {return *e.lenDCID + rquic.SrcHeaderSize}
-func (e *encoder) rQuicHdrPos()     int {return 1 /*1st byte*/ + *e.lenDCID}
-func (e *encoder) rQuicSrcPldPos()  int {return 1 /*1st byte*/ + *e.lenDCID + rquic.SrcHeaderSize}
+func (e *Encoder) lenNotProtected() int { return *e.lenDCID + rquic.SrcHeaderSize }
+func (e *Encoder) rQuicHdrPos()     int { return 1 /*1st byte*/ + *e.lenDCID }
+func (e *Encoder) rQuicSrcPldPos()  int { return 1 /*1st byte*/ + *e.lenDCID + rquic.SrcHeaderSize }
 
 
 
-func (e *encoder) Process(raw []byte, ackEliciting bool) {
+func (e *Encoder) Process(raw []byte, ackEliciting bool) {
     
     // Add rQUIC header to SRC
     if !ackEliciting {
@@ -39,7 +39,7 @@ func (e *encoder) Process(raw []byte, ackEliciting bool) {
         return
     }
     rQuicHdr := []byte{rquic.MaskType, e.rQuicId}
-    raw = append(  append(raw[:e.rQuicHdrPos()], rQuicHdr...)  , raw[e.rQuicHdrPos():]...)
+    raw = append(append(raw[:e.rQuicHdrPos()], rQuicHdr...), raw[e.rQuicHdrPos():]...)
     // TODO: Consider inserting rQUIC hdr & TYPE value at QUIC pkt marshalling
     
     // Parse SRC and add it to generations under construction
@@ -60,7 +60,7 @@ func (e *encoder) Process(raw []byte, ackEliciting bool) {
     e.rQuicId++
 }
 
-func (e *encoder) parseSrc(raw []byte) []byte {
+func (e *Encoder) parseSrc(raw []byte) []byte {
     // TODO: same parseSrc as decoder, consider merging
     lng := len(raw) - e.lenNotProtected()
     pldHdr := make([]byte, 3)
@@ -70,17 +70,17 @@ func (e *encoder) parseSrc(raw []byte) []byte {
     return append(pldHdr, raw[e.rQuicSrcPldPos():]...)
 }
 
-func (e *encoder) DisableCoding() {
+func (e *Encoder) DisableCoding() {
     e.Ratio.Change(0)
 }
 
-func (e *encoder) AddRetransmissionCount() {
+func (e *Encoder) AddRetransmissionCount() {
     if e.Ratio.dynamic {
         e.Ratio.AddReTxCount()
     }
 }
 
-func (e *encoder) AddTransmissionCount() {
+func (e *Encoder) AddTransmissionCount() {
     if e.Ratio.dynamic {
         e.Ratio.AddTxCount()
     }
@@ -96,11 +96,11 @@ func MakeEncoder(
     numPeriods      int,
     gammaTarget     float64,
     deltaRatio      float64,
-) *encoder {
+) *Encoder {
     
     overlap = 1 // TODO: make overlap work (& with adaptive rate)
     
-    enc := &encoder {
+    enc := &Encoder{
         // lenDCID:             // TODO: Find where to get DCID & its length
         Ratio:          makeRatio(dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio),
         Scheme:         scheme,
