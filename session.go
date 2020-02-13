@@ -488,6 +488,13 @@ func (s *session) run() error {
 
 	var closeErr closeError
 
+	// rQUIC {
+	if s.encoder != nil {
+		s.sentPacketHandler.PTOat1RTToff()
+		// TODO: Try: Probe = last (re)coded packets
+	}
+	// } rQUIC
+
 runLoop:
 	for {
 		// Close immediately if requested

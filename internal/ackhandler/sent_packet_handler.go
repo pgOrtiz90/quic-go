@@ -74,6 +74,11 @@ type sentPacketHandler struct {
 	traceCallback func(quictrace.Event)
 
 	logger utils.Logger
+
+	// rQUIC {
+	// Does PTO interfere with FEC? To Be Researched... Meanwhile, disable PTO with FEC
+	noPTOat1RTT bool
+	// } rQUIC
 }
 
 // NewSentPacketHandler creates a new sentPacketHandler
@@ -99,6 +104,16 @@ func NewSentPacketHandler(
 		logger:           logger,
 	}
 }
+
+// rQUIC {
+func (h *sentPacketHandler) PTOat1RTTon() {
+	h.noPTOat1RTT = false
+}
+
+func (h *sentPacketHandler) PTOat1RTToff() {
+	h.noPTOat1RTT = true
+}
+// } rQUIC
 
 func (h *sentPacketHandler) DropPackets(encLevel protocol.EncryptionLevel) {
 	// remove outstanding packets from bytes_in_flight
@@ -480,7 +495,13 @@ func (h *sentPacketHandler) onVerifiedLossDetectionTimeout() error {
 	case protocol.EncryptionHandshake:
 		h.ptoMode = SendPTOHandshake
 	case protocol.Encryption1RTT:
-		h.ptoMode = SendPTOAppData
+		// rQUIC {
+		if h.noPTOat1RTT {
+			h.ptoMode = SendNone
+			h.numProbesToSend -= 2
+		} else {
+			h.ptoMode = SendPTOAppData
+		}
 	default:
 		return fmt.Errorf("TPO timer in unexpected encryption level: %s", encLevel)
 	}

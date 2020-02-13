@@ -53,6 +53,11 @@ type SentPacketHandler interface {
 
 	// report some congestion statistics. For tracing only.
 	GetStats() *quictrace.TransportState
+
+	// rQUIC {
+	PTOat1RTTon()
+	PTOat1RTToff()
+	// } rQUIC
 }
 
 // ReceivedPacketHandler handles ACKs needed to send for incoming packets
