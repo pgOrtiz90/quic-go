@@ -10,14 +10,9 @@ import (
 
 
 type Encoder struct {
-    
     rQuicId             uint8
-    
-    // DCID                *[]byte
-    lenDCID             *int // length of DCID
-    
+    lenDCID             int
     Ratio               *ratio
-    
     Scheme              uint8
     Overlap             uint8                  // overlapping generations, i.e. convolutional
     redunBuilders       []schemes.RedunBuilder // need slice for overlapping/convolutional
@@ -25,16 +20,17 @@ type Encoder struct {
 
 
 
-func (e *Encoder) lenNotProtected() int { return *e.lenDCID + rquic.SrcHeaderSize }
-func (e *Encoder) rQuicHdrPos()     int { return 1 /*1st byte*/ + *e.lenDCID }
-func (e *Encoder) rQuicSrcPldPos()  int { return 1 /*1st byte*/ + *e.lenDCID + rquic.SrcHeaderSize }
+func (e *Encoder) lenNotProtected() int { return e.lenDCID + rquic.SrcHeaderSize }
+func (e *Encoder) rQuicHdrPos()     int { return 1 /*1st byte*/ + e.lenDCID }
+func (e *Encoder) rQuicSrcPldPos()  int { return 1 /*1st byte*/ + e.lenDCID + rquic.SrcHeaderSize }
 
 
 
-func (e *Encoder) Process(raw []byte, ackEliciting bool) {
+func (e *Encoder) Process(raw []byte, ackEliciting bool, latestDCIDLen int) (newCodedPkts [][]byte) {
+    e.lenDCID = latestDCIDLen
     
     // Add rQUIC header to SRC
-    if !ackEliciting {
+    if !ackEliciting { // Not protected
         raw = append(append(raw[:e.rQuicHdrPos()], 0), raw[e.rQuicHdrPos():]...)
         return
     }
@@ -45,7 +41,6 @@ func (e *Encoder) Process(raw []byte, ackEliciting bool) {
     // Parse SRC and add it to generations under construction
     rQuicHdr = raw[:e.rQuicSrcPldPos()] // we try to send COD before ACK, spin bit should be ok
     src := e.parseSrc(raw)
-    var newCodedPkts [][]byte
     reduns := 1 // Change reduns or genSize? To be researched...
     for ind, rb := range e.redunBuilders {
         rb.AddSrc(src)
@@ -53,11 +48,12 @@ func (e *Encoder) Process(raw []byte, ackEliciting bool) {
             // multiple gen-s finished at the same time ---> append
             newCodedPkts = append(newCodedPkts, rb.Assemble(rQuicHdr)...)
             e.redunBuilders[ind] = schemes.MakeRedunBuilder(e.Scheme, reduns)
+            // TODO: Consider using sync.Pool for coded packets (buffer_pool.go)
         }
     }
-    // TODO: Find to whom pass newCodedPkts
     
     e.rQuicId++
+    return
 }
 
 func (e *Encoder) parseSrc(raw []byte) []byte {
@@ -101,7 +97,6 @@ func MakeEncoder(
     overlap = 1 // TODO: make overlap work (& with adaptive rate)
     
     enc := &Encoder{
-        // lenDCID:             // TODO: Find where to get DCID & its length
         Ratio:          makeRatio(dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio),
         Scheme:         scheme,
         Overlap:        overlap,

@@ -21,6 +21,10 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/quictrace"
+	// rQUIC {
+	"github.com/lucas-clemente/quic-go/rquic/rdecoder"
+	"github.com/lucas-clemente/quic-go/rquic/rencoder"
+	// } rQUIC
 )
 
 type unpacker interface {
@@ -185,6 +189,11 @@ type session struct {
 
 	logID  string
 	logger utils.Logger
+
+	// rQUIC {
+	encoder *rencoder.Encoder
+	decoder *rdecoder.Decoder
+	// } rQUIC
 }
 
 var _ Session = &session{}
@@ -1305,8 +1314,23 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 		})
 	}
 	s.logPacket(packet)
+	// rQUIC {
+	var codedPkts [][]byte
+	if s.encoder != nil {
+		if !packet.header.IsLongHeader {
+			codedPkts = s.encoder.Process(packet.raw, packet.IsAckEliciting(), s.connIDManager.activeConnectionID.Len())
+		}
+	}
+	// } rQUIC
 	s.connIDManager.SentPacket()
 	s.sendQueue.Send(packet)
+	
+	// rQUIC {
+	for _, coded := range codedPkts { // Send coded packets
+		s.connIDManager.SentPacket()
+		s.sendQueue.Send(&packedPacket{raw: coded})
+	}
+	// } rQUIC
 }
 
 func (s *session) sendConnectionClose(quicErr *qerr.QuicError) ([]byte, error) {
