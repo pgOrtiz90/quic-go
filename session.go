@@ -724,6 +724,15 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 		return false
 	}
 
+	// rQUIC {
+	if !hdr.IsLongHeader && s.decoder != nil {
+		// If the packet is SRC, at least remove rQUIC header
+		if pass2quic := s.decoder.Process(p.data, s.srcConnIDLen); !pass2quic {
+			return false
+		}
+	}
+	// } rQUIC
+
 	packet, err := s.unpacker.Unpack(hdr, p.rcvTime, p.data)
 	if err != nil {
 		switch err {

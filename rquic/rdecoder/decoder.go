@@ -51,8 +51,8 @@ func (d *Decoder) Process(raw []byte) bool {
 		d.Recover()
 	}
 
-	// Coded and unknown packets are discarded
-	return false // do not forward this packet to QUIC
+	// Coded and unknown packets are not passed to QUIC
+	return false
 }
 
 func (d *Decoder) NewSrc(raw []byte) (ps *parsedSrc) {
