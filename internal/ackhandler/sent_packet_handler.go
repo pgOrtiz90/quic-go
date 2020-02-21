@@ -77,7 +77,7 @@ type sentPacketHandler struct {
 
 	// rQUIC {
 	// Does PTO interfere with FEC? To Be Researched... Meanwhile, disable PTO with FEC
-	noPTOat1RTT bool
+	coding bool
 	// } rQUIC
 }
 
@@ -106,12 +106,12 @@ func NewSentPacketHandler(
 }
 
 // rQUIC {
-func (h *sentPacketHandler) PTOat1RTTon() {
-	h.noPTOat1RTT = false
+func (h *sentPacketHandler) CodingEnabled() {
+	h.coding = true
 }
 
-func (h *sentPacketHandler) PTOat1RTToff() {
-	h.noPTOat1RTT = true
+func (h *sentPacketHandler) CodingDisabled() {
+	h.coding = false
 }
 // } rQUIC
 
@@ -410,7 +410,12 @@ func (h *sentPacketHandler) detectLostPackets(
 			return false, nil
 		}
 
-		if packet.SendTime.Before(lostSendTime) || pnSpace.largestAcked >= packet.PacketNumber+packetThreshold {
+		//if packet.SendTime.Before(lostSendTime) || pnSpace.largestAcked >= packet.PacketNumber+packetThreshold {
+		// rQUIC {
+		// lossDelay = 9/8 maxRTT --> Too small for recovering losses from coded packets ==> ignore loss timeouts
+		timeoutLoss := packet.SendTime.Before(lostSendTime) && !(h.coding && encLevel == protocol.Encryption1RTT)
+		if timeoutLoss || pnSpace.largestAcked >= packet.PacketNumber+packetThreshold {
+			// } rQUIC
 			lostPackets = append(lostPackets, packet)
 		} else if pnSpace.lossTime.IsZero() {
 			// Note: This conditional is only entered once per call
@@ -496,12 +501,12 @@ func (h *sentPacketHandler) onVerifiedLossDetectionTimeout() error {
 		h.ptoMode = SendPTOHandshake
 	case protocol.Encryption1RTT:
 		// rQUIC {
-		if h.noPTOat1RTT {
+		if h.coding {
 			h.ptoMode = SendNone
 			h.numProbesToSend -= 2
 		} else {
 			h.ptoMode = SendPTOAppData
-		}
+		} // } rQUIC
 	default:
 		return fmt.Errorf("TPO timer in unexpected encryption level: %s", encLevel)
 	}

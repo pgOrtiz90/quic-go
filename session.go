@@ -490,7 +490,7 @@ func (s *session) run() error {
 
 	// rQUIC {
 	if s.encoder != nil {
-		s.sentPacketHandler.PTOat1RTToff()
+		s.sentPacketHandler.CodingEnabled()
 		// TODO: Try: Probe = last (re)coded packets
 	}
 	// } rQUIC

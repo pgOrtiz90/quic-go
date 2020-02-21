@@ -55,8 +55,8 @@ type SentPacketHandler interface {
 	GetStats() *quictrace.TransportState
 
 	// rQUIC {
-	PTOat1RTTon()
-	PTOat1RTToff()
+	CodingEnabled()
+	CodingDisabled()
 	// } rQUIC
 }
 
