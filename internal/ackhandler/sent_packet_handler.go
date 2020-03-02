@@ -108,6 +108,7 @@ func NewSentPacketHandler(
 // rQUIC {
 func (h *sentPacketHandler) CodingEnabled() {
 	h.coding = true
+	h.alarm = time.Time{} // Disable early retransmit & PTO alarm
 }
 
 func (h *sentPacketHandler) CodingDisabled() {
@@ -370,6 +371,14 @@ func (h *sentPacketHandler) hasOutstandingPackets() bool {
 }
 
 func (h *sentPacketHandler) setLossDetectionTimer() {
+	// rQUIC {
+	// This method sets h.alarm for: (1) Early retransmit; (2) PTO
+	// Both of them interfere with rQUIC and are disabled
+	if h.coding {
+		return
+	}
+	// } rQUIC
+
 	if lossTime, _ := h.getEarliestLossTimeAndSpace(); !lossTime.IsZero() {
 		// Early retransmit timer or time loss detection.
 		h.alarm = lossTime
@@ -504,6 +513,7 @@ func (h *sentPacketHandler) onVerifiedLossDetectionTimeout() error {
 		if h.coding {
 			h.ptoMode = SendNone
 			h.numProbesToSend -= 2
+			// TODO: Try: Probe = last (re)coded packets
 		} else {
 			h.ptoMode = SendPTOAppData
 		} // } rQUIC
