@@ -22,6 +22,7 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/quictrace"
 	// rQUIC {
+	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/rdecoder"
 	"github.com/lucas-clemente/quic-go/rquic/rencoder"
 	// } rQUIC
@@ -726,9 +727,25 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 
 	// rQUIC {
 	if !hdr.IsLongHeader && s.decoder != nil {
-		// If the packet is SRC, at least remove rQUIC header
-		if pass2quic := s.decoder.Process(p.data, s.srcConnIDLen); !pass2quic {
+		pktType, numRec := s.decoder.Process(p.data, s.srcConnIDLen)
+		if numRec > 0 {
+			// Somehow pass recovered packets to QUIC
+		}
+
+		switch pktType {
+		case rquic.TypeUnprotected, rquic.TypeProtected:
+			// Do nothing, process the packet as usual
+		case rquic.TypeCoded:
+			// Idle timeout should take coded packets into account
+			s.lastPacketReceivedTime = p.rcvTime
+			s.keepAlivePingSent = false
+			// This packet cannot be processed before decoding
+			return true
+		case rquic.TypeUnknown:
+			// This packet can be discarded
 			return false
+		default:
+			panic("rQUIC packet is not recognized even as Unknown packet")
 		}
 	}
 	// } rQUIC
@@ -1340,7 +1357,7 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	// } rQUIC
 	s.connIDManager.SentPacket()
 	s.sendQueue.Send(packet)
-	
+
 	// rQUIC {
 	for _, coded := range codedPkts { // Send coded packets
 		s.connIDManager.SentPacket()

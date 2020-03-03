@@ -13,6 +13,7 @@ type Decoder struct {
 
 	lastScheme uint8
 	coeff      schemes.CoeffUnpacker
+	queuedRecoveredSrc [][]byte
 
 	// Obsolete packets detection
 	nwstCodId     uint8
@@ -25,7 +26,8 @@ type Decoder struct {
 	pollutionCount float64
 }
 
-func (d *Decoder) Process(raw []byte) bool {
+func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, int) {
+	d.lenDCID = currentSCIDLen
 
 	rHdrPos := d.rQuicHdrPos()
 	ptype := raw[rHdrPos+rquic.FieldPosTypeScheme]
@@ -33,26 +35,27 @@ func (d *Decoder) Process(raw []byte) bool {
 	// unprotected packet
 	if ptype == 0 {
 		raw = append(raw[:rHdrPos], raw[rHdrPos+1:]...)
-		return true // forward this packet to QUIC
+		return rquic.TypeUnprotected, len(d.queuedRecoveredSrc)
 	}
 
 	// protected packet
 	if ptype&rquic.MaskType == 0 {
 		if src := d.NewSrc(raw); src != nil {
 			d.optimizeWithSrc(src)
-			return true
+			return rquic.TypeProtected, len(d.queuedRecoveredSrc)
 		}
-		return false
+		return rquic.TypeUnknown, len(d.queuedRecoveredSrc)
 	}
 
 	// coded packet
 	if ptype&rquic.MaskType != 0 {
 		d.NewCod(raw)
 		d.Recover()
+		return rquic.TypeCoded, len(d.queuedRecoveredSrc)
 	}
 
 	// Coded and unknown packets are not passed to QUIC
-	return false
+	return rquic.TypeUnknown, len(d.queuedRecoveredSrc)
 }
 
 func (d *Decoder) NewSrc(raw []byte) (ps *parsedSrc) {
@@ -84,7 +87,7 @@ func (d *Decoder) NewSrcRec(cod *parsedCod) (ps *parsedSrc) { // cod.pld must be
 	lastPos := int(cod.pld[0])*256 + int(cod.pld[1]) /*length*/ - 1 /*1st byte*/ + 3 /*pld offset*/
 
 	raw := append(append([]byte{cod.pld[2]}, cod.quicDCID...), cod.pld[3:lastPos]...)
-	// TODO: Find to whom pass this new SRC & report it as RECOVERED
+	d.queuedRecoveredSrc = append(d.queuedRecoveredSrc, raw)
 
 	// New SRC
 	if d.isObsolete(cod.srcIds[0]) {

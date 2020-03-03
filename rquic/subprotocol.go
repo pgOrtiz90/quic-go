@@ -20,6 +20,8 @@ const (
 const (
     TypeCoded uint8 = iota
     TypeProtected
+    TypeUnprotected
+    TypeUnknown
 )
 
 ////////////////////////////////////////////////////////////////////////// Field
