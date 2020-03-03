@@ -15,8 +15,9 @@ type parsedCod struct {
 	// genSize     int   // is not necessary after remaining is defined
 	remaining int
 
-	coeff  []uint8
-	srcIds []uint8
+	coeff    []uint8
+	srcIds   []uint8
+	quicDCID []uint8
 
 	pld []byte
 }

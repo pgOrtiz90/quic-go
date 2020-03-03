@@ -9,8 +9,7 @@ type Decoder struct {
 	pktsSrc []*parsedSrc
 	pktsCod []*parsedCod
 
-	DCID    *[]byte
-	lenDCID *int // length of DCID
+	lenDCID int // length of DCID
 
 	lastScheme uint8
 	coeff      schemes.CoeffUnpacker
@@ -26,7 +25,7 @@ type Decoder struct {
 	pollutionCount float64
 }
 
-func (d *Decoder) ParseRPacket(raw []byte) bool {
+func (d *Decoder) Process(raw []byte) bool {
 
 	rHdrPos := d.rQuicHdrPos()
 	ptype := raw[rHdrPos+rquic.FieldPosTypeScheme]
@@ -82,9 +81,9 @@ func (d *Decoder) NewSrc(raw []byte) (ps *parsedSrc) {
 
 func (d *Decoder) NewSrcRec(cod *parsedCod) (ps *parsedSrc) { // cod.pld must be fully decoded
 
-	lastPos := int(cod.pld[0])*256 + int(cod.pld[1]) /*lng*/ - 1 /*1st byte*/ + 3 /*pld offset*/
+	lastPos := int(cod.pld[0])*256 + int(cod.pld[1]) /*length*/ - 1 /*1st byte*/ + 3 /*pld offset*/
 
-	raw := append(append([]byte{cod.pld[2]}, *d.DCID...), cod.pld[3:lastPos]...)
+	raw := append(append([]byte{cod.pld[2]}, cod.quicDCID...), cod.pld[3:lastPos]...)
 	// TODO: Find to whom pass this new SRC & report it as RECOVERED
 
 	// New SRC
@@ -107,6 +106,7 @@ func (d *Decoder) NewCod(raw []byte) {
 
 	pc := &parsedCod{
 		remaining: int(raw[rHdrPos+rquic.FieldPosGenSize]),
+		quicDCID:  raw[1 : 1+d.lenDCID], // CODED could be used after Tx changes DCID
 	} // till pc is optimized at the end of this method, remaining == genSize
 
 	// Update scheme

@@ -4,9 +4,9 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic"
 )
 
-func (d *Decoder) lenNotProtected() int { return *d.lenDCID + rquic.SrcHeaderSize }
-func (d *Decoder) rQuicHdrPos() int     { return 1 /*1st byte*/ + *d.lenDCID }
-func (d *Decoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + *d.lenDCID + rquic.SrcHeaderSize }
+func (d *Decoder) lenNotProtected() int { return d.lenDCID + rquic.SrcHeaderSize }
+func (d *Decoder) rQuicHdrPos() int     { return 1 /*1st byte*/ + d.lenDCID }
+func (d *Decoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + d.lenDCID + rquic.SrcHeaderSize }
 
 func idLolderR(older, newer uint8) bool {
 	return (newer - older) > 128
