@@ -2,6 +2,7 @@ package rencoder
 
 import (
 	"time"
+	"bytes"
 
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/schemes"
@@ -10,6 +11,7 @@ import (
 type Encoder struct {
 	rQuicId       uint8
 	lenDCID       int
+	prevDCID      []byte
 	Ratio         *ratio
 	Scheme        uint8
 	Overlap       uint8                  // overlapping generations, i.e. convolutional
@@ -22,6 +24,18 @@ func (e *Encoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + e.lenDCID + rq
 
 func (e *Encoder) Process(raw []byte, ackEliciting bool, latestDCIDLen int) (newCodedPkts [][]byte) {
 	e.lenDCID = latestDCIDLen
+
+	// Check if DCID has changed
+	newDCID := raw[1 : 1+e.lenDCID]
+	doNotResetReduns := true
+	if e.prevDCID != nil {
+		if !bytes.Equal(e.prevDCID, newDCID) {
+			e.prevDCID = newDCID
+			doNotResetReduns = false
+		}
+	} else {
+		e.prevDCID = newDCID
+	}
 
 	// Add rQUIC header to SRC
 	if !ackEliciting { // Not protected
@@ -36,17 +50,26 @@ func (e *Encoder) Process(raw []byte, ackEliciting bool, latestDCIDLen int) (new
 	rQuicHdr = raw[:e.rQuicSrcPldPos()] // we try to send COD before ACK, spin bit should be ok
 	src := e.parseSrc(raw)
 	reduns := 1 // Change reduns or genSize? To be researched...
-	for ind, rb := range e.redunBuilders {
-		rb.AddSrc(src)
-		if rb.ReadyToSend(e.Ratio.Check()) {
-			// multiple gen-s finished at the same time ---> append
-			newCodedPkts = append(newCodedPkts, rb.Assemble(rQuicHdr)...)
-			e.redunBuilders[ind] = schemes.MakeRedunBuilder(e.Scheme, reduns)
-			// TODO: Consider using sync.Pool for coded packets (buffer_pool.go)
+	if doNotResetReduns {
+		for ind, rb := range e.redunBuilders {
+			rb.AddSrc(src)
+			if rb.ReadyToSend(e.Ratio.Check()) {
+				// multiple gen-s finished at the same time ---> append
+				newCodedPkts = append(newCodedPkts, rb.Assemble(rQuicHdr)...)
+				e.redunBuilders[ind] = schemes.MakeRedunBuilder(e.Scheme, reduns)
+				// TODO: Consider using sync.Pool for coded packets (buffer_pool.go)
+			}
 		}
+		e.rQuicId++
+		return
 	}
 
-	e.rQuicId++
+	// if DCID changed, reset redunBuilders
+	for i, rb := range e.redunBuilders {
+		newCodedPkts = append(newCodedPkts, rb.Assemble(rQuicHdr)...)
+		e.redunBuilders[i] = schemes.MakeRedunBuilder(rb.Scheme(), rb.Reduns())
+	}
+	e.rQuicId++ // TODO: consider adding a random number
 	return
 }
 

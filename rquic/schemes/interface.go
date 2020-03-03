@@ -6,6 +6,8 @@ type RedunBuilder interface {
 	ReadyToSend(float64) bool // takes ratio as input
 	Assemble([]byte) [][]byte // Takes rQUIC SRC header, expands it and adds coded payload
 	SeedMaxFieldSize() uint8
+	Scheme() byte
+	Reduns() int
 }
 
 type CoeffUnpacker interface {

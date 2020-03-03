@@ -64,6 +64,14 @@ func (r *redunBuilderRlcSys) SeedMaxFieldSize() uint8 { // TODO: limit SRC paylo
 	return rquic.MaxGenSize
 }
 
+func (r *redunBuilderRlcSys) Scheme() byte {
+	return r.scheme
+}
+
+func (r *redunBuilderRlcSys) Reduns() int {
+	return r.redun
+}
+
 func makeRedunBuilderRlcSys(reduns int) *redunBuilderRlcSys {
 	return &redunBuilderRlcSys{
 		scheme:   rquic.SchemeRlcSys,

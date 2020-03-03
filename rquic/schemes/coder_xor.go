@@ -43,6 +43,14 @@ func (r *redunBuilderXor) SeedMaxFieldSize() uint8 {
 	return 0
 }
 
+func (r *redunBuilderXor) Scheme() byte {
+	return r.scheme
+}
+
+func (r *redunBuilderXor) Reduns() int {
+	return 1
+}
+
 func makeRedunBuilderXor() *redunBuilderXor {
 	rb := redunBuilderXor{
 		scheme: rquic.SchemeXor,
