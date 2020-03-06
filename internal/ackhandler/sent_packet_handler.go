@@ -78,6 +78,7 @@ type sentPacketHandler struct {
 	// rQUIC {
 	// Does PTO interfere with FEC? To Be Researched... Meanwhile, disable PTO with FEC
 	coding bool
+	processingCoded bool
 	// } rQUIC
 }
 
@@ -113,6 +114,14 @@ func (h *sentPacketHandler) CodingEnabled() {
 
 func (h *sentPacketHandler) CodingDisabled() {
 	h.coding = false
+}
+
+func (h *sentPacketHandler) ProcessingCoded() {
+	h.processingCoded = true
+}
+
+func (h *sentPacketHandler) ProcessingCodedFinished() {
+	h.processingCoded = false
 }
 // } rQUIC
 
@@ -220,7 +229,16 @@ func (h *sentPacketHandler) ReceivedAck(ackFrame *wire.AckFrame, withPacketNumbe
 		if encLevel == protocol.Encryption1RTT {
 			ackDelay = utils.MinDuration(ackFrame.DelayTime, h.rttStats.MaxAckDelay())
 		}
-		h.rttStats.UpdateRTT(rcvTime.Sub(p.SendTime), ackDelay, rcvTime)
+		// rQUIC {
+		// If the packet was recovered from a coded one,
+		// rcvTime > rcvTimeThatTheLostOriginalPacketWouldHave
+		// Ignore these packets for RTT update.
+		if h.processingCoded {
+			// } rQUIC
+			h.rttStats.UpdateRTT(rcvTime.Sub(p.SendTime), ackDelay, rcvTime)
+			// rQUIC {
+		}
+		// } rQUIC
 		if h.logger.Debug() {
 			h.logger.Debugf("\tupdated RTT: %s (σ: %s)", h.rttStats.SmoothedRTT(), h.rttStats.MeanDeviation())
 		}

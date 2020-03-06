@@ -57,6 +57,8 @@ type SentPacketHandler interface {
 	// rQUIC {
 	CodingEnabled()
 	CodingDisabled()
+	ProcessingCoded()
+	ProcessingCodedFinished()
 	// } rQUIC
 }
 

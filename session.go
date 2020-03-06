@@ -192,8 +192,11 @@ type session struct {
 	logger utils.Logger
 
 	// rQUIC {
-	encoder *rencoder.Encoder
-	decoder *rdecoder.Decoder
+	encoder            *rencoder.Encoder
+	decoder            *rdecoder.Decoder
+	codingEnabled      bool
+	rQuicBuffer        rQuicReceivedPacketList
+	rQuicLastForwarded byte
 	// } rQUIC
 }
 
@@ -490,10 +493,11 @@ func (s *session) run() error {
 	var closeErr closeError
 
 	// rQUIC {
-	if s.encoder != nil {
+	if s.codingEnabled {
 		s.sentPacketHandler.CodingEnabled()
 		// TODO: Try: Probe = last (re)coded packets
 	}
+	var rcvTime time.Time
 	// } rQUIC
 
 runLoop:
@@ -523,7 +527,18 @@ runLoop:
 			// Only reset the timers if this packet was actually processed.
 			// This avoids modifying any state when handling undecryptable packets,
 			// which could be injected by an attacker.
+			// rQUIC {
+			rcvTime = p.rcvTime
+			// } rQUIC
 			if wasProcessed := s.handlePacketImpl(p); !wasProcessed {
+				// rQUIC {
+				// handlePacketImpl has been changed to call buffering methods,
+				// necessary for in-order delivery of decoded packets.
+				// Some attributes should be updated as the packet is received,
+				// not by the time it will be delivered.
+				s.lastPacketReceivedTime = rcvTime
+				s.keepAlivePingSent = false // TODO: Consider increasing nextKeepAliveTime
+				// } rQUIC
 				continue
 			}
 		case <-s.handshakeCompleteChan:
@@ -701,6 +716,9 @@ func (s *session) handlePacketImpl(rp *receivedPacket) bool {
 }
 
 func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /* was the packet successfully processed */ {
+	// rQUIC {
+	/*          //  moving defer ... p.bufferDecrement  \\
+	// } rQUIC
 	var wasQueued bool
 
 	defer func() {
@@ -709,6 +727,9 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 			p.buffer.Decrement()
 		}
 	}()
+	// rQUIC {
+	*///        \\  to handleSinglePacketFinish         //
+	// } rQUIC
 
 	if hdr.Type == protocol.PacketTypeRetry {
 		return s.handleRetryPacket(hdr, p.data)
@@ -726,28 +747,108 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 	}
 
 	// rQUIC {
-	if !hdr.IsLongHeader && s.decoder != nil {
-		pktType, numRec := s.decoder.Process(p.data, s.srcConnIDLen)
-		if numRec > 0 {
-			// Somehow pass recovered packets to QUIC
-		}
-
-		switch pktType {
-		case rquic.TypeUnprotected, rquic.TypeProtected:
-			// Do nothing, process the packet as usual
-		case rquic.TypeCoded:
-			// Idle timeout should take coded packets into account
-			s.lastPacketReceivedTime = p.rcvTime
-			s.keepAlivePingSent = false
-			// This packet cannot be processed before decoding
-			return true
-		case rquic.TypeUnknown:
-			// This packet can be discarded
-			return false
-		default:
-			panic("rQUIC packet is not recognized even as Unknown packet")
-		}
+	if !hdr.IsLongHeader && s.codingEnabled {
+		return s.maybeDecodeReceivedPacket(p, hdr)
 	}
+	return s.handleSinglePacketFinish(p, hdr)
+}
+
+func (s *session) maybeDecodeReceivedPacket(p *receivedPacket, hdr *wire.Header) bool {
+	if s.decoder == nil {
+		panic("Trying to decode without a decoder")
+	}
+
+	pktType, numRec := s.decoder.Process(p.data, s.srcConnIDLen)
+	if numRec > 0 {
+		s.rQuicBuffer.order()
+	}
+
+	switch pktType {
+	case rquic.TypeUnprotected:
+		// Do nothing, process the packet as usual
+		return s.handleSinglePacketFinish(p, hdr)
+	case rquic.TypeCoded, rquic.TypeProtected:
+		s.rQuicBuffer.addNewReceivedPacket(p, hdr)
+		s.rQuicBufferFwdAll()
+		return true
+	case rquic.TypeUnknown:
+		// This packet can be discarded
+		return false
+	default:
+		panic("rQUIC packet is not recognized even as Unknown packet")
+	}
+}
+
+func (s *session) rQuicBufferFwdAll() {
+	var isSource, isObsolete bool
+	for e := s.rQuicBuffer.oldest(); e != nil; e = e.getNewer() {
+		isObsolete = e.isObsolete()
+		if e.delivered {
+			if isObsolete {
+				s.rQuicBuffer.remove(e)
+			}
+			continue
+		}
+		// the packet has not been delivered yet
+		isSource = e.isSource()
+		if isObsolete {
+			if isSource {
+				s.rQuicBufferFwd(e)
+				//  if e.wasCoded() {
+				//      Increased e.rp.rcvTime should not affect reno (the default) CC
+				//  }
+			}
+			s.rQuicBuffer.remove(e)
+			e.rp.buffer.Decrement()
+			e.rp.buffer.MaybeRelease()
+			continue
+		}
+		// packet is neither delivered nor obsolete
+		if *e.id == s.rQuicLastForwarded {
+			if isSource {
+				// This packet has already been delivered
+				// TODO: Generate an error or panic
+			} else {
+				// Coded packet, do nothing
+				continue
+			}
+		}
+		if *e.id == s.rQuicLastForwarded+1 {
+			if isSource {
+				if e.wasCoded() {
+					s.sentPacketHandler.ProcessingCoded()
+					s.rQuicBufferFwd(e)
+					s.sentPacketHandler.ProcessingCodedFinished()
+				} else {
+					s.rQuicBufferFwd(e)
+				}
+				e.rp.buffer.MaybeRelease()
+				e.delivered = true
+			}
+			continue
+		}
+		// Neither obsolete nor consecutive
+		return
+	}
+}
+
+func (s *session) rQuicBufferFwd(e *rQuicReceivedPacket) {
+	s.handleSinglePacketFinish(e.rp, e.hdr)
+	e.removeRQuicHeader()
+	s.rQuicLastForwarded = *e.id
+}
+
+func (s *session) handleSinglePacketFinish(p *receivedPacket, hdr *wire.Header) bool {
+
+	// Moving this piece of code from handelSinglePacket
+	var wasQueued bool
+
+	defer func() {
+		// Put back the packet buffer if the packet wasn't queued for later decryption.
+		if !wasQueued {
+			p.buffer.Decrement()
+		}
+	}()
 	// } rQUIC
 
 	packet, err := s.unpacker.Unpack(hdr, p.rcvTime, p.data)
@@ -1349,7 +1450,7 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	s.logPacket(packet)
 	// rQUIC {
 	var codedPkts [][]byte
-	if s.encoder != nil {
+	if s.codingEnabled {
 		if !packet.header.IsLongHeader {
 			codedPkts = s.encoder.Process(packet.raw, packet.IsAckEliciting(), s.connIDManager.activeConnectionID.Len())
 		}
