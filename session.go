@@ -758,8 +758,8 @@ func (s *session) maybeDecodeReceivedPacket(p *receivedPacket, hdr *wire.Header)
 		panic("Trying to decode without a decoder")
 	}
 
-	pktType, numRec := s.decoder.Process(p.data, s.srcConnIDLen)
-	if numRec > 0 {
+	pktType, thereAreRecovered := s.decoder.Process(p.data, s.srcConnIDLen)
+	if thereAreRecovered {
 		s.rQuicBuffer.order()
 	}
 
@@ -838,8 +838,8 @@ func (s *session) rQuicBufferFwdAll() {
 }
 
 func (s *session) rQuicBufferFwd(e *rQuicReceivedPacket) {
-	s.handleSinglePacketFinish(e.rp, e.hdr)
 	e.removeRQuicHeader()
+	s.handleSinglePacketFinish(e.rp, e.hdr)
 	s.rQuicLastForwarded = *e.id
 }
 
