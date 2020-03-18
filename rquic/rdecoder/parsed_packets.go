@@ -4,34 +4,50 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic/gf"
 )
 
-type parsedSrc struct {
-	id  uint8
-	pld []byte
+type parsedPacket interface {
+	NewestGen() uint8
+	OldestGen() uint8
+	NewestPkt() uint8
+	OldestPkt() uint8
 }
 
+type parsedSrc struct {
+	id       uint8
+	lastGen  uint8
+	overlap  uint8
+	fwd      *byte
+	pld      []byte
+	codedLen []byte
+}
+
+func (s *parsedSrc) NewestGen() uint8 { return s.lastGen }
+func (s *parsedSrc) OldestGen() uint8 { return s.lastGen - s.overlap + 1 }
+func (s *parsedSrc) NewestPkt() uint8 { return s.id }
+func (s *parsedSrc) OldestPkt() uint8 { return s.id }
+
 type parsedCod struct {
-	// id          uint8 // is not necessary after srcIds are generated
+	id uint8
 	// scheme      uint8 // is not necessary after Decoder.lastScheme is updated
 	// genSize     int   // is not necessary after remaining is defined
 	remaining int
 
-	coeff    []uint8
-	srcIds   []uint8
-	quicDCID []uint8
+	coeff  []uint8
+	srcIds []uint8
+	genId  uint8
+	fwd    *byte
 
-	pld []byte
+	pld      []byte
+	codedLen []byte
+	codedPld []byte
 }
 
-func (c *parsedCod) last() int {
-	return len(c.coeff) - 1
-}
-
-func (c *parsedCod) lastId() uint8 {
-	return c.srcIds[len(c.srcIds)-1]
-}
+func (c *parsedCod) NewestGen() uint8 { return c.genId }
+func (c *parsedCod) OldestGen() uint8 { return c.genId }
+func (c *parsedCod) NewestPkt() uint8 { return c.srcIds[0] }
+func (c *parsedCod) OldestPkt() uint8 { return c.srcIds[len(c.srcIds)-1] }
 
 func (c *parsedCod) findSrcId(id uint8) (int, bool) {
-	if idLolderR(id, c.srcIds[0]) || idLolderR(c.lastId(), id) {
+	if idLolderR(id, c.srcIds[0]) || idLolderR(c.OldestPkt(), id) {
 		return 0, false
 	}
 	// https://yourbasic.org/golang/find-search-contains-slice/
@@ -49,32 +65,34 @@ func (c *parsedCod) findSrcId(id uint8) (int, bool) {
 func (c *parsedCod) removeSrc(src *parsedSrc, ind int) {
 	cf := c.coeff[ind]
 	if cf == 1 {
-		for i, v := range src.pld {
-			c.pld[i] ^= v
+		for i, v := range src.codedLen {
+			c.codedLen[i] ^= v
 		}
-	} else {
 		for i, v := range src.pld {
-			c.pld[i] ^= gf.Mult(cf, v)
+			c.codedPld[i] ^= v
 		}
+		return
+	}
+	for i, v := range src.codedLen {
+		c.codedLen[i] ^= gf.Mult(cf, v)
+	}
+	for i, v := range src.pld {
+		c.codedPld[i] ^= gf.Mult(cf, v)
 	}
 }
 
 func (c *parsedCod) wipeZeros() {
-	newCoeff := make([]uint8, 0, len(c.coeff))
-	newSrcIds := make([]uint8, 0, len(c.coeff))
+	var j int
 	for i, cf := range c.coeff {
 		if cf != 0 {
-			newCoeff = append(newCoeff, cf)
-			newSrcIds = append(newSrcIds, c.srcIds[i])
+			c.coeff[j] = cf
+			c.srcIds[j] = c.srcIds[i]
+			j++
 		}
 	}
-	c.coeff = newCoeff
-	c.srcIds = newSrcIds
-
-	c.remaining = len(c.coeff)
-	if c.remaining == 1 {
-		c.scaleDown()
-	}
+	c.coeff = c.coeff[:j]
+	c.srcIds = c.srcIds[:j]
+	c.remaining = j
 }
 
 func (c *parsedCod) scaleDown() {
@@ -100,7 +118,7 @@ func (c *parsedCod) attachCod(cod *parsedCod, codInd int) {
 	//            XXX   |       1XX             1XX      <    1
 	//          XXXX    <        1X              1X      |     1
 	//            XXX             1               1     cod     1
-	//               XXX           1XX             1XX     <     1 Y
+	//               XXX           1XX             1XX     <     1Y
 	//               XXX            1X              1X    cod     1X
 	//
 	//  0 <= c.srcIds[0] - cod.srcIds[0] < 128
@@ -111,40 +129,42 @@ func (c *parsedCod) attachCod(cod *parsedCod, codInd int) {
 	}
 
 	j := 0 // aux. var. for iteration over  --< cod.srcIds >--
+	codCfLen := len(cod.coeff)
 
 	cf := gf.Div(c.coeff[ind], cod.coeff[codInd])
 
 	if cf != 1 {
 		// Update coefficients
-		for i := 0; i < len(c.srcIds); i++ {
-			if cod.srcIds[j] == c.srcIds[i] {
+		for i := 0; i < len(c.srcIds) && j < codCfLen; {
+			if c.srcIds[i] == cod.srcIds[j] {
 				c.coeff[i] ^= gf.Mult(cod.coeff[j], cf)
+				i++
 				j++
-				// i++
-			} else if c.srcIds[i] > cod.srcIds[j] {
-				if cod.coeff[j] > 0 {
-					c.srcIds = append(append(c.srcIds[:i], cod.srcIds[j]), c.srcIds[i:]...)
-					c.coeff = append(append(c.coeff[:i], gf.Mult(cod.coeff[j], cf)), c.coeff[i:]...)
-					j++
-				}
+				continue
 			}
-			// if c.srcIds[i] < cod.srcIds[j] {i++}
-			if j == len(cod.srcIds) {
-				break
+			if c.srcIds[i] < cod.srcIds[j] {
+				i++
+				continue
 			}
+			//if c.srcIds[i] > cod.srcIds[j] {
+				c.srcIds = append(append(c.srcIds[:i], cod.srcIds[j]), c.srcIds[i:]...)
+				c.coeff = append(append(c.coeff[:i], gf.Mult(cod.coeff[j], cf)), c.coeff[i:]...)
+				j++
+			//	continue
+			//}
 		}
-		if d := len(cod.srcIds) - j; d > 0 {
-			prevLen := len(c.coeff)
+		if j < codCfLen {
 			c.srcIds = append(c.srcIds, cod.srcIds[j:]...)
-			c.coeff = append(c.coeff, make([]uint8, d)...)
-			for i := prevLen; i < len(c.coeff); i++ {
+			c.coeff = append(c.coeff, make([]uint8, codCfLen-j)...)
+			for i := len(c.coeff); i < codCfLen; i++ {
 				c.coeff[i] = gf.Mult(cod.coeff[j], cf)
 				j++
 			}
 		}
 		// Update payload
-		if diffLen := len(cod.pld) - len(c.pld); diffLen > 0 {
-			c.pld = append(c.pld, make([]uint8, diffLen)...)
+		if codLen := len(cod.pld); codLen > len(c.pld) {
+			// Coded packets MUST NOT be aliased with other QUIC packets in the same UDP datagram!
+			c.pld = c.pld[:codLen]
 		}
 		for i, v := range cod.pld {
 			c.pld[i] ^= gf.Mult(v, cf)
@@ -152,35 +172,37 @@ func (c *parsedCod) attachCod(cod *parsedCod, codInd int) {
 		return
 	}
 
+	// if cf == 1
+
 	// Update coefficients
 	for i := 0; i < len(c.srcIds); i++ {
-		if cod.srcIds[j] == c.srcIds[i] {
+		if c.srcIds[i] == cod.srcIds[j] {
 			c.coeff[i] ^= cod.coeff[j]
+			i++
 			j++
-			// i++
-		} else if c.srcIds[i] > cod.srcIds[j] {
-			if cod.coeff[j] > 0 {
-				c.srcIds = append(append(c.srcIds[:i], cod.srcIds[j]), c.srcIds[i:]...)
-				c.coeff = append(append(c.coeff[:i], cod.coeff[j]), c.coeff[i:]...)
-				j++
-			}
+			continue
 		}
-		// if c.srcIds[i] < cod.srcIds[j] {i++}
-		if j == len(cod.srcIds) {
-			break
+		if c.srcIds[i] < cod.srcIds[j] {
+			i++
+			continue
 		}
+		//if c.srcIds[i] > cod.srcIds[j] {
+			c.srcIds = append(append(c.srcIds[:i], cod.srcIds[j]), c.srcIds[i:]...)
+			c.coeff = append(append(c.coeff[:i], cod.coeff[j]), c.coeff[i:]...)
+			j++
+		//	continue
+		//}
 	}
-	if d := len(cod.srcIds) - j; d > 0 {
+	if j < codCfLen {
 		c.srcIds = append(c.srcIds, cod.srcIds[j:]...)
 		c.coeff = append(c.coeff, cod.coeff[j:]...)
 	}
 	// Update payload
-	loopLim := len(cod.pld)
-	if len(c.pld) < loopLim {
-		loopLim = len(c.pld)
-		c.pld = append(c.pld, cod.pld[loopLim:]...)
+	if codLen := len(cod.pld); codLen > len(c.pld) {
+		// Coded packets MUST NOT be aliased with other QUIC packets in the same UDP datagram!
+		c.pld = c.pld[:codLen]
 	}
-	for i := 0; i < loopLim; i++ {
-		c.pld[i] ^= cod.pld[i]
+	for i, v := range cod.pld {
+		c.pld[i] ^= gf.Mult(v, cf)
 	}
 }

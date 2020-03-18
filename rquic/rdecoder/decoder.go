@@ -13,11 +13,13 @@ type Decoder struct {
 
 	lastScheme uint8
 	coeff      schemes.CoeffUnpacker
-	queuedRecoveredSrc [][]byte
+	didRecover bool
 
 	// Obsolete packets detection
-	nwstCodId     uint8
-	obsoleteXhold uint8
+	lastSeenGen        uint8
+	lastSeenPkt        uint8
+	obsoleteXhold      uint8 // rQUIC ID of the last valid packet
+	obsoleteSrcChecked bool
 
 	srcAvbl           []uint8 // used for building srcMiss (missing SRC)
 	srcMiss           []uint8 // used for Decoder.Recover()
@@ -26,82 +28,93 @@ type Decoder struct {
 	pollutionCount float64
 }
 
-func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, int) {
+func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	d.lenDCID = currentSCIDLen
+	d.didRecover = false
+	d.obsoleteSrcChecked = false
 
 	rHdrPos := d.rQuicHdrPos()
 	ptype := raw[rHdrPos+rquic.FieldPosTypeScheme]
 
 	// unprotected packet
 	if ptype == 0 {
-		raw = append(raw[:rHdrPos], raw[rHdrPos+1:]...)
-		return rquic.TypeUnprotected, len(d.queuedRecoveredSrc)
+		return rquic.TypeUnprotected, d.didRecover
 	}
 
 	// protected packet
 	if ptype&rquic.MaskType == 0 {
 		if src := d.NewSrc(raw); src != nil {
-			d.optimizeWithSrc(src)
-			return rquic.TypeProtected, len(d.queuedRecoveredSrc)
+			d.optimizeWithSrc(src, 0)
+			return rquic.TypeProtected, d.didRecover
 		}
-		return rquic.TypeUnknown, len(d.queuedRecoveredSrc)
+		return rquic.TypeUnknown, d.didRecover
 	}
 
 	// coded packet
 	if ptype&rquic.MaskType != 0 {
 		d.NewCod(raw)
 		d.Recover()
-		return rquic.TypeCoded, len(d.queuedRecoveredSrc)
+		return rquic.TypeCoded, d.didRecover
 	}
 
 	// Coded and unknown packets are not passed to QUIC
-	return rquic.TypeUnknown, len(d.queuedRecoveredSrc)
+	return rquic.TypeUnknown, d.didRecover
 }
 
-func (d *Decoder) NewSrc(raw []byte) (ps *parsedSrc) {
+func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
 	rHdrPos := d.rQuicHdrPos()
 
-	id := raw[rHdrPos+rquic.FieldPosId]
-	if d.isObsolete(id) {
-		return
+	ps := &parsedSrc{
+		id:      raw[rHdrPos+rquic.FieldPosId],
+		lastGen: raw[rHdrPos+rquic.FieldPosLastGen],
+		overlap: raw[rHdrPos+rquic.FieldPosOverlap],
+		fwd:     &raw[rHdrPos+rquic.FieldPosTypeScheme], // reusing scheme field
+		pld:     raw[d.rQuicSrcPldPos():],
+	}
+	ps.codedLen = rquic.PldLenPrepare(len(ps.pld))
+
+	d.updateScope(ps)
+	if d.isObsoletePktAndUpdateXhold(ps) {
+		return nil
 	} // if SRC is TOO OLD
-	if d.srcAvblUpdate(id) {
-		return
+	if d.srcAvblUpdate(ps.id) {
+		return nil
 	} // or REPEATED, discard it
 
-	// Parse & store SRC
-	ps = &parsedSrc{
-		id:  id,
-		pld: d.parseSrc(raw),
-	}
+	*ps.fwd = rquic.FlagSource
+	raw[rHdrPos+rquic.FieldPosGenSize] = 0 // rQUIC field reused for showing number of coefficients in the header
 	d.pktsSrc = append(d.pktsSrc, ps)
 
-	// Remove rQUIC header and leave raw packet ready for QUIC
-	raw = append(raw[:rHdrPos], raw[d.rQuicSrcPldPos():]...)
-
-	return
+	return ps
 }
 
-func (d *Decoder) NewSrcRec(cod *parsedCod) (ps *parsedSrc) { // cod.pld must be fully decoded
-
-	lastPos := int(cod.pld[0])*256 + int(cod.pld[1]) /*length*/ - 1 /*1st byte*/ + 3 /*pld offset*/
-
-	raw := append(append([]byte{cod.pld[2]}, cod.quicDCID...), cod.pld[3:lastPos]...)
-	d.queuedRecoveredSrc = append(d.queuedRecoveredSrc, raw)
-
-	// New SRC
-	if d.isObsolete(cod.srcIds[0]) {
-		return
-	} // if SRC is TOO OLD
-	if d.srcAvblUpdate(cod.srcIds[0]) {
-		return
-	} //  or REPEATED, discard it
-	ps = &parsedSrc{
-		id:  cod.srcIds[0],
-		pld: cod.pld[:lastPos],
+func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
+	// Recovered too late or already received in a retransmission? Discard.
+	if d.isObsoleteId(cod.srcIds[0]) || d.srcAvblUpdate(cod.srcIds[0]) {
+		*cod.fwd |= rquic.FlagObsolete
+		return nil
 	}
+	// cod.pld must be fully decoded. If not, discard.
+	if cod.remaining > 1 {
+		// TODO: Log not decoded decoded packets.
+		*cod.fwd |= rquic.FlagObsolete
+		return nil
+	}
+	cod.scaleDown()
+	*cod.fwd |= rquic.FlagSource
+
+	ps := &parsedSrc{
+		id: cod.srcIds[0],
+		//// These fields are consulted only when brand new packet is received
+		// lastSeenGen: cod.genId
+		// overlap: 0
+		fwd: cod.fwd,
+		pld: cod.pld[rquic.LenOfSrcLen:rquic.PldLenRead(cod.pld, 0)],
+	}
+	d.updateScope(ps)
 	d.pktsSrc = append(d.pktsSrc, ps)
-	return
+	d.didRecover = true
+	return ps
 }
 
 func (d *Decoder) NewCod(raw []byte) {
@@ -109,22 +122,8 @@ func (d *Decoder) NewCod(raw []byte) {
 
 	pc := &parsedCod{
 		remaining: int(raw[rHdrPos+rquic.FieldPosGenSize]),
-		quicDCID:  raw[1 : 1+d.lenDCID], // CODED could be used after Tx changes DCID
+		genId:     raw[rHdrPos+rquic.FieldPosGenId],
 	} // till pc is optimized at the end of this method, remaining == genSize
-
-	// Update scheme
-	// The use of different schemes at a time is very unlikely.
-	newScheme := raw[rHdrPos+rquic.FieldPosTypeScheme] & rquic.MaskScheme
-	if d.lastScheme != newScheme {
-		d.coeff = schemes.MakeCoeffUnpacker(newScheme)
-		d.lastScheme = newScheme
-	}
-
-	// Get the coefficients
-	pc.coeff = d.coeff.Unpack(raw, rHdrPos)
-	if d.isObsolete(pc.coeff[0]) {
-		return
-	}
 
 	// List of SRC IDs covered by this COD
 	pc.srcIds = make([]uint8, pc.remaining)
@@ -133,20 +132,31 @@ func (d *Decoder) NewCod(raw []byte) {
 	for i := 1; i < pc.remaining; i++ {
 		pc.srcIds[i] = pc.srcIds[i-1] + 1
 	}
+	d.updateScope(pc)
+	if d.isObsoletePktAndUpdateXhold(pc) {
+		return
+	}
+
+	// Update scheme
+	// The use of different schemes at a time is very unlikely.
+	newScheme := raw[rHdrPos+rquic.FieldPosTypeScheme] & rquic.MaskScheme
+	if d.lastScheme != newScheme {
+		d.coeff = schemes.MakeCoeffUnpacker(newScheme)
+		d.lastScheme = newScheme
+	}
+	// Get the coefficients
+	pc.coeff = d.coeff.Unpack(raw, rHdrPos)
 
 	// Store coded payload
-	totalOverh := d.coeff.CoeffFieldSize()
-	if totalOverh < 0 {
-		totalOverh = (0 - totalOverh) * pc.remaining
+	coeffsInHdr := d.coeff.CoeffFieldSize() // Coefficients in rQUIC header
+	if coeffsInHdr < 0 {
+		coeffsInHdr = (0 - coeffsInHdr) * pc.remaining
 	}
-	totalOverh = rHdrPos + rquic.FieldPosSeed + totalOverh /*coefficients*/
-	pc.pld = make([]byte, len(raw)-totalOverh)
-	copy(pc.pld, raw[totalOverh:])
-
-	// Update obsolete packets detection threshold
-	if idLolderR(d.nwstCodId, pcId) {
-		d.updateObsoleteXhold(pc)
-	}
+	// The next line is necessary for Rx buffer correctly rescuing decoded pld
+	raw[rHdrPos+rquic.FieldPosGenSize] = uint8(coeffsInHdr)
+	pc.pld = raw[rHdrPos+rquic.FieldPosSeed+coeffsInHdr:]
+	pc.codedLen = pc.pld[:rquic.LenOfSrcLen]
+	pc.codedPld = pc.pld[rquic.LenOfSrcLen:]
 
 	// Remove existing SRC from this new COD
 	if srcs, inds, genNotFull := d.optimizeThisCodAim(pc); genNotFull {
@@ -157,14 +167,13 @@ func (d *Decoder) NewCod(raw []byte) {
 }
 
 func MakeDecoder() *Decoder {
-	return &Decoder{
-		// DCID:               // TODO: Find where to get DCID & its length
-		// lenDCID:
-
-		pollutionCount: rquic.MinRatio * rquic.RxRedunMarg,
-		// TODO: implement pollution attack detection
-		// if SRC --> d.pollutionCount++
+	return &Decoder{ // if d.pollutionCount < 0 --> Close this path/connection
 		// if COD --> d.pollutionCount -= rquic.MinRate
-		// if d.pollutionCount < 0 --> Close this path/connection
+		// if SRC --> d.pollutionCount++
+		// TODO: implement pollution attack detection
+		pollutionCount: rquic.MinRatio * rquic.RxRedunMarg,
+
+		srcAvbl: make([]byte, 0, (1+rquic.GenMargin)*rquic.MaxGenSize),
+		srcMiss: make([]byte, 0, (1+rquic.GenMargin)*rquic.MaxGenSize),
 	}
 }

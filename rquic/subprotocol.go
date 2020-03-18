@@ -1,7 +1,5 @@
 package rquic
 
-import "github.com/lucas-clemente/quic-go/rquic/rdecoder"
-
 ////////////////////////////////////////////////////////////////////////// Scheme
 const (
 	SchemeNoCode uint8 = iota // 0x00
@@ -57,7 +55,8 @@ const ( //---------------------------------------------------------------- Field
 	FieldPosId         int = FieldPosTypeScheme + FieldSizeTypeScheme
 	FieldPosLastGen    int = FieldPosId + FieldSizeId           // source
 	FieldPosOverlap    int = FieldPosLastGen + FieldSizeLastGen // source
-	FieldPosGenSize    int = FieldPosId + FieldSizeId           // coded
+	FieldPosGenId      int = FieldPosId + FieldSizeId           // coded
+	FieldPosGenSize    int = FieldPosGenId + FieldSizeGenId     // coded
 	FieldPosSeed       int = FieldPosGenSize + FieldSizeGenSize // coded
 )
 
@@ -73,9 +72,31 @@ const (
 
 ////////////////////////////////////////////////////////////////////////// Min & Max
 const (
-	MaxGf       int            = 255 // GF(2**8)
-	MaxGenSize  uint8          = 63  // The bigger, the smaller SRC size in RLNC
-	MinRatio    float64        = 8   // (g+r)(1-a) >= g; a = 11% --> g/r <= 8.0909
-	RxRedunMarg float64        = 2   // If more COD than this --> Pollution!
-	GenMargin   rdecoder.GenId = 1   // Older generations than the last one to keep
+	MaxGf       int     = 255 // GF(2**8)
+	MaxGenSize  uint8   = 63  // The bigger, the smaller SRC size in RLNC
+	MinRatio    float64 = 8   // (g+r)(1-a) >= g; a = 11% --> g/r <= 8.0909
+	RxRedunMarg float64 = 2   // If more COD than this --> Pollution!
+	GenMargin   uint8   = 1   // Older generations than the last one to keep
 )
+
+////////////////////////////////////////////////////////////////////////// functions
+
+func PldLenRead(slice []byte, ind int) (pldLen int) {
+	for i := 0; i < LenOfSrcLen; i++ {
+		pldLen = pldLen<<8 + int(slice[ind])
+		ind++
+	}
+	return
+}
+
+func PldLenPrepare(pldLen int) []byte {
+	if pldLen == 0 {
+		return make([]byte, LenOfSrcLen)
+	}
+	slice := make([]byte, LenOfSrcLen)
+	for i := LenOfSrcLen - 1; i >= 0; i-- {
+		slice[i] = byte(pldLen % 256)
+		pldLen >>= 8
+	}
+	return slice
+}

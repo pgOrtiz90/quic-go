@@ -1,31 +1,38 @@
 package rdecoder
 
-func (d *Decoder) optimizeWithSrc(src *parsedSrc) {
+import "github.com/lucas-clemente/quic-go/rquic"
+
+func (d *Decoder) optimizeWithSrc(src *parsedSrc, srcIndOffset int) {
 	var cod *parsedCod
 	for i := 0; i < len(d.pktsCod); i++ {
-		// Remove obsolete COD
-		//         | ,--- obsoleteXhold
-		//   [* * *|* * * * * * *]
-		//   /     |           /
-		//  /                 /
-		//  coeff[0]         coeff[last]
-		//          Which one?
-		for d.isObsolete(d.pktsCod[i].coeff[0]) { //coeff[d.pktsCod[i].last()]) {
-			d.removeCodNoOrder(i)
+		if i >= srcIndOffset {
+			for d.isObsoletePkt(d.pktsCod[i]) {
+				d.removeCodNoOrder(i)
+				*d.pktsCod[i].fwd |= rquic.FlagObsolete
+			}
 		}
 		cod = d.pktsCod[i]
 		// Remove SRC from COD, if COD protects it
 		if ind, ok := cod.findSrcId(src.id); ok {
-			cod.removeSrc(src, ind)
-			// If COD decoded, prepare new SRC
 			cod.remaining--
+			if cod.remaining == 0 {
+				d.removeCodNoOrder(i)
+				*cod.fwd |= rquic.FlagObsolete
+				i--
+				continue
+			}
+			cod.removeSrc(src, ind)
 			// Remove only 1 SRC --> reslicing, not cod.wipeZeros
 			cod.coeff = append(cod.coeff[:i], cod.coeff[i+1:]...)
 			cod.srcIds = append(cod.srcIds[:i], cod.srcIds[i+1:]...)
 			if cod.remaining == 1 {
 				if ns := d.NewSrcRec(cod); ns != nil {
-					d.optimizeWithSrc(ns)
+					d.removeCodNoOrder(i)
+					d.optimizeWithSrc(ns, i+1)
+					// Previous call to optimizeWithSrc has finished obsolete packet check. Stop checking.
+					srcIndOffset = len(d.pktsCod)
 				}
+				// COD is decoded and converted to SRC, remove it from the list of COD
 				d.removeCodNoOrder(i)
 				i--
 			}
@@ -39,18 +46,24 @@ func (d *Decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc,
 	notFull = true
 
 	for i := 0; i < len(d.pktsSrc); i++ {
-		for d.isObsolete(d.pktsSrc[i].id) {
-			d.removeSrcNoOrder(i) // remove obsolete SRC
+		for d.isObsoletePkt(d.pktsSrc[i]) {
+			d.removeSrcNoOrder(i)
 		}
-		if notFull { // main for loop is not broken for obsolete SRC removal
+		if i >= len(d.pktsSrc) {
+			return
+		}
+		if notFull {
 			if ind, ok := cod.findSrcId(d.pktsSrc[i].id); ok {
 				availableSrc = append(availableSrc, d.pktsSrc[i])
 				inds = append(inds, ind)
 				notFull = len(availableSrc) < cod.remaining
 			}
+		} else if d.obsoleteSrcChecked {
+			return
 		}
+		// main for loop is not broken for obsolete SRC removal
 	}
-
+	d.obsoleteSrcChecked = true
 	return
 }
 
@@ -68,10 +81,10 @@ func (d *Decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []
 	}
 	// if !codIsUseful --> cod.remaining == 1; cod.remaining == 0 --> this method is not called
 
-	cod.scaleDown()
 	if ns := d.NewSrcRec(cod); ns != nil {
-		d.optimizeWithSrc(ns)
+		d.optimizeWithSrc(ns, 0)
 	}
+	// When this method is called, COD is not stored yet, no need(way) to remove it from pktsCod.
 
 	return
 }
