@@ -33,7 +33,8 @@ const (
 //    [   1st byte   ]
 //    [                 Destination Connection ID                    ]
 //    [ type  scheme ][    pkt id    ][    gen id    ][  gen.  size  ]
-//    [ seed / coeff ]
+//    [ seed / coeff   ... ... ... ... ... ... ... ... ... ... ... ...
+//    ...  up to MaxGenSize * n (n /*coeff size*/ = /*always(?)*/ 1) ]
 const ( //---------------------------------------------------------------- FieldSize
 	FieldSizeTypeScheme int = 1
 	FieldSizeId         int = 1
@@ -47,9 +48,12 @@ const ( //---------------------------------------------------------------- Field
 	CodPreHeaderSize int = FieldSizeTypeScheme + FieldSizeId + FieldSizeGenId + FieldSizeGenSize
 	LenOfSrcLen      int = 2 // COD payload header, shows decoded SRC length
 
-	OverheadNoCoeff int = CodPreHeaderSize + LenOfSrcLen
+	OverheadNoCoeff int = CodPreHeaderSize + LenOfSrcLen + 1 /*1st byte*/
 	OverheadMax     int = OverheadNoCoeff + int(MaxGenSize)
 )
+
+var seedFieldMaxSizeUpdate int
+
 const ( //---------------------------------------------------------------- FieldPos
 	FieldPosTypeScheme int = 0
 	FieldPosId         int = FieldPosTypeScheme + FieldSizeTypeScheme
@@ -99,4 +103,12 @@ func PldLenPrepare(pldLen int) []byte {
 		pldLen >>= 8
 	}
 	return slice
+}
+
+func Overhead() int {
+	return OverheadNoCoeff + seedFieldMaxSizeUpdate
+}
+
+func SeedFieldMaxSizeUpdate(n int) {
+	seedFieldMaxSizeUpdate = n
 }

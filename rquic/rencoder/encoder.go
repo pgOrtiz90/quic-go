@@ -3,9 +3,9 @@ package rencoder
 import (
 	"time"
 	"bytes"
-
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/schemes"
+	"github.com/lucas-clemente/quic-go/internal/utils"
 )
 
 type Encoder struct {
@@ -74,13 +74,19 @@ func (e *Encoder) Process(raw []byte, ackEliciting bool, latestDCIDLen int) (new
 }
 
 func (e *Encoder) parseSrc(raw []byte) []byte {
-	// TODO: same parseSrc as decoder, consider merging
 	lng := len(raw) - e.lenNotProtected()
-	pldHdr := make([]byte, 3)
-	pldHdr[0] = byte(lng / 256)
-	pldHdr[1] = byte(lng % 256)
-	pldHdr[2] = raw[0] // 1st byte, which is partially encrypted
-	return append(pldHdr, raw[e.rQuicSrcPldPos():]...)
+	// 1st byte, which is partially encrypted .....______
+	return append(append(rquic.PldLenPrepare(lng), raw[0]), raw[e.rQuicSrcPldPos():]...)
+	// TODO: manage memory (too much appending)
+}
+
+// updateRQuicOverhead has to be called whenever a coding scheme is changed
+func (e *Encoder) updateRQuicOverhead() {
+	var sizeSeedCoeff int
+	for _, rb := range e.redunBuilders {
+		sizeSeedCoeff = utils.Max(sizeSeedCoeff, int(rb.SeedMaxFieldSize()))
+	}
+	rquic.SeedFieldMaxSizeUpdate(sizeSeedCoeff)
 }
 
 func (e *Encoder) DisableCoding() {
@@ -121,6 +127,7 @@ func MakeEncoder(
 	for i := range enc.redunBuilders {
 		enc.redunBuilders[i] = schemes.MakeRedunBuilder(scheme, 1)
 	}
+	rquic.SeedFieldMaxSizeUpdate(int(enc.redunBuilders[0].SeedMaxFieldSize()))
 
 	return enc
 }

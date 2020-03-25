@@ -12,6 +12,7 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
+	"github.com/lucas-clemente/quic-go/rquic"
 )
 
 type packer interface {
@@ -154,6 +155,10 @@ type packetPacker struct {
 
 	maxPacketSize          protocol.ByteCount
 	numNonAckElicitingAcks int
+
+	// rQUIC {
+	coding bool
+	// } rQUIC
 }
 
 var _ packer = &packetPacker{}
@@ -187,6 +192,16 @@ func newPacketPacker(
 		maxPacketSize:       getMaxPacketSize(remoteAddr),
 	}
 }
+
+// rQUIC {
+func (p *packetPacker) CodingEnabled() {
+	p.coding = true
+}
+
+func (p *packetPacker) CodingDisabled() {
+	p.coding = false
+}
+// } rQUIC
 
 func (p *packetPacker) handshakeConfirmed() bool {
 	return p.droppedInitial && p.droppedHandshake
@@ -396,6 +411,13 @@ func (p *packetPacker) maybePackAppDataPacket() (*packedPacket, error) {
 	headerLen := header.GetLength(p.version)
 
 	maxSize := p.maxPacketSize - protocol.ByteCount(sealer.Overhead()) - headerLen
+	// rQUIC {
+	if encLevel == protocol.Encryption1RTT {
+		if p.coding {
+			maxSize -= protocol.ByteCount(rquic.Overhead())
+		}
+	}
+	// } rQUIC
 	payload := p.composeNextPacket(maxSize)
 
 	// check if we have anything to send
@@ -574,10 +596,22 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 	packetBuffer := getPacketBuffer()
 	buffer := bytes.NewBuffer(packetBuffer.Slice[:0])
 
+	// rQUIC {
+	var rquicOv int
+	if encLevel == protocol.Encryption1RTT {
+		if p.coding {
+			rquicOv = rquic.SrcHeaderSize
+		}
+	}
+	// } rQUIC
+
 	if err := header.Write(buffer, p.version); err != nil {
 		return nil, err
 	}
 	payloadOffset := buffer.Len()
+	// rQUIC {
+	payloadOffset += rquicOv
+	// } rQUIC
 
 	if payload.ack != nil {
 		if err := payload.ack.Write(buffer, p.version); err != nil {
@@ -606,6 +640,15 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 	raw = raw[0 : buffer.Len()+sealer.Overhead()]
 
 	pnOffset := payloadOffset - int(header.PacketNumberLen)
+	// rQUIC {
+	if rquicOv > 0 {
+		// Move packet number right before the payload
+		for i, j := payloadOffset-rquicOv-1, payloadOffset-1; i >= pnOffset; i, j = i-1, j-1 {
+			raw[j] = raw[i]
+		}
+		pnOffset += rquicOv
+	}
+	// } rQUIC
 	sealer.EncryptHeader(
 		raw[pnOffset+4:pnOffset+4+16],
 		&raw[0],
