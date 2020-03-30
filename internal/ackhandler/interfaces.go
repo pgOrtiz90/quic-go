@@ -59,6 +59,7 @@ type SentPacketHandler interface {
 	CodingDisabled()
 	ProcessingCoded()
 	ProcessingCodedFinished()
+	GetMinPacketsInCongestionWindow() protocol.ByteCount
 	// } rQUIC
 }
 

@@ -23,4 +23,7 @@ type SendAlgorithmWithDebugInfos interface {
 	InSlowStart() bool
 	InRecovery() bool
 	GetCongestionWindow() protocol.ByteCount
+	// rQUIC {
+	GetMinPacketsInCongestionWindow() protocol.ByteCount
+	// } rQUIC
 }

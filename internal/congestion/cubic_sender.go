@@ -142,6 +142,12 @@ func (c *cubicSender) GetCongestionWindow() protocol.ByteCount {
 	return c.congestionWindow
 }
 
+// rQUIC {
+func (c *cubicSender) GetMinPacketsInCongestionWindow() protocol.ByteCount {
+	return c.GetCongestionWindow() / maxDatagramSize
+}
+// } rQUIC
+
 func (c *cubicSender) GetSlowStartThreshold() protocol.ByteCount {
 	return c.slowstartThreshold
 }

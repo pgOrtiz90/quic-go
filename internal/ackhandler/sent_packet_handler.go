@@ -123,6 +123,10 @@ func (h *sentPacketHandler) ProcessingCoded() {
 func (h *sentPacketHandler) ProcessingCodedFinished() {
 	h.processingCoded = false
 }
+
+func (h *sentPacketHandler) GetMinPacketsInCongestionWindow() protocol.ByteCount {
+	return h.congestion.GetMinPacketsInCongestionWindow()
+}
 // } rQUIC
 
 func (h *sentPacketHandler) DropPackets(encLevel protocol.EncryptionLevel) {

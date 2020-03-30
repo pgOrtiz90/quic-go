@@ -1457,6 +1457,7 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	var codedPkts [][]byte
 	if s.codingEnabled {
 		if !packet.header.IsLongHeader {
+			s.encoder.MaybeReduceCodingRatio(s.sentPacketHandler.GetMinPacketsInCongestionWindow())
 			codedPkts = s.encoder.Process(packet.raw, packet.IsAckEliciting(), s.connIDManager.activeConnectionID.Len())
 		}
 	}
@@ -1465,6 +1466,7 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	s.sendQueue.Send(packet)
 
 	// rQUIC {
+	// TODO: Rethink sending coded packets. In this way, they are not paced.
 	for _, coded := range codedPkts { // Send coded packets
 		s.connIDManager.SentPacket()
 		s.sendQueue.Send(&packedPacket{raw: coded})

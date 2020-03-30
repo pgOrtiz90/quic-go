@@ -6,6 +6,7 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/schemes"
 	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/lucas-clemente/quic-go/internal/protocol"
 )
 
 type Encoder struct {
@@ -87,6 +88,15 @@ func (e *Encoder) updateRQuicOverhead() {
 		sizeSeedCoeff = utils.Max(sizeSeedCoeff, int(rb.SeedMaxFieldSize()))
 	}
 	rquic.SeedFieldMaxSizeUpdate(sizeSeedCoeff)
+}
+
+func (e *Encoder) MaybeReduceCodingRatio(minPktsCwnd protocol.ByteCount) bool /* did reduce ratio */ {
+	newRatio := float64(minPktsCwnd)
+	if newRatio < e.Ratio.Check() {
+		e.Ratio.Change(newRatio)
+		return true
+	}
+	return false
 }
 
 func (e *Encoder) DisableCoding() {
