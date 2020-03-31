@@ -37,23 +37,31 @@ func (p *rQuicReceivedPacket) wasCoded() bool   { return *p.fwd&rquic.FlagCoded 
 
 func (p *rQuicReceivedPacket) removeRQuicHeader() {
 	pldEnd := len(p.rp.data)
-	offset := rquic.OverheadNoCoeff + int(*p.coeffLen)
-	if pldLenPos := p.rHdrPos + offset; p.wasCoded() {
-		offset += rquic.LenOfSrcLen
-		if newPldEnd := pldLenPos + rquic.PldLenRead(p.rp.data, pldLenPos); newPldEnd > pldEnd {
+	var pos int // will end up pointing at payload
+	if p.wasCoded() {
+		pos = p.rHdrPos + rquic.CodPreHeaderSize + int(*p.coeffLen) // length of decoded payload
+		pldLen := rquic.PldLenRead(p.rp.data, pos)
+		pos += rquic.LenOfSrcLen
+		p.rp.data[0] = p.rp.data[pos] // recover decoded partially encrypted 1st byte
+		pos += 1                      // decoded payload
+		if newPldEnd := pos + pldLen; newPldEnd > pldEnd {
 			// TODO: Stack overflow? Panic or close conn.
 		} else {
 			pldEnd = newPldEnd
 		}
+	} else {
+		pos = p.rHdrPos + rquic.SrcHeaderSize
 	}
+	// Close the gap between 1st byte and DCID, and the payload
 	posOrig := p.rHdrPos - 1
-	posDest := posOrig + offset
+	posDest := pos
 	for posOrig >= 0 {
+		posDest--
 		p.rp.data[posDest] = p.rp.data[posOrig]
 		posOrig--
-		posDest--
 	}
-	p.rp.data = p.rp.data[offset:pldEnd]
+	// posDest now is pointing at the beginning of the reconstructed QUIC packet
+	p.rp.data = p.rp.data[posDest:pldEnd]
 }
 
 // Newer returns the newer list element or nil.
