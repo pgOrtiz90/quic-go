@@ -244,7 +244,7 @@ func (h *sentPacketHandler) ReceivedAck(ackFrame *wire.AckFrame, withPacketNumbe
 		// If the packet was recovered from a coded one,
 		// rcvTime > rcvTimeThatTheLostOriginalPacketWouldHave
 		// Ignore these packets for RTT update.
-		if h.processingCoded {
+		if !h.processingCoded {
 			// } rQUIC
 			h.rttStats.UpdateRTT(rcvTime.Sub(p.SendTime), ackDelay, rcvTime)
 			// rQUIC {
