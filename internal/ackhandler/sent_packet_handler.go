@@ -77,8 +77,9 @@ type sentPacketHandler struct {
 
 	// rQUIC {
 	// Does PTO interfere with FEC? To Be Researched... Meanwhile, disable PTO with FEC
-	coding bool
+	coding          bool
 	processingCoded bool
+	lastLosses      int
 	// } rQUIC
 }
 
@@ -126,6 +127,12 @@ func (h *sentPacketHandler) ProcessingCodedFinished() {
 
 func (h *sentPacketHandler) GetMinPacketsInCongestionWindow() protocol.ByteCount {
 	return h.congestion.GetMinPacketsInCongestionWindow()
+}
+
+func (h *sentPacketHandler) LastLosses() int {
+	lastLosses := h.lastLosses
+	h.lastLosses = 0
+	return lastLosses
 }
 // } rQUIC
 
@@ -458,6 +465,14 @@ func (h *sentPacketHandler) detectLostPackets(
 		}
 		return true, nil
 	})
+
+	// rQUIC {
+	if h.coding {
+		if encLevel == protocol.Encryption1RTT {
+			h.lastLosses += len(lostPackets)
+		}
+	}
+	// } rQUIC
 
 	if h.logger.Debug() && len(lostPackets) > 0 {
 		pns := make([]protocol.PacketNumber, len(lostPackets))

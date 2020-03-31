@@ -25,6 +25,7 @@ func (e *Encoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + e.lenDCID + rq
 
 func (e *Encoder) Process(raw []byte, ackEliciting bool, latestDCIDLen int) (newCodedPkts [][]byte) {
 	e.lenDCID = latestDCIDLen
+	e.AddTransmissionCount()
 
 	// Check if DCID has changed
 	newDCID := raw[1 : 1+e.lenDCID]
@@ -103,9 +104,9 @@ func (e *Encoder) DisableCoding() {
 	e.Ratio.Change(0)
 }
 
-func (e *Encoder) AddRetransmissionCount() {
+func (e *Encoder) AddLossCount(n int) {
 	if e.Ratio.dynamic {
-		e.Ratio.AddReTxCount()
+		e.Ratio.AddLossCount(n)
 	}
 }
 

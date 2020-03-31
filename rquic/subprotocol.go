@@ -79,6 +79,7 @@ const (
 	MaxGf       int     = 255 // GF(2**8)
 	MaxGenSize  uint8   = 63  // The bigger, the smaller SRC size in RLNC
 	MinRatio    float64 = 8   // (g+r)(1-a) >= g; a = 11% --> g/r <= 8.0909
+	MaxRatio    float64 = 255 // MaxGenSize // ?
 	RxRedunMarg float64 = 2   // If more COD than this --> Pollution!
 	GenMargin   uint8   = 1   // Older generations than the last one to keep
 )

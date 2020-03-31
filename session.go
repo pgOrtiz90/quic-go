@@ -1457,6 +1457,7 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	var codedPkts [][]byte
 	if s.codingEnabled {
 		if !packet.header.IsLongHeader {
+			s.encoder.AddLossCount(s.sentPacketHandler.LastLosses())
 			s.encoder.MaybeReduceCodingRatio(s.sentPacketHandler.GetMinPacketsInCongestionWindow())
 			codedPkts = s.encoder.Process(packet.raw, packet.IsAckEliciting(), s.connIDManager.activeConnectionID.Len())
 		}

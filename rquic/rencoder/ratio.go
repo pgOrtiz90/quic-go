@@ -13,6 +13,7 @@ type ratio struct {
 
 	dynamic        bool
 	MeasPeriod     time.Duration
+	timer          *time.Timer
 	residual       *residualLoss
 	residualTarget float64
 	ratioDelta     float64
@@ -54,9 +55,9 @@ func (r *ratio) MakeDynamic() {
 	}
 }
 
-func (r *ratio) AddReTxCount() {
+func (r *ratio) AddLossCount(n int) {
 	r.rtxMu.Lock()
-	r.rtx++
+	r.rtx += uint32(n)
 	r.rtxMu.Unlock()
 }
 
@@ -83,10 +84,7 @@ func (r *ratio) measureLoss() { // meas. thread
 		case <-r.stopMeas:
 			close(r.stopMeasDone)
 			return
-		default:
-
-			timer := time.NewTimer(r.MeasPeriod)
-			<-timer.C
+		case <-r.timer.C:
 
 			r.rtxMu.Lock()
 			rtx := r.rtx
@@ -100,6 +98,8 @@ func (r *ratio) measureLoss() { // meas. thread
 
 			r.residual.update(float64(rtx) / float64(tx-rtx))
 			r.update()
+
+			r.timer = time.NewTimer(r.MeasPeriod)
 		}
 	}
 }
@@ -117,8 +117,8 @@ func (r *ratio) update() { // meas. thread
 	if ratio < rquic.MinRatio {
 		ratio = rquic.MinRatio
 	}
-	if ratio > 255 {
-		ratio = 255
+	if ratio > rquic.MaxRatio {
+		ratio = rquic.MaxRatio
 	}
 
 	r.Change(ratio)
