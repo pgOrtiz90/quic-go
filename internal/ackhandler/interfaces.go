@@ -60,7 +60,7 @@ type SentPacketHandler interface {
 	ProcessingCoded()
 	ProcessingCodedFinished()
 	GetMinPacketsInCongestionWindow() protocol.ByteCount
-	LastLosses() int
+	AllUnAcked() (int, int)
 	// } rQUIC
 }
 

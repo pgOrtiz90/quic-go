@@ -1163,6 +1163,12 @@ func (s *session) handleAckFrame(frame *wire.AckFrame, pn protocol.PacketNumber,
 	if encLevel == protocol.Encryption1RTT {
 		s.receivedPacketHandler.IgnoreBelow(s.sentPacketHandler.GetLowestPacketNotConfirmedAcked())
 		s.cryptoStreamHandler.SetLargest1RTTAcked(frame.LargestAcked())
+		// rQUIC {
+		// Lost and in-flight packets information has to be updated upon ACK reception.
+		if s.codingEnabled {
+			s.encoder.UpdateUnAcked(s.sentPacketHandler.AllUnAcked())
+		}
+		// } rQUIC
 	}
 	return nil
 }
@@ -1457,7 +1463,6 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	var codedPkts [][]byte
 	if s.codingEnabled {
 		if !packet.header.IsLongHeader {
-			s.encoder.AddLossCount(s.sentPacketHandler.LastLosses())
 			s.encoder.MaybeReduceCodingRatio(s.sentPacketHandler.GetMinPacketsInCongestionWindow())
 			codedPkts = s.encoder.Process(packet.raw, packet.IsAckEliciting(), s.connIDManager.activeConnectionID.Len())
 		}

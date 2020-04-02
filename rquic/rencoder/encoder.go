@@ -104,9 +104,9 @@ func (e *Encoder) DisableCoding() {
 	e.Ratio.Change(0)
 }
 
-func (e *Encoder) AddLossCount(n int) {
+func (e *Encoder) UpdateUnAcked(loss, unAcked int) {
 	if e.Ratio.dynamic {
-		e.Ratio.AddLossCount(n)
+		e.Ratio.UpdateUnAcked(loss, unAcked)
 	}
 }
 

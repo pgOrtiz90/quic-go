@@ -80,6 +80,7 @@ type sentPacketHandler struct {
 	coding          bool
 	processingCoded bool
 	lastLosses      int
+	unAcked         int // Num. of not lost and not ACKed packets
 	// } rQUIC
 }
 
@@ -112,27 +113,23 @@ func (h *sentPacketHandler) CodingEnabled() {
 	h.coding = true
 	h.alarm = time.Time{} // Disable early retransmit & PTO alarm
 }
-
 func (h *sentPacketHandler) CodingDisabled() {
 	h.coding = false
 }
 
-func (h *sentPacketHandler) ProcessingCoded() {
-	h.processingCoded = true
-}
-
-func (h *sentPacketHandler) ProcessingCodedFinished() {
-	h.processingCoded = false
-}
+func (h *sentPacketHandler) ProcessingCoded()         { h.processingCoded = true }
+func (h *sentPacketHandler) ProcessingCodedFinished() { h.processingCoded = false }
 
 func (h *sentPacketHandler) GetMinPacketsInCongestionWindow() protocol.ByteCount {
 	return h.congestion.GetMinPacketsInCongestionWindow()
 }
 
-func (h *sentPacketHandler) LastLosses() int {
+func (h *sentPacketHandler) AllUnAcked() (int, int) {
+	// Both lost and unconfirmed packets haven't received their ACK.
+	// All of them are UnAcked.
 	lastLosses := h.lastLosses
 	h.lastLosses = 0
-	return lastLosses
+	return lastLosses, h.unAcked
 }
 // } rQUIC
 
@@ -443,8 +440,14 @@ func (h *sentPacketHandler) detectLostPackets(
 	lostSendTime := now.Add(-lossDelay)
 
 	var lostPackets []*Packet
+	// rQUIC {
+	h.unAcked = 0
+	// } rQUIC
 	pnSpace.history.Iterate(func(packet *Packet) (bool, error) {
 		if packet.PacketNumber > pnSpace.largestAcked {
+			// rQUIC {
+			h.unAcked++
+			// } rQUIC
 			return false, nil
 		}
 

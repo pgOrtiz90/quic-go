@@ -20,10 +20,11 @@ type ratio struct {
 	stopMeas       chan struct{}
 	stopMeasDone   chan struct{}
 
-	rtxMu sync.Mutex
-	rtx   uint32
-	txMu  sync.Mutex
-	tx    uint32
+	unAckedMu sync.Mutex
+	lost      uint32
+	unAcked   uint32
+	txMu      sync.Mutex
+	tx        uint32
 }
 
 func (r *ratio) Check() float64 {
@@ -55,10 +56,11 @@ func (r *ratio) MakeDynamic() {
 	}
 }
 
-func (r *ratio) AddLossCount(n int) {
-	r.rtxMu.Lock()
-	r.rtx += uint32(n)
-	r.rtxMu.Unlock()
+func (r *ratio) UpdateUnAcked(lost, unAcked int) {
+	r.unAckedMu.Lock()
+	r.lost += uint32(lost)
+	r.unAcked = uint32(unAcked)
+	r.unAckedMu.Unlock()
 }
 
 func (r *ratio) AddTxCount() {
@@ -71,9 +73,10 @@ func (r *ratio) measureLoss() { // meas. thread
 
 	r.residual.reset()
 
-	r.rtxMu.Lock()
-	r.rtx = 0
-	r.rtxMu.Unlock()
+	r.unAckedMu.Lock()
+	r.lost = 0
+	r.unAcked = 0
+	r.unAckedMu.Unlock()
 
 	r.txMu.Lock()
 	r.tx = 0
@@ -86,17 +89,18 @@ func (r *ratio) measureLoss() { // meas. thread
 			return
 		case <-r.timer.C:
 
-			r.rtxMu.Lock()
-			rtx := r.rtx
-			r.rtx = 0
-			r.rtxMu.Unlock()
+			r.unAckedMu.Lock()
+			lost := r.lost
+			r.lost = 0
+			unAcked := r.unAcked
+			r.unAckedMu.Unlock()
 
 			r.txMu.Lock()
 			tx := r.tx
 			r.tx = 0
 			r.txMu.Unlock()
 
-			r.residual.update(float64(rtx) / float64(tx-rtx))
+			r.residual.update(float64(lost) / float64(tx-unAcked-lost))
 			r.update()
 
 			r.timer = time.NewTimer(r.MeasPeriod)
@@ -116,8 +120,7 @@ func (r *ratio) update() { // meas. thread
 
 	if ratio < rquic.MinRatio {
 		ratio = rquic.MinRatio
-	}
-	if ratio > rquic.MaxRatio {
+	} else if ratio > rquic.MaxRatio {
 		ratio = rquic.MaxRatio
 	}
 
