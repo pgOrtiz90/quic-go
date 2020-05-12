@@ -1,4 +1,4 @@
-package rencoder
+package quic
 
 import (
 	"time"
@@ -7,13 +7,14 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic/schemes"
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
+	"github.com/lucas-clemente/quic-go/rquic/rencoder"
 )
 
 type Encoder struct {
 	rQuicId       uint8
 	lenDCID       int
 	prevDCID      []byte
-	Ratio         *ratio
+	Ratio         rencoder.DynRatio
 	Scheme        uint8
 	Overlap       uint8                  // overlapping generations, i.e. convolutional
 	redunBuilders []schemes.RedunBuilder // need slice for overlapping/convolutional
@@ -105,15 +106,11 @@ func (e *Encoder) DisableCoding() {
 }
 
 func (e *Encoder) UpdateUnAcked(loss, unAcked int) {
-	if e.Ratio.dynamic {
-		e.Ratio.UpdateUnAcked(loss, unAcked)
-	}
+	e.Ratio.UpdateUnAcked(loss, unAcked)
 }
 
 func (e *Encoder) AddTransmissionCount() {
-	if e.Ratio.dynamic {
-		e.Ratio.AddTxCount()
-	}
+	e.Ratio.AddTxCount()
 }
 
 func MakeEncoder(
@@ -129,7 +126,7 @@ func MakeEncoder(
 	overlap = 1 // TODO: make overlap work (& with adaptive rate)
 
 	enc := &Encoder{
-		Ratio:         makeRatio(dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio),
+		Ratio:         rencoder.MakeRatio(dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio),
 		Scheme:        scheme,
 		Overlap:       overlap,
 		redunBuilders: make([]schemes.RedunBuilder, overlap),

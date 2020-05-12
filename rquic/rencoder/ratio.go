@@ -7,6 +7,15 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic"
 )
 
+type DynRatio interface {
+	Check() float64
+	Change(float64)
+	MakeStatic()
+	MakeDynamic()
+	AddTxCount()
+	UpdateUnAcked(int, int)
+}
+
 type ratio struct {
 	ratioMu sync.RWMutex
 	ratio   float64
@@ -57,6 +66,9 @@ func (r *ratio) MakeDynamic() {
 }
 
 func (r *ratio) UpdateUnAcked(lost, unAcked int) {
+	if !r.dynamic {
+		return
+	}
 	r.unAckedMu.Lock()
 	r.lost += uint32(lost)
 	r.unAcked = uint32(unAcked)
@@ -64,6 +76,9 @@ func (r *ratio) UpdateUnAcked(lost, unAcked int) {
 }
 
 func (r *ratio) AddTxCount() {
+	if !r.dynamic {
+		return
+	}
 	r.txMu.Lock()
 	r.tx++
 	r.txMu.Unlock()
@@ -131,7 +146,7 @@ func (r *ratio) update() { // meas. thread
 	//fmt.Printf("Update Ratio Old: %d, New: %f, residual: %f, Target: %f N: %d\n", d.encoder.Ratio, d.Ratio, residual, d.target,d.N)
 }
 
-func makeRatio(
+func MakeRatio(
 	dynamic bool,
 	Tperiod time.Duration,
 	numPeriods int,

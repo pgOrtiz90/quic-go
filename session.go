@@ -24,7 +24,6 @@ import (
 	// rQUIC {
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/rdecoder"
-	"github.com/lucas-clemente/quic-go/rquic/rencoder"
 	// } rQUIC
 )
 
@@ -192,7 +191,7 @@ type session struct {
 	logger utils.Logger
 
 	// rQUIC {
-	encoder            *rencoder.Encoder
+	encoder            *Encoder
 	decoder            *rdecoder.Decoder
 	codingEnabled      bool
 	rQuicBuffer        rQuicReceivedPacketList
