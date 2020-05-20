@@ -4,12 +4,12 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic"
 )
 
-func MakeRedunBuilder(scheme uint8, reduns int) RedunBuilder {
+func MakeRedunBuilder(scheme uint8, packets [][]byte, posRQuicHdr int) RedunBuilder {
 	switch scheme {
 	case rquic.SchemeXor:
-		return makeRedunBuilderXor() // always 1 redun
+		return makeRedunBuilderXor(packets, posRQuicHdr)
 	case rquic.SchemeRlcSys:
-		return makeRedunBuilderRlcSys(reduns)
+		return makeRedunBuilderRlcSys(packets, posRQuicHdr)
 	default:
 		return nil
 	}

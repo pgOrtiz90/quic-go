@@ -4,7 +4,7 @@ type RedunBuilder interface {
 	//updateCoeffs()
 	AddSrc([]byte)
 	ReadyToSend(float64) bool // takes ratio as input
-	Assemble([]byte) [][]byte // Takes rQUIC SRC header, expands it and adds coded payload
+	Finish()
 	SeedMaxFieldSize() uint8
 	Scheme() byte
 	Reduns() int

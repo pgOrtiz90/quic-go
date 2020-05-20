@@ -9,20 +9,23 @@ import (
 type redunBuilderXor struct {
 	scheme      uint8
 	genSize     uint8
-	payload     []byte // only 1 pkt per gen
-	codedPktLen int
+	posRQuicHdr int
+	codedPkt    []byte // only 1 pkt per gen
+	codedPldLen int
+	finished    bool
 }
 
 func (r *redunBuilderXor) AddSrc(src []byte) {
-	// Update coded payloads' lengths
-	srcLen := len(src) // int
-	if difLen := srcLen - r.codedPktLen; difLen > 0 {
-		r.payload = append(r.payload, make([]byte, difLen)...)
-		r.codedPktLen = srcLen
+	if r.finished {
+		return
 	}
+	if len(src) > r.codedPldLen {
+		return
+	} // Packets that are filled here are max size
+
 	// Add SRC
 	for i, v := range src {
-		r.payload[i] ^= v
+		r.codedPkt[i] ^= v
 	}
 	r.genSize++
 }
@@ -34,9 +37,11 @@ func (r *redunBuilderXor) ReadyToSend(ratio float64) bool {
 	return float64(r.genSize) > ratio
 }
 
-func (r *redunBuilderXor) Assemble(rQuicSrcHdr []byte) [][]byte {
-	r.payload = append(append(rQuicSrcHdr, r.genSize), r.payload...)
-	return [][]byte{r.payload}
+func (r *redunBuilderXor) Finish() {
+	r.codedPkt[0] = 0
+	r.codedPkt[r.posRQuicHdr+rquic.FieldPosGenSize] = r.genSize
+	r.codedPkt[r.posRQuicHdr+rquic.FieldPosTypeScheme] = r.scheme
+	r.finished = true
 }
 
 func (r *redunBuilderXor) SeedMaxFieldSize() uint8 {
@@ -51,9 +56,12 @@ func (r *redunBuilderXor) Reduns() int {
 	return 1
 }
 
-func makeRedunBuilderXor() *redunBuilderXor {
+func makeRedunBuilderXor(packets [][]byte, posRQuicHdr int) *redunBuilderXor {
 	rb := redunBuilderXor{
-		scheme: rquic.SchemeXor,
+		scheme:      rquic.SchemeXor,
+		posRQuicHdr: posRQuicHdr,
+		codedPkt:    packets[0],
+		codedPldLen: len(packets[0]) - (posRQuicHdr + rquic.FieldPosSeed),
 	}
 	return &rb
 }

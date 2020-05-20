@@ -610,6 +610,7 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 	}
 	payloadOffset := buffer.Len()
 	// rQUIC {
+	buffer.Write(bytes.Repeat([]byte{0}, rquicOv))
 	payloadOffset += rquicOv
 	// } rQUIC
 

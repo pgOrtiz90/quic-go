@@ -44,15 +44,16 @@ const ( //---------------------------------------------------------------- Field
 	FieldSizeGenSize    int = 1 // coded
 	// FieldSizeSeed    // This will depend on the scheme
 
-	SrcHeaderSize    int = FieldSizeTypeScheme + FieldSizeId + FieldSizeLastGen + FieldSizeOverlap
-	CodPreHeaderSize int = FieldSizeTypeScheme + FieldSizeId + FieldSizeGenId + FieldSizeGenSize
-	LenOfSrcLen      int = 2 // COD payload header, shows decoded SRC length
+	SrcHeaderSize      int = FieldSizeTypeScheme + FieldSizeId + FieldSizeLastGen + FieldSizeOverlap
+	ProtMinusUnprotLen int = SrcHeaderSize - FieldSizeTypeScheme
+	CodPreHeaderSize   int = FieldSizeTypeScheme + FieldSizeId + FieldSizeGenId + FieldSizeGenSize
+	LenOfSrcLen        int = 2 // COD payload header, shows decoded SRC length
 
 	OverheadNoCoeff int = CodPreHeaderSize + LenOfSrcLen + 1 /*1st byte*/
 	OverheadMax     int = OverheadNoCoeff + int(MaxGenSize)
 )
 
-var seedFieldMaxSizeUpdate int
+var seedFieldMaxSize int
 
 const ( //---------------------------------------------------------------- FieldPos
 	FieldPosTypeScheme int = 0
@@ -107,9 +108,9 @@ func PldLenPrepare(pldLen int) []byte {
 }
 
 func Overhead() int {
-	return OverheadNoCoeff + seedFieldMaxSizeUpdate
+	return OverheadNoCoeff + seedFieldMaxSize
 }
 
 func SeedFieldMaxSizeUpdate(n int) {
-	seedFieldMaxSizeUpdate = n
+	seedFieldMaxSize = n
 }

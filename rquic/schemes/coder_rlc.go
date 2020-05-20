@@ -12,37 +12,40 @@ import (
 type redunBuilderRlcSys struct {
 	scheme      uint8
 	genSize     uint8
-	coeffs      [][]uint8
-	payloads    [][]byte
-	codedPktLen int
+	posRQuicHdr int
+	posCoeffs   int
+	posNewCoeff int
+	posPld      int
+	codedPkts   [][]byte
+	codedPldLen int
 	redun       int // coded packets in this gen
+	finished    bool
 }
 
 func newCoeff() uint8 {
-	// rand.Seed(time.Now().UnixNano()) // Gogoratuzu!
+	// rand.Seed(time.Now().UnixNano())
 	return uint8(rand.Intn(rquic.MaxGf-1) + 1)
 }
 
 func (r *redunBuilderRlcSys) AddSrc(src []byte) {
-	var cf uint8
-	difLen := len(src) - r.codedPktLen
-	if difLen > 0 {
-		r.codedPktLen = len(src)
+	if r.finished {
+		return
 	}
+	if len(src) > r.codedPldLen {
+		return
+	} // Packets that are filled here are max size
 
-	for i := 0; i < r.redun; i++ {
-		// Update coded payloads' lengths
-		if difLen > 0 {
-			r.payloads[i] = append(r.payloads[i], make([]byte, difLen)...)
-		}
+	var cf uint8
+	for _, cod := range r.codedPkts {
 		// Update coefficients
 		cf = newCoeff()
-		r.coeffs[i] = append(r.coeffs[i], cf)
+		cod[r.posNewCoeff] = cf
 		// Add SRC
 		for j, v := range src {
-			r.payloads[i][j] ^= gf.Mult(v, cf)
+			cod[r.posPld+j] ^= gf.Mult(v, cf)
 		}
 	}
+	r.posNewCoeff++
 	r.genSize++
 }
 
@@ -53,11 +56,22 @@ func (r *redunBuilderRlcSys) ReadyToSend(ratio float64) bool {
 	return float64(r.genSize)/float64(r.redun) > ratio
 }
 
-func (r *redunBuilderRlcSys) Assemble(rQuicSrcHdr []byte) [][]byte {
-	for i, pld := range r.payloads {
-		r.payloads[i] = append(append(append(rQuicSrcHdr, r.genSize), r.coeffs[i]...), pld...)
+func (r *redunBuilderRlcSys) Finish() {
+	unused := rquic.MaxGenSize - r.genSize
+	unusedInt := int(unused)
+	r.posRQuicHdr += unusedInt
+	posCoeffsNew := r.posCoeffs + unusedInt
+	posGenSize := r.posRQuicHdr + rquic.FieldPosGenSize
+	posScheme := r.posRQuicHdr + rquic.FieldPosTypeScheme
+
+	for _, cod := range r.codedPkts {
+		cod[0] = unused
+		copy(cod[r.posCoeffs:r.posNewCoeff], cod[posCoeffsNew:r.posPld])
+		cod[posGenSize] = r.genSize
+		cod[posScheme] = r.scheme
 	}
-	return r.payloads
+
+	r.finished = true
 }
 
 func (r *redunBuilderRlcSys) SeedMaxFieldSize() uint8 { // TODO: limit SRC payload length
@@ -72,12 +86,22 @@ func (r *redunBuilderRlcSys) Reduns() int {
 	return r.redun
 }
 
-func makeRedunBuilderRlcSys(reduns int) *redunBuilderRlcSys {
+func makeRedunBuilderRlcSys(packets [][]byte, posRQuicHdr int) *redunBuilderRlcSys {
+	redun := len(packets)
+	if redun == 0 {
+		return nil
+	}
+	posCoeffs := posRQuicHdr + rquic.FieldPosSeed
+	posPld := posCoeffs + int(rquic.MaxGenSize)
 	return &redunBuilderRlcSys{
-		scheme:   rquic.SchemeRlcSys,
-		coeffs:   make([][]uint8, reduns),
-		payloads: make([][]uint8, reduns),
-		redun:    reduns,
+		scheme:      rquic.SchemeRlcSys,
+		posRQuicHdr: posRQuicHdr,
+		posCoeffs:   posCoeffs,
+		posNewCoeff: posCoeffs,
+		posPld:      posPld,
+		codedPkts:   packets,
+		codedPldLen: len(packets[0]) - posPld,
+		redun:       redun,
 	}
 }
 

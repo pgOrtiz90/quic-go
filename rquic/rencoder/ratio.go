@@ -10,6 +10,7 @@ import (
 type DynRatio interface {
 	Check() float64
 	Change(float64)
+	IsDynamic() bool
 	MakeStatic()
 	MakeDynamic()
 	AddTxCount()
@@ -46,6 +47,10 @@ func (r *ratio) Change(newR float64) {
 	r.ratioMu.Lock()
 	r.ratio = newR
 	r.ratioMu.Unlock()
+}
+
+func (r *ratio) IsDynamic() bool {
+	return r.dynamic
 }
 
 func (r *ratio) MakeStatic() {

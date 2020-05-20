@@ -191,7 +191,7 @@ type session struct {
 	logger utils.Logger
 
 	// rQUIC {
-	encoder            *Encoder
+	encoder            *encoder
 	decoder            *rdecoder.Decoder
 	codingEnabled      bool
 	rQuicBuffer        rQuicReceivedPacketList
@@ -1165,7 +1165,7 @@ func (s *session) handleAckFrame(frame *wire.AckFrame, pn protocol.PacketNumber,
 		// rQUIC {
 		// Lost and in-flight packets information has to be updated upon ACK reception.
 		if s.codingEnabled {
-			s.encoder.UpdateUnAcked(s.sentPacketHandler.AllUnAcked())
+			s.encoder.updateUnAcked(s.sentPacketHandler.AllUnAcked())
 		}
 		// } rQUIC
 	}
@@ -1459,11 +1459,11 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	}
 	s.logPacket(packet)
 	// rQUIC {
-	var codedPkts [][]byte
+	var codedPkts []*packedPacket
 	if s.codingEnabled {
 		if !packet.header.IsLongHeader {
-			s.encoder.MaybeReduceCodingRatio(s.sentPacketHandler.GetMinPacketsInCongestionWindow())
-			codedPkts = s.encoder.Process(packet.raw, packet.IsAckEliciting(), s.connIDManager.activeConnectionID.Len())
+			s.encoder.maybeReduceCodingRatio(s.sentPacketHandler.GetMinPacketsInCongestionWindow())
+			codedPkts = s.encoder.process(packet)
 		}
 	}
 	// } rQUIC
@@ -1474,7 +1474,7 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	// TODO: Rethink sending coded packets. In this way, they are not paced.
 	for _, coded := range codedPkts { // Send coded packets
 		s.connIDManager.SentPacket()
-		s.sendQueue.Send(&packedPacket{raw: coded})
+		s.sendQueue.Send(coded)
 	}
 	// } rQUIC
 }

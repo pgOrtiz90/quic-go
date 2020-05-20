@@ -10,132 +10,251 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic/rencoder"
 )
 
-type Encoder struct {
-	rQuicId       uint8
-	lenDCID       int
-	prevDCID      []byte
-	Ratio         rencoder.DynRatio
-	Scheme        uint8
-	Overlap       uint8                  // overlapping generations, i.e. convolutional
-	redunBuilders []schemes.RedunBuilder // need slice for overlapping/convolutional
+type redunBuilder struct {
+	builder    schemes.RedunBuilder
+	buffers    []*packetBuffer
+	firstId    byte
+	rateScaler float64
 }
 
-func (e *Encoder) lenNotProtected() int { return e.lenDCID + rquic.SrcHeaderSize }
-func (e *Encoder) rQuicHdrPos() int     { return 1 /*1st byte*/ + e.lenDCID }
-func (e *Encoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + e.lenDCID + rquic.SrcHeaderSize }
+func (r *redunBuilder) readyToSend(ratio float64) bool {
+	// Every genSize/overlap reduns packets are sent --> ratio = genSize/(overlap*reduns)
+	// Check genSize/reduns > ratio * overlap
+	// The first generations are partial, ratio is not always multiplied with overlap
+	return r.builder.ReadyToSend(ratio * r.rateScaler)
+}
 
-func (e *Encoder) Process(raw []byte, ackEliciting bool, latestDCIDLen int) (newCodedPkts [][]byte) {
-	e.lenDCID = latestDCIDLen
-	e.AddTransmissionCount()
+type encoder struct {
+	rQuicId    uint8
+	rQuicGenId uint8
 
-	// Check if DCID has changed
-	newDCID := raw[1 : 1+e.lenDCID]
-	doNotResetReduns := true
-	if e.prevDCID != nil {
-		if !bytes.Equal(e.prevDCID, newDCID) {
-			e.prevDCID = newDCID
-			doNotResetReduns = false
+	firstByte   uint8
+	lenDCID     int
+	currentDCID []byte
+
+	ratio      rencoder.DynRatio
+	scheme     uint8
+	overlap    uint8 // overlapping generations, i.e. convolutional
+	overlapInt int
+	overlapF64 float64
+	reduns     int
+
+	redunBuilders   []*redunBuilder
+	srcForCoding    []byte
+	newCodedPackets []*packedPacket
+
+	doNotEncode     bool
+	ratioWasDynamic bool
+}
+
+func (e *encoder) lenNotProtected() int { return e.lenDCID + rquic.SrcHeaderSize }
+func (e *encoder) rQuicHdrPos() int     { return 1 /*1st byte*/ + e.lenDCID }
+func (e *encoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + e.lenDCID + rquic.SrcHeaderSize }
+
+func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
+	if e.doNotEncode {
+		return []*packedPacket{}
+	}
+
+	e.lenDCID = pdSrc.header.DestConnectionID.Len()
+	e.firstByte = pdSrc.raw[0]
+	e.addTransmissionCount()
+	e.newCodedPackets = []*packedPacket{}
+
+	// Add rQUIC header to SRC. Prepare SRC for coding if necessary.
+	if !pdSrc.IsAckEliciting() { // Not protected
+		posTypeNew := e.rQuicSrcPldPos() - 1
+		pdSrc.raw[posTypeNew] = 0
+		copy(pdSrc.raw[rquic.ProtMinusUnprotLen:posTypeNew], pdSrc.raw[:e.rQuicHdrPos()])
+		pdSrc.raw = pdSrc.raw[rquic.ProtMinusUnprotLen:]
+		return e.newCodedPackets
+	}
+	e.processProtected(pdSrc.raw)
+
+	// Add SRC to the CODs under construction
+
+	e.checkDCID(pdSrc.header.DestConnectionID.Bytes())
+	var rb *redunBuilder
+
+	for i := 0; i < len(e.redunBuilders); i++ {
+		rb = e.redunBuilders[i]
+		rb.builder.AddSrc(e.srcForCoding)
+		if rb.readyToSend(e.ratio.Check()) {
+			e.assemble(rb)
+			e.rQuicGenId++
+			e.redunBuilders[i] = e.redunBuildersNew()
+		}
+	}
+
+	e.rQuicId++ // TODO: consider adding a random number
+	return e.newCodedPackets
+}
+
+func (e *encoder) processProtected(raw []byte) {
+	//////// Complete rQUIC header
+	ofs := e.rQuicHdrPos()
+	raw[ofs+rquic.FieldPosTypeScheme] = rquic.MaskType | e.scheme
+	raw[ofs+rquic.FieldPosId] = e.rQuicId
+	raw[ofs+rquic.FieldPosLastGen] = e.rQuicGenId
+	raw[ofs+rquic.FieldPosOverlap] = e.overlap
+
+	//////// Prepare SRC to be coded
+	e.srcForCoding = e.srcForCoding[:cap(e.srcForCoding)]
+	// [  len(what remains)   ][          ][          ]
+	lng := rquic.LenOfSrcLen
+	copy(e.srcForCoding[:lng], rquic.PldLenPrepare(len(raw)-e.lenNotProtected()))
+	// [          ][          ][ 1st Byte ][          ]
+	e.srcForCoding[lng] = raw[0]
+	// [          ][          ][          ][ packet.number, packet.payload...
+	lng++
+	lng += copy(e.srcForCoding[lng:], raw[e.rQuicSrcPldPos():])
+	// Limit packet to its length
+	e.srcForCoding = e.srcForCoding[:lng]
+}
+
+func (e *encoder) checkDCID(newDCID []byte) {
+	if e.currentDCID != nil {
+		if !bytes.Equal(e.currentDCID, newDCID) {
+			// https://github.com/go101/go101/wiki/How-to-perfectly-clone-a-slice%3F
+			e.currentDCID = append(newDCID[0:0], newDCID...)
+			e.redunBuildersPurge()
+			e.redunBuildersInit()
 		}
 	} else {
-		e.prevDCID = newDCID
+		e.currentDCID = append(newDCID[0:0], newDCID...)
 	}
-
-	// Add rQUIC header to SRC
-	if !ackEliciting { // Not protected
-		raw = append(append(raw[:e.rQuicHdrPos()], 0), raw[e.rQuicHdrPos():]...)
-		return
-	}
-	rQuicHdr := []byte{rquic.MaskType, e.rQuicId}
-	raw = append(append(raw[:e.rQuicHdrPos()], rQuicHdr...), raw[e.rQuicHdrPos():]...)
-	// TODO: Consider inserting rQUIC hdr & TYPE value at QUIC pkt marshalling
-
-	// Parse SRC and add it to generations under construction
-	rQuicHdr = raw[:e.rQuicSrcPldPos()] // we try to send COD before ACK, spin bit should be ok
-	src := e.parseSrc(raw)
-	reduns := 1 // Change reduns or genSize? To be researched...
-	if doNotResetReduns {
-		for ind, rb := range e.redunBuilders {
-			rb.AddSrc(src)
-			if rb.ReadyToSend(e.Ratio.Check()) {
-				// multiple gen-s finished at the same time ---> append
-				newCodedPkts = append(newCodedPkts, rb.Assemble(rQuicHdr)...)
-				e.redunBuilders[ind] = schemes.MakeRedunBuilder(e.Scheme, reduns)
-				// TODO: Consider using sync.Pool for coded packets (buffer_pool.go)
-			}
-		}
-		e.rQuicId++
-		return
-	}
-
-	// if DCID changed, reset redunBuilders
-	for i, rb := range e.redunBuilders {
-		newCodedPkts = append(newCodedPkts, rb.Assemble(rQuicHdr)...)
-		e.redunBuilders[i] = schemes.MakeRedunBuilder(rb.Scheme(), rb.Reduns())
-	}
-	e.rQuicId++ // TODO: consider adding a random number
-	return
 }
 
-func (e *Encoder) parseSrc(raw []byte) []byte {
-	lng := len(raw) - e.lenNotProtected()
-	// 1st byte, which is partially encrypted .....______
-	return append(append(rquic.PldLenPrepare(lng), raw[0]), raw[e.rQuicSrcPldPos():]...)
-	// TODO: manage memory (too much appending)
+func (e *encoder) redunBuildersPurge() {
+	for i, rb := range e.redunBuilders {
+		e.assemble(rb)
+		e.redunBuilders[i] = nil
+	}
+	e.redunBuilders = e.redunBuilders[:0]
+}
+
+func (e *encoder) redunBuildersInit() {
+	e.overlapF64 = 0
+	for i := 0; i < e.overlapInt; i++ {
+		e.overlapF64++
+		e.redunBuilders = append(e.redunBuilders, e.redunBuildersNew())
+	}
+}
+
+func (e *encoder) redunBuildersNew() *redunBuilder {
+	var bfs []*packetBuffer
+	var bf *packetBuffer
+	var packets [][]byte
+	for i := 0; i < e.reduns; i++ {
+		bf = getPacketBuffer()
+		bfs = append(bfs, bf)
+		packets = append(packets, bf.Slice)
+	}
+	return &redunBuilder{
+		builder:    schemes.MakeRedunBuilder(e.scheme, packets, e.rQuicHdrPos()),
+		buffers:    bfs,
+		firstId:    e.rQuicId,
+		rateScaler: e.overlapF64,
+	}
+}
+
+func (e *encoder) assemble(rb *redunBuilder) {
+	rb.builder.Finish()
+
+	var pdPkt packedPacket
+	var ofs int
+	var lastElem int
+	rQHdrPos := e.rQuicHdrPos()
+	fieldPosId := rQHdrPos + rquic.FieldPosId
+	fieldPosGenId := rQHdrPos + rquic.FieldPosGenId
+
+	for _, bf := range rb.buffers {
+
+		// sendQueue (send_queue.go) only uses p.raw and p.buffer.Release()
+		pdPkt = packedPacket{buffer: bf}
+		ofs = int(bf.Slice[0])
+		pdPkt.raw = bf.Slice[ofs:]
+		// After linear combination, last useful bytes might become 0. Decoder can handle this.
+		lastElem = len(pdPkt.raw) - 1
+		for pdPkt.raw[lastElem] == 0 {
+			lastElem--
+		}
+		pdPkt.raw = pdPkt.raw[:lastElem+1]
+
+		// Complete rQUIC header
+		pdPkt.raw[0] = e.firstByte
+		copy(pdPkt.raw[1:rQHdrPos], e.currentDCID)
+		pdPkt.raw[fieldPosId] = e.rQuicId
+		pdPkt.raw[fieldPosGenId] = e.rQuicGenId
+
+		// Add packet to the assembled packet list
+		e.newCodedPackets = append(e.newCodedPackets, &pdPkt)
+	}
 }
 
 // updateRQuicOverhead has to be called whenever a coding scheme is changed
-func (e *Encoder) updateRQuicOverhead() {
+func (e *encoder) updateRQuicOverhead() {
 	var sizeSeedCoeff int
 	for _, rb := range e.redunBuilders {
-		sizeSeedCoeff = utils.Max(sizeSeedCoeff, int(rb.SeedMaxFieldSize()))
+		sizeSeedCoeff = utils.Max(sizeSeedCoeff, int(rb.builder.SeedMaxFieldSize()))
 	}
 	rquic.SeedFieldMaxSizeUpdate(sizeSeedCoeff)
 }
 
-func (e *Encoder) MaybeReduceCodingRatio(minPktsCwnd protocol.ByteCount) bool /* did reduce ratio */ {
+func (e *encoder) maybeReduceCodingRatio(minPktsCwnd protocol.ByteCount) bool /* did reduce ratio */ {
 	newRatio := float64(minPktsCwnd)
-	if newRatio < e.Ratio.Check() {
-		e.Ratio.Change(newRatio)
+	if newRatio < e.ratio.Check() {
+		e.ratio.Change(newRatio)
 		return true
 	}
 	return false
 }
 
-func (e *Encoder) DisableCoding() {
-	e.Ratio.Change(0)
+func (e *encoder) disableCoding() {
+	e.redunBuildersPurge()
+	e.ratioWasDynamic = e.ratio.IsDynamic()
+	e.ratio.MakeStatic()
+	e.doNotEncode = true
 }
 
-func (e *Encoder) UpdateUnAcked(loss, unAcked int) {
-	e.Ratio.UpdateUnAcked(loss, unAcked)
+func (e *encoder) enableCoding() {
+	e.doNotEncode = false
+	e.redunBuildersInit()
+	if e.ratioWasDynamic {
+		e.ratio.MakeDynamic()
+	}
 }
 
-func (e *Encoder) AddTransmissionCount() {
-	e.Ratio.AddTxCount()
+func (e *encoder) updateUnAcked(loss, unAcked int) {
+	e.ratio.UpdateUnAcked(loss, unAcked)
+}
+
+func (e *encoder) addTransmissionCount() {
+	e.ratio.AddTxCount()
 }
 
 func MakeEncoder(
 	scheme uint8,
-	overlap uint8,
+	overlap int,
+	reduns  int,
 	dynamic bool,
 	Tperiod time.Duration,
 	numPeriods int,
 	gammaTarget float64,
 	deltaRatio float64,
-) *Encoder {
+) *encoder {
 
-	overlap = 1 // TODO: make overlap work (& with adaptive rate)
-
-	enc := &Encoder{
-		Ratio:         rencoder.MakeRatio(dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio),
-		Scheme:        scheme,
-		Overlap:       overlap,
-		redunBuilders: make([]schemes.RedunBuilder, overlap),
+	enc := &encoder{
+		ratio:        rencoder.MakeRatio(dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio),
+		scheme:       scheme,
+		overlap:      byte(overlap), // Currently, given the overlap and redunancies
+		overlapInt:   overlap,       // per generation, we only change generation size.
+		reduns:       reduns,        // Overlap and redundancies variation are WiP
+		srcForCoding: make([]byte, protocol.MaxPacketSizeIPv4),
 	}
 
-	for i := range enc.redunBuilders {
-		enc.redunBuilders[i] = schemes.MakeRedunBuilder(scheme, 1)
-	}
-	rquic.SeedFieldMaxSizeUpdate(int(enc.redunBuilders[0].SeedMaxFieldSize()))
+	enc.redunBuildersInit()
+	rquic.SeedFieldMaxSizeUpdate(int(enc.redunBuilders[0].builder.SeedMaxFieldSize()))
 
 	return enc
 }
