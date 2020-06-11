@@ -51,7 +51,6 @@ func (d *Decoder) updateScope(pkt parsedPacket) {
 }
 
 func (d *Decoder) removeSrcNoOrder(ind int) {
-	*d.pktsSrc[ind].fwd |= rquic.FlagObsolete
 	// https://stackoverflow.com/a/37335777
 	last := len(d.pktsSrc) - 1
 	if ind != last {

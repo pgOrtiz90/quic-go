@@ -49,8 +49,9 @@ const ( //---------------------------------------------------------------- Field
 	CodPreHeaderSize   int = FieldSizeTypeScheme + FieldSizeId + FieldSizeGenId + FieldSizeGenSize
 	LenOfSrcLen        int = 2 // COD payload header, shows decoded SRC length
 
-	OverheadNoCoeff int = CodPreHeaderSize + LenOfSrcLen + 1 /*1st byte*/
-	OverheadMax     int = OverheadNoCoeff + int(MaxGenSize)
+	OverheadNoCoeff  int = CodPreHeaderSize + LenOfSrcLen + 1 /*1st byte*/
+	OverheadMax      int = OverheadNoCoeff + int(MaxGenSize)
+	CodHeaderSizeMax int = CodPreHeaderSize + int(MaxGenSize)
 )
 
 var seedFieldMaxSize int

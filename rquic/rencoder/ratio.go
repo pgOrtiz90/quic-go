@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/lucas-clemente/quic-go/rquic"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
 type DynRatio interface {
@@ -47,6 +48,9 @@ func (r *ratio) Change(newR float64) {
 	r.ratioMu.Lock()
 	r.ratio = newR
 	r.ratioMu.Unlock()
+	if rLogger.IsEnabled() {
+		rLogger.Printf("Encoder Ratio NewValue:%f", newR)
+	}
 }
 
 func (r *ratio) IsDynamic() bool {
@@ -54,19 +58,27 @@ func (r *ratio) IsDynamic() bool {
 }
 
 func (r *ratio) MakeStatic() {
+	was := r.dynamic
 	if r.dynamic {
 		close(r.stopMeas)
 		<-r.stopMeasDone
 		r.dynamic = false
 	}
+	if rLogger.IsEnabled() {
+		rLogger.Printf("Encoder Ratio WasDynamic:%t IsNowDynamic:%t", was, r.dynamic)
+	}
 }
 
 func (r *ratio) MakeDynamic() {
+	was := r.dynamic
 	if !r.dynamic {
 		r.stopMeas = make(chan struct{}, 0)
 		r.stopMeasDone = make(chan struct{}, 0)
 		go r.measureLoss()
 		r.dynamic = true
+	}
+	if rLogger.IsEnabled() {
+		rLogger.Printf("Encoder Ratio WasDynamic:%t IsNowDynamic:%t", was, r.dynamic)
 	}
 }
 
@@ -120,6 +132,10 @@ func (r *ratio) measureLoss() { // meas. thread
 			r.tx = 0
 			r.txMu.Unlock()
 
+			if rLogger.IsEnabled() {
+				rLogger.Printf("Encoder Ratio Update Tx:%d Lost:%d UnAcked:%d", tx, lost, unAcked)
+			}
+
 			r.residual.update(float64(lost) / float64(tx-unAcked-lost))
 			r.update()
 
@@ -145,10 +161,6 @@ func (r *ratio) update() { // meas. thread
 	}
 
 	r.Change(ratio)
-
-	// TODO: imlement or reuse traces
-	//traces.PrintFecEncoder(d.encoder.Ratio)
-	//fmt.Printf("Update Ratio Old: %d, New: %f, residual: %f, Target: %f N: %d\n", d.encoder.Ratio, d.Ratio, residual, d.target,d.N)
 }
 
 func MakeRatio(
@@ -167,5 +179,12 @@ func MakeRatio(
 	if dynamic {
 		r.MakeDynamic()
 	}
+
+	if rLogger.IsEnabled() {
+		rLogger.Printf("Encoder Ratio Config Dynamic:%t TMeasPeriod:%? NumPeriods:%d GammaTarget:%f DeltaRatio:%f",
+			dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio,
+		)
+	}
+
 	return r
 }

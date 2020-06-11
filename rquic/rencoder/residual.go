@@ -5,6 +5,7 @@ package rencoder
 import (
 	//"fmt"
 	"sync"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
 type residualLoss struct {
@@ -20,6 +21,9 @@ func (r *residualLoss) update(newLoss float64) { // meas. thread
 	r.lastLossInd = (r.lastLossInd + 1) % r.numPeriods
 	r.cumLoss += newLoss - r.losses[r.lastLossInd]
 	r.losses[r.lastLossInd] = newLoss
+	if rLogger.IsEnabled() {
+		rLogger.Printf("Encoder Ratio ResidualLoss New:%f Avg:%f", newLoss,  r.cumLoss / float64(r.numPeriods))
+	}
 	r.mu.Unlock()
 }
 

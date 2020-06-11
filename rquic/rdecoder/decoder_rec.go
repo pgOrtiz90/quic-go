@@ -1,19 +1,29 @@
 package rdecoder
 
-import "github.com/lucas-clemente/quic-go/rquic"
+import "github.com/lucas-clemente/quic-go/rquic/rLogger"
 
 func (d *Decoder) Recover() {
-	if len(d.pktsCod) < 2 {
+	numRows := len(d.pktsCod)
+
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder Recovery Initiated NumCodPkts:%d", numRows)
+		defer rLogger.Printf("Decoder Recovery Finished")
+	}
+
+	if numRows < 2 {
 		return
 	} // Nothing to do
 
 	if d.doCheckMissingSrc {
 		d.srcMissUpdate()
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Decoder Recovery MissingSrcPkts:%d", d.srcMiss)
+		}
 	}
 
 	var cod *parsedCod
 	var topRow, r, ind int
-	numRows := len(d.pktsCod)
+	// numRows := len(d.pktsCod) // Moved upwards
 
 	//--------- Top-down ---------
 	//    1XXX          1XXX
@@ -30,27 +40,37 @@ func (d *Decoder) Recover() {
 		for r < numRows {
 			if _, ok := d.pktsCod[r].findSrcId(id); ok {
 				cod = d.pktsCod[r]
+				if rLogger.IsDebugging() {
+					rLogger.Printf("Decoder Recovery TopDown Row:%d srcIDs:%d coeffs:%d", r, cod.srcIds, cod.coeff)
+				}
 				break
 			}
 			r++
 		}
-		if r < topRow {
-			// swap
+		// swap
+		if topRow < r {
 			d.pktsCod[r] = d.pktsCod[topRow]
 			d.pktsCod[topRow] = cod
-			// scale the row
-			cod.scaleDown()
-			// subtract scaled row from other rows with non-zero element
+		}
+		// scale the row
+		cod.scaleDown()
+		// log swap&scale
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Decoder Recovery SwapScale NewRow:%d coeffs:%d", topRow, cod.coeff)
+		}
+		// subtract scaled row from other rows with non-zero element
+		r++
+		for r < numRows {
+			if rLogger.IsDebugging() {
+				rLogger.Printf("Decoder Recovery AttachCod TgtRow:%d", r)
+			}
+			d.pktsCod[r].attachCod(cod, 0)
 			r++
-			for r < numRows {
-				d.pktsCod[r].attachCod(cod, 0)
-				r++
-			}
+		}
 
-			topRow++
-			if topRow >= numRows {
-				break
-			}
+		topRow++
+		if topRow >= numRows {
+			break
 		}
 	}
 
@@ -67,13 +87,19 @@ func (d *Decoder) Recover() {
 	for topRow >= 0 {
 		cod = d.pktsCod[topRow]
 		cod.wipeZeros()
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Decoder Recovery BottomUp Row:%d", topRow)
+		}
 		if cod.remaining == 0 {
 			d.removeCodNoOrder(topRow)
-			*cod.fwd |= rquic.FlagObsolete
+			cod.markAsObsolete()
 		} else {
 			ind = len(cod.coeff) - 1
 			for i := 0; i < topRow; i++ {
 				// 0 <= d.pktsCod[i].srcIds[0] - cod.srcIds[0] < 128
+				if rLogger.IsDebugging() {
+					rLogger.Printf("Decoder Recovery AttachCod TgtRow:%d", i)
+				}
 				d.pktsCod[i].attachCod(cod, ind)
 			}
 			if cod.remaining == 1 {

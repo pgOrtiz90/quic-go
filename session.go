@@ -24,6 +24,7 @@ import (
 	// rQUIC {
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/rdecoder"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 	// } rQUIC
 )
 
@@ -810,8 +811,9 @@ func (s *session) rQuicBufferFwdAll() {
 		// packet is neither delivered nor obsolete
 		if *e.id == s.rQuicLastForwarded {
 			if isSource {
-				// This packet has already been delivered
-				// TODO: Generate an error or panic
+				if rLogger.IsEnabled() {
+					rLogger.Printf("ERROR Decoder Buffer UndeliveredSrc pkt.ID:%d", *e.id)
+				}
 			} else {
 				// Coded packet, do nothing
 				continue
@@ -837,6 +839,9 @@ func (s *session) rQuicBufferFwdAll() {
 }
 
 func (s *session) rQuicBufferFwd(e *rQuicReceivedPacket) {
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder Buffer Delivering pkt.ID:%d LastDelivered.ID:%d", *e.id, s.rQuicLastForwarded)
+	}
 	e.removeRQuicHeader()
 	s.handleSinglePacketFinish(e.rp, e.hdr)
 	s.rQuicLastForwarded = *e.id

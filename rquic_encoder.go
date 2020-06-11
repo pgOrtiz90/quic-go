@@ -8,6 +8,7 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/rquic/rencoder"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
 type redunBuilder struct {
@@ -56,24 +57,46 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 		return []*packedPacket{}
 	}
 
-	e.lenDCID = pdSrc.header.DestConnectionID.Len()
+	dcid := pdSrc.header.DestConnectionID.Bytes()
+	e.lenDCID = len(dcid)
 	e.firstByte = pdSrc.raw[0]
 	e.addTransmissionCount()
 	e.newCodedPackets = []*packedPacket{}
+
+	rQuicHdrPos := e.rQuicHdrPos()
+	rQuicSrcPldPos := e.rQuicSrcPldPos()
+
+	// Check QUIC header and the space reserved for rQUIC header
+	if rLogger.IsDebugging() {
+		wrongHeader := e.firstByte == 0 && !bytes.Equal(pdSrc.raw[1:rQuicHdrPos], dcid)
+		for i := rQuicHdrPos; !wrongHeader && i < rQuicSrcPldPos; i++ {
+			wrongHeader = pdSrc.raw[i] != 0
+		}
+		if wrongHeader {
+			rLogger.Printf("ERROR Encoder Header Malformed DCID.Len:%d rQUIChdr.Len:%d hdr(hex):[% X]",
+				e.lenDCID, rquic.SrcHeaderSize, pdSrc.raw[:rQuicSrcPldPos+1],
+			)
+		}
+	}
 
 	// Add rQUIC header to SRC. Prepare SRC for coding if necessary.
 	if !pdSrc.IsAckEliciting() { // Not protected
 		posTypeNew := e.rQuicSrcPldPos() - 1
 		pdSrc.raw[posTypeNew] = 0
-		copy(pdSrc.raw[rquic.ProtMinusUnprotLen:posTypeNew], pdSrc.raw[:e.rQuicHdrPos()])
+		copy(pdSrc.raw[rquic.ProtMinusUnprotLen:posTypeNew], pdSrc.raw[:rQuicHdrPos])
 		pdSrc.raw = pdSrc.raw[rquic.ProtMinusUnprotLen:]
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+				len(pdSrc.raw), e.lenDCID, pdSrc.raw[:rQuicHdrPos+rquic.FieldSizeTypeScheme],
+			)
+		}
 		return e.newCodedPackets
 	}
 	e.processProtected(pdSrc.raw)
 
 	// Add SRC to the CODs under construction
 
-	e.checkDCID(pdSrc.header.DestConnectionID.Bytes())
+	e.checkDCID(dcid)
 	var rb *redunBuilder
 
 	for i := 0; i < len(e.redunBuilders); i++ {
@@ -86,6 +109,11 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 		}
 	}
 
+	rLogger.MaybeIncreaseTxSrc()
+	if cods := len(e.newCodedPackets); cods > 0 {
+		rLogger.MaybeIncreaseTxCodN(cods)
+	}
+
 	e.rQuicId++ // TODO: consider adding a random number
 	return e.newCodedPackets
 }
@@ -93,10 +121,16 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 func (e *encoder) processProtected(raw []byte) {
 	//////// Complete rQUIC header
 	ofs := e.rQuicHdrPos()
-	raw[ofs+rquic.FieldPosTypeScheme] = rquic.MaskType | e.scheme
+	pldPos := e.rQuicSrcPldPos()
+	raw[ofs+rquic.FieldPosTypeScheme] = rquic.MaskType | e.scheme // Sending current scheme (unencrypted!) for debugging
 	raw[ofs+rquic.FieldPosId] = e.rQuicId
 	raw[ofs+rquic.FieldPosLastGen] = e.rQuicGenId
 	raw[ofs+rquic.FieldPosOverlap] = e.overlap
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+			len(raw), e.lenDCID, raw[:ofs+pldPos],
+		)
+	}
 
 	//////// Prepare SRC to be coded
 	e.srcForCoding = e.srcForCoding[:cap(e.srcForCoding)]
@@ -107,7 +141,7 @@ func (e *encoder) processProtected(raw []byte) {
 	e.srcForCoding[lng] = raw[0]
 	// [          ][          ][          ][ packet.number, packet.payload...
 	lng++
-	lng += copy(e.srcForCoding[lng:], raw[e.rQuicSrcPldPos():])
+	lng += copy(e.srcForCoding[lng:], raw[pldPos:])
 	// Limit packet to its length
 	e.srcForCoding = e.srcForCoding[:lng]
 }
@@ -189,6 +223,12 @@ func (e *encoder) assemble(rb *redunBuilder) {
 
 		// Add packet to the assembled packet list
 		e.newCodedPackets = append(e.newCodedPackets, &pdPkt)
+
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+				len(pdPkt.raw), e.lenDCID, pdPkt.raw[:rQHdrPos+rquic.CodHeaderSizeMax],
+			)
+		}
 	}
 }
 
@@ -202,12 +242,18 @@ func (e *encoder) updateRQuicOverhead() {
 }
 
 func (e *encoder) maybeReduceCodingRatio(minPktsCwnd protocol.ByteCount) bool /* did reduce ratio */ {
+	curRatio := e.ratio.Check()
 	newRatio := float64(minPktsCwnd)
-	if newRatio < e.ratio.Check() {
-		e.ratio.Change(newRatio)
-		return true
+	doChange := newRatio < curRatio
+
+	if rLogger.IsEnabled() {
+		rLogger.Printf("Encoder Ratio MinPktsCWND:%f CurrentRatio:%f RatioChanged:%t", newRatio, curRatio, doChange)
 	}
-	return false
+
+	if doChange {
+		e.ratio.Change(newRatio)
+	}
+	return doChange
 }
 
 func (e *encoder) disableCoding() {

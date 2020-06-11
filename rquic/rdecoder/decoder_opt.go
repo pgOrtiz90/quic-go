@@ -1,14 +1,19 @@
 package rdecoder
 
-import "github.com/lucas-clemente/quic-go/rquic"
+import "github.com/lucas-clemente/quic-go/rquic/rLogger"
 
 func (d *Decoder) optimizeWithSrc(src *parsedSrc, srcIndOffset int) {
 	var cod *parsedCod
+
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder OptimizeSrc Pkt.ID:%d", src.id)
+	}
+
 	for i := 0; i < len(d.pktsCod); i++ {
 		if i >= srcIndOffset {
 			for d.isObsoletePkt(d.pktsCod[i]) {
 				d.removeCodNoOrder(i)
-				*d.pktsCod[i].fwd |= rquic.FlagObsolete
+				d.pktsCod[i].markAsObsolete()
 			}
 		}
 		cod = d.pktsCod[i]
@@ -17,7 +22,7 @@ func (d *Decoder) optimizeWithSrc(src *parsedSrc, srcIndOffset int) {
 			cod.remaining--
 			if cod.remaining == 0 {
 				d.removeCodNoOrder(i)
-				*cod.fwd |= rquic.FlagObsolete
+				cod.markAsObsolete()
 				i--
 				continue
 			}
@@ -47,6 +52,7 @@ func (d *Decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc,
 
 	for i := 0; i < len(d.pktsSrc); i++ {
 		for d.isObsoletePkt(d.pktsSrc[i]) {
+			d.pktsSrc[i].markAsObsolete()
 			d.removeSrcNoOrder(i)
 		}
 		if i >= len(d.pktsSrc) {
@@ -63,7 +69,14 @@ func (d *Decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc,
 		}
 		// main for loop is not broken for obsolete SRC removal
 	}
+
 	d.obsoleteSrcChecked = true
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder OptimizeCod gen.ID:%d pkt.ID:%d RxSrc:%d/%d",
+			cod.genId, cod.id, len(availableSrc), cod.remaining,
+		)
+	}
+
 	return
 }
 
@@ -82,6 +95,9 @@ func (d *Decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []
 	// if !codIsUseful --> cod.remaining == 1; cod.remaining == 0 --> this method is not called
 
 	if ns := d.NewSrcRec(cod); ns != nil {
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Decoder OptimizeCod Optimized remaining:%d", cod.remaining)
+		}
 		d.optimizeWithSrc(ns, 0)
 	}
 	// When this method is called, COD is not stored yet, no need(way) to remove it from pktsCod.

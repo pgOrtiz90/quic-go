@@ -5,6 +5,7 @@ package quic
 import (
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/rquic"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
 type rQuicReceivedPacket struct {
@@ -174,6 +175,11 @@ func (l *rQuicReceivedPacketList) remove(e *rQuicReceivedPacket) *rQuicReceivedP
 		e.older = nil // avoid memory leaks
 		e.list = nil
 		l.len--
+	}
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder Buffer Removing pkt.ID:%d IsObsolete:%t IsSource:%t WasCoded:%t",
+			*e.id, e.isObsolete(), e.isSource(), e.wasCoded(),
+		)
 	}
 	return e
 }

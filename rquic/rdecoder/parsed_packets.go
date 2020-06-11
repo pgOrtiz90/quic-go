@@ -1,7 +1,9 @@
 package rdecoder
 
 import (
+	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/gf"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
 type parsedPacket interface {
@@ -25,10 +27,18 @@ func (s *parsedSrc) OldestGen() uint8 { return s.lastGen - s.overlap + 1 }
 func (s *parsedSrc) NewestPkt() uint8 { return s.id }
 func (s *parsedSrc) OldestPkt() uint8 { return s.id }
 
+func (s *parsedSrc) markAsObsolete() {
+	*s.fwd |= rquic.FlagObsolete
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder ObsoleteSrc gen.ID:%d pkt.ID:%d", s.lastGen, s.id)
+	}
+
+}
+
 type parsedCod struct {
-	id uint8
 	// scheme      uint8 // is not necessary after Decoder.lastScheme is updated
-	// genSize     int   // is not necessary after remaining is defined
+	id        byte // not necessary, but good for logging
+	genSize   byte // is not necessary after remaining is defined // good for logging
 	remaining int
 
 	coeff  []uint8
@@ -45,6 +55,13 @@ func (c *parsedCod) NewestGen() uint8 { return c.genId }
 func (c *parsedCod) OldestGen() uint8 { return c.genId }
 func (c *parsedCod) NewestPkt() uint8 { return c.srcIds[0] }
 func (c *parsedCod) OldestPkt() uint8 { return c.srcIds[len(c.srcIds)-1] }
+
+func (c *parsedCod) markAsObsolete() {
+	*c.fwd |= rquic.FlagObsolete
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder ObsoleteCod gen.ID:%d pkt.ID:%d", c.genId, c.id)
+	}
+}
 
 func (c *parsedCod) findSrcId(id uint8) (int, bool) {
 	if idLolderR(id, c.srcIds[0]) || idLolderR(c.OldestPkt(), id) {
@@ -126,6 +143,12 @@ func (c *parsedCod) attachCod(cod *parsedCod, codInd int) {
 	ind, ok := c.findSrcId(cod.srcIds[codInd])
 	if !ok {
 		return
+	}
+
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder Recovery AttachCod Orig.  srcIDs:%d coeffs:%d", c.srcIds, c.coeff)
+		rLogger.Printf("Decoder Recovery AttachCod Attach srcIDs:%d coeffs:%d coeffInd:%d", cod.srcIds, cod.coeff, codInd)
+		defer rLogger.Printf("Decoder Recovery AttachCod Result srcIDs:%d coeffs:%d", c.srcIds, c.coeff)
 	}
 
 	j := 0 // aux. var. for iteration over  --< cod.srcIds >--

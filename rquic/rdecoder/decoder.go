@@ -3,6 +3,7 @@ package rdecoder
 import (
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/schemes"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
 type Decoder struct {
@@ -36,8 +37,21 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	rHdrPos := d.rQuicHdrPos()
 	ptype := raw[rHdrPos+rquic.FieldPosTypeScheme]
 
+	logUnknownPkt := func() {
+		if rLogger.IsEnabled() {
+			rLogger.Printf("Decoder Packet UNKNOWN pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+				len(raw), d.lenDCID, raw[:rHdrPos+rquic.CodHeaderSizeMax],
+			)
+		}
+	}
+
 	// unprotected packet
 	if ptype == 0 {
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Decoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+				len(raw), d.lenDCID, raw[:rHdrPos+rquic.FieldSizeTypeScheme],
+			)
+		}
 		return rquic.TypeUnprotected, d.didRecover
 	}
 
@@ -47,6 +61,7 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 			d.optimizeWithSrc(src, 0)
 			return rquic.TypeProtected, d.didRecover
 		}
+		logUnknownPkt()
 		return rquic.TypeUnknown, d.didRecover
 	}
 
@@ -58,18 +73,25 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	}
 
 	// Coded and unknown packets are not passed to QUIC
+	logUnknownPkt()
 	return rquic.TypeUnknown, d.didRecover
 }
 
 func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
 	rHdrPos := d.rQuicHdrPos()
+	srcPldPos := d.rQuicSrcPldPos()
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+			len(raw), d.lenDCID, raw[:rHdrPos+srcPldPos],
+		)
+	}
 
 	ps := &parsedSrc{
 		id:      raw[rHdrPos+rquic.FieldPosId],
 		lastGen: raw[rHdrPos+rquic.FieldPosLastGen],
 		overlap: raw[rHdrPos+rquic.FieldPosOverlap],
 		fwd:     &raw[rHdrPos+rquic.FieldPosTypeScheme], // reusing scheme field
-		pld:     raw[d.rQuicSrcPldPos():],
+		pld:     raw[srcPldPos:],
 	}
 	ps.codedLen = rquic.PldLenPrepare(len(ps.pld))
 
@@ -85,19 +107,28 @@ func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
 	raw[rHdrPos+rquic.FieldPosGenSize] = 0 // rQUIC field reused for showing number of coefficients in the header
 	d.pktsSrc = append(d.pktsSrc, ps)
 
+	rLogger.MaybeIncreaseRxSrc()
+
 	return ps
 }
 
 func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
 	// Recovered too late or already received in a retransmission? Discard.
-	if d.isObsoleteId(cod.srcIds[0]) || d.srcAvblUpdate(cod.srcIds[0]) {
-		*cod.fwd |= rquic.FlagObsolete
+	if obsolete, duplicate := d.isObsoleteId(cod.srcIds[0]), d.srcAvblUpdate(cod.srcIds[0]); obsolete || duplicate {
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Decoder Packet Recovered DISCARDED pkt.ID:%d Obsolete:%t Duplicate:%t",
+				cod.srcIds[0], obsolete, duplicate,
+			)
+		}
+		cod.markAsObsolete()
 		return nil
 	}
 	// cod.pld must be fully decoded. If not, discard.
 	if cod.remaining > 1 {
-		// TODO: Log not decoded decoded packets.
-		*cod.fwd |= rquic.FlagObsolete
+		if rLogger.IsEnabled() {
+			rLogger.Printf("ERROR Decoder RecoveredPkt NotDecoded srcIDs:%d coeffs:%d", cod.srcIds, cod.coeff)
+		}
+		cod.markAsObsolete()
 		return nil
 	}
 	cod.scaleDown()
@@ -114,21 +145,39 @@ func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
 	d.updateScope(ps)
 	d.pktsSrc = append(d.pktsSrc, ps)
 	d.didRecover = true
+
+	rLogger.MaybeIncreaseRxRec()
+	if rLogger.IsDebugging() {
+		srcPldPos := d.rQuicSrcPldPos()
+		rLogger.Printf("Decoder Packet Recovered pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+			srcPldPos+len(ps.pld), d.lenDCID, ps.pld[:srcPldPos],
+		)
+	}
+
 	return ps
 }
 
 func (d *Decoder) NewCod(raw []byte) {
 	rHdrPos := d.rQuicHdrPos()
 
+	rLogger.MaybeIncreaseRxCod()
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+			len(raw), d.lenDCID, raw[:rHdrPos+rquic.CodHeaderSizeMax],
+		)
+	}
+
 	pc := &parsedCod{
-		remaining: int(raw[rHdrPos+rquic.FieldPosGenSize]),
-		genId:     raw[rHdrPos+rquic.FieldPosGenId],
-	} // till pc is optimized at the end of this method, remaining == genSize
+		genSize: raw[rHdrPos+rquic.FieldPosGenSize],
+		genId:   raw[rHdrPos+rquic.FieldPosGenId],
+	}
+	// till pc is optimized at the end of this method, remaining == genSize
+	pc.remaining = int(pc.genSize)
 
 	// List of SRC IDs covered by this COD
 	pc.srcIds = make([]uint8, pc.remaining)
-	pcId := raw[rHdrPos+rquic.FieldPosId]
-	pc.srcIds[0] = pcId - uint8(pc.remaining) + 1
+	pc.id = raw[rHdrPos+rquic.FieldPosId]
+	pc.srcIds[0] = pc.id - uint8(pc.remaining) + 1
 	for i := 1; i < pc.remaining; i++ {
 		pc.srcIds[i] = pc.srcIds[i-1] + 1
 	}
