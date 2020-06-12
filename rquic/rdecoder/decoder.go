@@ -17,10 +17,11 @@ type Decoder struct {
 	didRecover bool
 
 	// Obsolete packets detection
-	lastSeenGen        uint8
-	lastSeenPkt        uint8
-	obsoleteXhold      uint8 // rQUIC ID of the last valid packet
-	obsoleteSrcChecked bool
+	lastSeenGen           uint8
+	lastSeenPkt           uint8
+	obsoleteXhold         uint8 // rQUIC ID of the last valid packet
+	obsoleteSrcChecked    bool
+	obsoleteCodCheckedInd int
 
 	srcAvbl           []uint8 // used for building srcMiss (missing SRC)
 	srcMiss           []uint8 // used for Decoder.Recover()
@@ -58,7 +59,7 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	// protected packet
 	if ptype&rquic.MaskType == 0 {
 		if src := d.NewSrc(raw); src != nil {
-			d.optimizeWithSrc(src, 0)
+			d.optimizeWithSrc(src, true)
 			return rquic.TypeProtected, d.didRecover
 		}
 		logUnknownPkt()
@@ -181,7 +182,7 @@ func (d *Decoder) NewCod(raw []byte) {
 	for i := 1; i < pc.remaining; i++ {
 		pc.srcIds[i] = pc.srcIds[i-1] + 1
 	}
-	d.updateScope(pc)
+	d.doCheckMissingSrc = d.updateScope(pc) // do check missing SRC if d.lastSeenPkt has been updated
 	if d.isObsoletePktAndUpdateXhold(pc) {
 		return
 	}

@@ -20,6 +20,9 @@ func (d *Decoder) Recover() {
 			rLogger.Printf("Decoder Recovery MissingSrcPkts:%d", d.srcMiss)
 		}
 	}
+	if len(d.srcMiss) == 0 {
+		return
+	} // Everything is recovered so far, nothing to do
 
 	var cod *parsedCod
 	var topRow, r, ind int
