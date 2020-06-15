@@ -14,7 +14,6 @@ import (
 type redunBuilder struct {
 	builder    schemes.RedunBuilder
 	buffers    []*packetBuffer
-	firstId    byte
 	rateScaler float64
 }
 
@@ -187,7 +186,6 @@ func (e *encoder) redunBuildersNew() *redunBuilder {
 	return &redunBuilder{
 		builder:    schemes.MakeRedunBuilder(e.scheme, packets, e.rQuicHdrPos()),
 		buffers:    bfs,
-		firstId:    e.rQuicId,
 		rateScaler: e.overlapF64,
 	}
 }
@@ -282,7 +280,7 @@ func (e *encoder) addTransmissionCount() {
 func MakeEncoder(
 	scheme uint8,
 	overlap int,
-	reduns  int,
+	reduns int,
 	dynamic bool,
 	Tperiod time.Duration,
 	numPeriods int,
