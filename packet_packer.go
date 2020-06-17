@@ -13,6 +13,9 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/rquic"
+	// rQUIC {
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
+	// } rQUIC
 )
 
 type packer interface {
@@ -199,6 +202,7 @@ func newPacketPacker(
 }
 
 // rQUIC {
+
 func (p *packetPacker) CodingEnabled() {
 	p.coding = true
 }
@@ -206,6 +210,7 @@ func (p *packetPacker) CodingEnabled() {
 func (p *packetPacker) CodingDisabled() {
 	p.coding = false
 }
+
 // } rQUIC
 
 func (p *packetPacker) handshakeConfirmed() bool {
@@ -419,7 +424,11 @@ func (p *packetPacker) maybePackAppDataPacket() (*packedPacket, error) {
 	// rQUIC {
 	if encLevel == protocol.Encryption1RTT {
 		if p.coding {
+			prevMS := maxSize
 			maxSize -= protocol.ByteCount(rquic.Overhead())
+			if rLogger.IsDebugging() {
+				rLogger.Printf("Encoder Header Construction maxPldSize Orig:%d New:%d", prevMS, maxSize)
+			}
 		}
 	}
 	// } rQUIC
@@ -647,10 +656,18 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 
 	pnOffset := payloadOffset - int(header.PacketNumberLen)
 	// rQUIC {
+	// Move packet number right before the payload
 	if rquicOv > 0 {
-		// Move packet number right before the payload
-		for i, j := payloadOffset-rquicOv-1, payloadOffset-1; i >= pnOffset; i, j = i-1, j-1 {
-			raw[j] = raw[i]
+		if rLogger.IsDebugging() {
+			rLogger.Printf("Encoder Header Construction Fields LenDCID:%d LenPN:%d",
+				header.DestConnectionID.Len(), header.PacketNumberLen,
+			)
+			rLogger.Printf("Encoder Header Construction NewHeader:[% X]", raw)
+			copy(raw[pnOffset:], raw[pnOffset-rquicOv:payloadOffset-rquicOv])
+			rLogger.Printf("Encoder Header Construction MovedPktN:[% X]", raw)
+			defer rLogger.Printf("Encoder Header Construction Encrypted:[% X]", raw)
+		} else {
+			copy(raw[pnOffset:], raw[pnOffset-rquicOv:payloadOffset-rquicOv])
 		}
 	}
 	// } rQUIC

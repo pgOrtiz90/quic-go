@@ -56,50 +56,23 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 		return []*packedPacket{}
 	}
 
-	dcid := pdSrc.header.DestConnectionID.Bytes()
-	e.lenDCID = len(dcid)
-	e.firstByte = pdSrc.raw[0]
+	e.lenDCID = pdSrc.header.DestConnectionID.Len()
 	e.addTransmissionCount()
-	e.newCodedPackets = []*packedPacket{}
-
-	rQuicHdrPos := e.rQuicHdrPos()
-	rQuicSrcPldPos := e.rQuicSrcPldPos()
-
-	// Check QUIC header and the space reserved for rQUIC header
-	if rLogger.IsDebugging() {
-		wrongHeader := e.firstByte == 0 && !bytes.Equal(pdSrc.raw[1:rQuicHdrPos], dcid)
-		for i := rQuicHdrPos; !wrongHeader && i < rQuicSrcPldPos; i++ {
-			wrongHeader = pdSrc.raw[i] != 0
-		}
-		if wrongHeader {
-			rLogger.Printf("ERROR Encoder Header Malformed DCID.Len:%d rQUIChdr.Len:%d hdr(hex):[% X]",
-				e.lenDCID, rquic.SrcHeaderSize, pdSrc.raw[:rQuicSrcPldPos+1],
-			)
-		}
-	}
 
 	// Add rQUIC header to SRC. Prepare SRC for coding if necessary.
 	if !pdSrc.IsAckEliciting() { // Not protected
-		posTypeNew := e.rQuicSrcPldPos() - 1
-		pdSrc.raw[posTypeNew] = 0
-		copy(pdSrc.raw[rquic.ProtMinusUnprotLen:posTypeNew], pdSrc.raw[:rQuicHdrPos])
-		pdSrc.raw = pdSrc.raw[rquic.ProtMinusUnprotLen:]
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-				len(pdSrc.raw), e.lenDCID, pdSrc.raw[:rQuicHdrPos+rquic.FieldSizeTypeScheme],
-			)
-		}
+		e.processUnprotected(pdSrc.raw)
 		return e.newCodedPackets
 	}
 	e.processProtected(pdSrc.raw)
 
 	// Add SRC to the CODs under construction
 
-	e.checkDCID(dcid)
-	var rb *redunBuilder
+	e.firstByte = pdSrc.raw[0]
+	e.checkDCID(pdSrc.header.DestConnectionID.Bytes())
+	e.newCodedPackets = []*packedPacket{}
 
-	for i := 0; i < len(e.redunBuilders); i++ {
-		rb = e.redunBuilders[i]
+	for i, rb := range e.redunBuilders {
 		rb.builder.AddSrc(e.srcForCoding)
 		if rb.readyToSend(e.ratio.Check()) {
 			e.assemble(rb)
@@ -115,6 +88,19 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 
 	e.rQuicId++ // TODO: consider adding a random number
 	return e.newCodedPackets
+}
+
+func (e *encoder) processUnprotected(raw []byte) {
+	rQuicHdrPos := e.rQuicHdrPos()
+	posTypeNew := e.rQuicSrcPldPos() - 1
+	raw[posTypeNew] = 0
+	copy(raw[rquic.ProtMinusUnprotLen:posTypeNew], raw[:rQuicHdrPos])
+	raw = raw[rquic.ProtMinusUnprotLen:]
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+			len(raw), e.lenDCID, raw[:rQuicHdrPos+rquic.FieldSizeTypeScheme],
+		)
+	}
 }
 
 func (e *encoder) processProtected(raw []byte) {
@@ -254,6 +240,8 @@ func (e *encoder) maybeReduceCodingRatio(minPktsCwnd protocol.ByteCount) bool /*
 	return doChange
 }
 
+// disableCoding stops generating coded packets,
+// but does not disable rQUIC
 func (e *encoder) disableCoding() {
 	e.redunBuildersPurge()
 	e.ratioWasDynamic = e.ratio.IsDynamic()
