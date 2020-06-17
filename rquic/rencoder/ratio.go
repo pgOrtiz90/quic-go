@@ -164,13 +164,15 @@ func (r *ratio) update() { // meas. thread
 }
 
 func MakeRatio(
-	dynamic bool,
-	Tperiod time.Duration,
-	numPeriods int,
+	ratioVal    float64,
+	dynamic     bool,
+	Tperiod     time.Duration,
+	numPeriods  int,
 	gammaTarget float64,
-	deltaRatio float64,
+	deltaRatio  float64,
 ) *ratio {
 	r := &ratio{
+		ratio:          ratioVal,
 		MeasPeriod:     Tperiod,
 		residual:       makeResidualLoss(numPeriods),
 		residualTarget: gammaTarget,

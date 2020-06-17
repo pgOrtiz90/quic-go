@@ -1,7 +1,6 @@
 package quic
 
 import (
-	"time"
 	"bytes"
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/schemes"
@@ -53,6 +52,7 @@ func (e *encoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + e.lenDCID + rq
 
 func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 	if e.doNotEncode {
+		e.processUnprotected(pdSrc.raw)
 		return []*packedPacket{}
 	}
 
@@ -277,28 +277,24 @@ func (e *encoder) addTransmissionCount() {
 	e.ratio.AddTxCount()
 }
 
-func MakeEncoder(
-	scheme uint8,
-	overlap int,
-	reduns int,
-	dynamic bool,
-	Tperiod time.Duration,
-	numPeriods int,
-	gammaTarget float64,
-	deltaRatio float64,
-) *encoder {
-
+func MakeEncoder(conf *rquic.CConf) *encoder {
+	dynRatio := rencoder.MakeRatio(
+		conf.RatioVal,
+		conf.Dynamic > 0,
+		conf.TPeriod,
+		conf.NumPeriods,
+		conf.GammaTarget,
+		conf.DeltaRatio,
+	)
 	enc := &encoder{
-		ratio:        rencoder.MakeRatio(dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio),
-		scheme:       scheme,
-		overlap:      byte(overlap), // Currently, given the overlap and redunancies
-		overlapInt:   overlap,       // per generation, we only change generation size.
-		reduns:       reduns,        // Overlap and redundancies variation are WiP
+		ratio:        dynRatio,
+		scheme:       conf.Scheme,
+		overlap:      byte(conf.Overlap),
+		overlapInt:   conf.Overlap,
+		reduns:       conf.Reduns,
 		srcForCoding: make([]byte, protocol.MaxPacketSizeIPv4),
 	}
-
 	enc.redunBuildersInit()
 	rquic.SeedFieldMaxSizeUpdate(int(enc.redunBuilders[0].builder.SeedMaxFieldSize()))
-
 	return enc
 }

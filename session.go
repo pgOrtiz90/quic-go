@@ -194,8 +194,9 @@ type session struct {
 	// rQUIC {
 	encoder            *encoder
 	decoder            *rdecoder.Decoder
-	codingEnabled      bool
-	rQuicBuffer        rQuicReceivedPacketList
+	encoderEnabled     bool
+	decoderEnabled     bool
+	rQuicBuffer        *rQuicReceivedPacketList
 	rQuicLastForwarded byte
 	// } rQUIC
 }
@@ -309,6 +310,9 @@ var newSession = func(
 	)
 	s.unpacker = newPacketUnpacker(cs, s.version)
 	s.cryptoStreamManager = newCryptoStreamManager(cs, initialStream, handshakeStream, oneRTTStream)
+	// rQUIC {
+	s.rQuicSetup()
+	// } rQUIC
 	return s
 }
 
@@ -418,6 +422,9 @@ var newClientSession = func(
 			s.packer.SetToken(token.data)
 		}
 	}
+	// rQUIC {
+	s.rQuicSetup()
+	// } rQUIC
 	return s
 }
 
@@ -465,6 +472,38 @@ func (s *session) preSetup() {
 	}
 }
 
+// } rQUIC {
+
+func (s *session) rQuicSetup() {
+	rConf := s.config.RQuic
+	if rConf.EnableEncoder {
+		s.encoderEnabled = true
+		rConf.Populate()
+		s.encoder = MakeEncoder(rConf.CodingConf)
+		s.sentPacketHandler.CodingEnabled()
+		s.packer.CodingEnabled()
+	}
+	if rConf.EnableDecoder {
+		s.decoderEnabled = true
+		s.decoder = rdecoder.MakeDecoder()
+		s.rQuicBuffer = newRQuicReceivedPacketList()
+	}
+}
+
+// rQuicDisable turns off coding and QUIC behaves normally
+func (s *session) rQuicDisable() {
+	if s.encoderEnabled {
+		s.sentPacketHandler.CodingDisabled()
+		s.packer.CodingDisabled()
+		s.encoderEnabled = false
+	}
+	if s.decoderEnabled {
+		s.decoderEnabled = false
+	}
+}
+
+// } rQUIC {
+
 // run the session main loop
 func (s *session) run() error {
 	defer s.ctxCancel()
@@ -493,10 +532,7 @@ func (s *session) run() error {
 	var closeErr closeError
 
 	// rQUIC {
-	if s.codingEnabled {
-		s.sentPacketHandler.CodingEnabled()
-		// TODO: Try: Probe = last (re)coded packets
-	}
+	// TODO: Try: Probe = last (re)coded packets
 	var rcvTime time.Time
 	// } rQUIC
 
@@ -747,7 +783,7 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 	}
 
 	// rQUIC {
-	if !hdr.IsLongHeader && s.codingEnabled {
+	if !hdr.IsLongHeader && s.decoderEnabled {
 		return s.maybeDecodeReceivedPacket(p, hdr)
 	}
 	return s.handleSinglePacketFinish(p, hdr)
@@ -1169,7 +1205,7 @@ func (s *session) handleAckFrame(frame *wire.AckFrame, pn protocol.PacketNumber,
 		s.cryptoStreamHandler.SetLargest1RTTAcked(frame.LargestAcked())
 		// rQUIC {
 		// Lost and in-flight packets information has to be updated upon ACK reception.
-		if s.codingEnabled {
+		if s.encoderEnabled {
 			s.encoder.updateUnAcked(s.sentPacketHandler.AllUnAcked())
 		}
 		// } rQUIC
@@ -1465,7 +1501,7 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	s.logPacket(packet)
 	// rQUIC {
 	var codedPkts []*packedPacket
-	if s.codingEnabled {
+	if s.encoderEnabled {
 		if !packet.header.IsLongHeader {
 			s.encoder.maybeReduceCodingRatio(s.sentPacketHandler.GetMinPacketsInCongestionWindow())
 			codedPkts = s.encoder.process(packet)

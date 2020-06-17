@@ -9,6 +9,9 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/handshake"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/quictrace"
+	// rQUIC {
+	"github.com/lucas-clemente/quic-go/rquic"
+	// } rQUIC
 )
 
 // The StreamID is the ID of a QUIC stream.
@@ -260,6 +263,10 @@ type Config struct {
 	// QUIC Event Tracer.
 	// Warning: Experimental. This API should not be considered stable and will change soon.
 	QuicTracer quictrace.Tracer
+
+	// rQUIC {
+	RQuic *rquic.Conf
+	// } rQUIC
 }
 
 // A Listener for incoming QUIC connections

@@ -23,6 +23,11 @@ type packer interface {
 
 	HandleTransportParameters(*handshake.TransportParameters)
 	SetToken([]byte)
+
+	// rQUIC {
+	CodingEnabled()
+	CodingDisabled()
+	// } rQUIC
 }
 
 type sealer interface {
@@ -647,7 +652,6 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 		for i, j := payloadOffset-rquicOv-1, payloadOffset-1; i >= pnOffset; i, j = i-1, j-1 {
 			raw[j] = raw[i]
 		}
-		pnOffset += rquicOv
 	}
 	// } rQUIC
 	sealer.EncryptHeader(
