@@ -114,6 +114,8 @@ func (r *ratio) measureLoss() { // meas. thread
 	r.tx = 0
 	r.txMu.Unlock()
 
+	r.timer = time.NewTimer(r.MeasPeriod)
+
 	for {
 		select {
 		case <-r.stopMeas:
