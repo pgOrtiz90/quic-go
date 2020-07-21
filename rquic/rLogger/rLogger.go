@@ -11,8 +11,6 @@ import (
 	"sync"
 )
 
-
-
 var enabledMx sync.RWMutex
 var enabled bool
 var debugging bool
@@ -26,29 +24,46 @@ var logFile *os.File
 
 var txSrc, txCod, rxSrc, rxCod, rxRec int64
 
-
-
-func Init(name string, debug bool) {
+func Init(name string, debug bool)  {
+	if IsEnabled() {
+		return
+	}
 	logFileName = name
 	debugging = debug
-	run()
+	prepareToRun()
+	go run()
 }
 
 func Enable() {
-	run()
+	if IsEnabled() {
+		return
+	}
+	prepareToRun()
+	go run()
 }
 
 func EnableForDebug() {
+	if IsEnabled() {
+		DebugStart()
+		return
+	}
 	debugging = true
-	run()
+	prepareToRun()
+	go run()
 }
 
 func Disable() {
+	if !IsEnabled() {
+		return
+	}
 	close(closeQ)
 	<-closeQdone
 }
 
 func DebugStart() {
+	if IsDebugging() {
+		return
+	}
 	enabledMx.Lock()
 	debugging = true
 	if enabled {
@@ -58,6 +73,9 @@ func DebugStart() {
 }
 
 func DebugEnd() {
+	if !IsDebugging() {
+		return
+	}
 	enabledMx.Lock()
 	debugging = false
 	if enabled {
@@ -82,14 +100,18 @@ func LogFileName(name string) {
 	logFileName = name
 }
 
-func run() error {
+func prepareToRun() error {
 	var msg string
 
 	if logFileName == "" {
 		logFileName = "rQUIC_log_" + timestamp()
 	}
-	logFile, err := os.OpenFile(logFileName+".log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+
+	var err error
+	logFile, err = os.OpenFile(logFileName+".log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 	if err != nil {
+		fmt.Println("Failed to open logFile " + logFileName)
+		fmt.Println(err)
 		return err
 	}
 
@@ -99,7 +121,7 @@ func run() error {
 	} else {
 		msg += "disabled\n"
 	}
-	logFile.Write([]byte(msg))
+	writeLog(msg)
 
 	msgQ = make(chan string, 4) // 2 goroutines at encoder, 1 at decoder, 1 for margin
 	closeQ = make(chan struct{}, 0)
@@ -111,19 +133,27 @@ func run() error {
 	enabled = true
 	enabledMx.Unlock()
 
+	return nil
+}
+
+func run() error {
+	var msg string
 	for {
 		select {
 		case msg = <-msgQ:
-			logFile.Write([]byte(msg + "\n"))
+			writeLog(msg)
 		case <-closeQ:
 			enabledMx.Lock()
 			enabled = false
 			enabledMx.Unlock()
-			logFile.Write([]byte(CountersReport()))
-			logFile.Write([]byte(timestamp() + " rQUIC logging finished.\n"))
-			logFile.Close()
+			writeLog(CountersReport() + "\n rQUIC logging finished.\n")
+			if err := logFile.Close(); err != nil {
+				fmt.Println("Failed to close log file " + logFileName)
+				fmt.Println(err)
+			}
 			close(msgQ)
 			close(closeQdone)
+			return nil
 		}
 	}
 }
@@ -165,9 +195,24 @@ func CountersReport() string {
 //   }
 //
 func Printf(format string, v ...interface{}) {
-	msgQ <- timestamp() + " " + fmt.Sprintf(format, v...)
+	msgQ <- timestamp() + " " + fmt.Sprintf(format, v...) + "\n"
 }
 
 func timestamp() string {
 	return time.Now().Format("2006/01/02-15:04:05.000000000")
+}
+
+func writeLog(msg string) {
+	l := len(msg)
+	var errMsg string
+	n, err := logFile.Write([]byte(msg))
+	if err != nil {
+		errMsg += err.Error() + "\n"
+	}
+	if n != l {
+		errMsg += fmt.Sprintf("Wrote %d bytes out of %d\n", n, l)
+	}
+	if errMsg != "" {
+		fmt.Printf("An error occurred while writing log message\nMESSAGE:\n%sERROR:\n%s",msg, errMsg)
+	}
 }
