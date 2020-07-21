@@ -134,12 +134,13 @@ func (r *ratio) measureLoss() { // meas. thread
 			r.tx = 0
 			r.txMu.Unlock()
 
-			if rLogger.IsEnabled() {
-				rLogger.Printf("Encoder Ratio Update Tx:%d Lost:%d UnAcked:%d", tx, lost, unAcked)
+			if tx > 0 || unAcked > 0 || lost > 0 {
+				if rLogger.IsEnabled() {
+					rLogger.Printf("Encoder Ratio Update Tx:%d Lost:%d UnAcked:%d", tx, lost, unAcked)
+				}
+				r.residual.update(float64(lost) / float64(tx-unAcked-lost))
+				r.update()
 			}
-
-			r.residual.update(float64(lost) / float64(tx-unAcked-lost))
-			r.update()
 
 			r.timer = time.NewTimer(r.MeasPeriod)
 		}
