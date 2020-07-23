@@ -803,9 +803,9 @@ func (s *session) maybeDecodeReceivedPacket(p *receivedPacket, hdr *wire.Header)
 	case rquic.TypeUnprotected:
 		// Remove rQUIC header, which in this case is only TYPE/SCHEME field after DCID
 		for i := s.srcConnIDLen /*+1 first byte -1 index adjustment*/ ; i >= 0; i-- {
-			p.data[i+rquic.FieldSizeTypeScheme] = p.data[i]
+			p.data[i+rquic.FieldSizeType] = p.data[i]
 		}
-		p.data = p.data[rquic.FieldSizeTypeScheme:]
+		p.data = p.data[rquic.FieldSizeType:]
 		//Process the packet as usual
 		return s.handleSinglePacketFinish(p, hdr)
 	case rquic.TypeCoded, rquic.TypeProtected:

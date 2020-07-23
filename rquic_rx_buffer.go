@@ -198,7 +198,7 @@ func (l *rQuicReceivedPacketList) addNewReceivedPacket(p *receivedPacket, hdr *w
 		hdr:      hdr,
 		rp:       p,
 		id:       &p.data[rHdrPos+rquic.FieldPosId],
-		fwd:      &p.data[rHdrPos+rquic.FieldPosTypeScheme],
+		fwd:      &p.data[rHdrPos+rquic.FieldPosType],
 		coeffLen: &p.data[rHdrPos+rquic.FieldPosGenSize],
 		rHdrPos:  rHdrPos,
 	}

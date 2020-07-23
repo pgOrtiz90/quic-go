@@ -1,8 +1,9 @@
 package rquic
 
-////////////////////////////////////////////////////////////////////////// Scheme
+////////////////////////////////////////////////////////////////////////// Type & Scheme
 const (
-	SchemeNoCode uint8 = iota // 0x00
+	TypeUnprotected uint8 = iota // 0x00
+	TypeProtected
 	SchemeXor
 	SchemeRlcSys
 	//SchemeRlc
@@ -13,40 +14,33 @@ const (
 	//SchemeFulcrum
 	//SchemeBats
 	// What else?
-)
-
-////////////////////////////////////////////////////////////////////////// Type
-// of rQUIC packet
-const (
-	TypeCoded uint8 = iota
-	TypeProtected
-	TypeUnprotected
 	TypeUnknown
 )
+const TypeCoded uint8 = TypeProtected + 1 // any value b/w TypeProtected and TypeUnknown
 
 ////////////////////////////////////////////////////////////////////////// Field
 // SRC
 //    [   1st byte   ]
 //    [                 Destination Connection ID                    ]
-//    [ type  scheme ][    pkt id    ][ last gen. id ][   overlap    ]
+//    [     type     ][    pkt id    ][ last gen. id ][   overlap    ]
 // COD
 //    [   1st byte   ]
 //    [                 Destination Connection ID                    ]
-//    [ type  scheme ][    pkt id    ][    gen id    ][  gen.  size  ]
+//    [     type     ][    pkt id    ][    gen id    ][  gen.  size  ]
 //    [ seed / coeff   ... ... ... ... ... ... ... ... ... ... ... ...
 //    ...  up to MaxGenSize * n (n /*coeff size*/ = /*always(?)*/ 1) ]
 const ( //---------------------------------------------------------------- FieldSize
-	FieldSizeTypeScheme int = 1
-	FieldSizeId         int = 1
-	FieldSizeLastGen    int = 1 // source
-	FieldSizeOverlap    int = 1 // source
-	FieldSizeGenId      int = 1 // coded
-	FieldSizeGenSize    int = 1 // coded
+	FieldSizeType    int = 1
+	FieldSizeId      int = 1
+	FieldSizeLastGen int = 1 // source
+	FieldSizeOverlap int = 1 // source
+	FieldSizeGenId   int = 1 // coded
+	FieldSizeGenSize int = 1 // coded
 	// FieldSizeSeed    // This will depend on the scheme
 
-	SrcHeaderSize      int = FieldSizeTypeScheme + FieldSizeId + FieldSizeLastGen + FieldSizeOverlap
-	ProtMinusUnprotLen int = SrcHeaderSize - FieldSizeTypeScheme
-	CodPreHeaderSize   int = FieldSizeTypeScheme + FieldSizeId + FieldSizeGenId + FieldSizeGenSize
+	SrcHeaderSize      int = FieldSizeType + FieldSizeId + FieldSizeLastGen + FieldSizeOverlap
+	ProtMinusUnprotLen int = SrcHeaderSize - FieldSizeType
+	CodPreHeaderSize   int = FieldSizeType + FieldSizeId + FieldSizeGenId + FieldSizeGenSize
 	LenOfSrcLen        int = 2 // COD payload header, shows decoded SRC length
 
 	OverheadNoCoeff  int = CodPreHeaderSize + LenOfSrcLen + 1 /*1st byte*/
@@ -57,20 +51,18 @@ const ( //---------------------------------------------------------------- Field
 var seedFieldMaxSize int
 
 const ( //---------------------------------------------------------------- FieldPos
-	FieldPosTypeScheme int = 0
-	FieldPosId         int = FieldPosTypeScheme + FieldSizeTypeScheme
-	FieldPosLastGen    int = FieldPosId + FieldSizeId           // source
-	FieldPosOverlap    int = FieldPosLastGen + FieldSizeLastGen // source
-	FieldPosGenId      int = FieldPosId + FieldSizeId           // coded
-	FieldPosGenSize    int = FieldPosGenId + FieldSizeGenId     // coded
-	FieldPosSeed       int = FieldPosGenSize + FieldSizeGenSize // coded
+	FieldPosType    int = 0
+	FieldPosId      int = FieldPosType + FieldSizeType
+	FieldPosLastGen int = FieldPosId + FieldSizeId           // source
+	FieldPosOverlap int = FieldPosLastGen + FieldSizeLastGen // source
+	FieldPosGenId   int = FieldPosId + FieldSizeId           // coded
+	FieldPosGenSize int = FieldPosGenId + FieldSizeGenId     // coded
+	FieldPosSeed    int = FieldPosGenSize + FieldSizeGenSize // coded
 )
 
-////////////////////////////////////////////////////////////////////////// Masks & Flags
+////////////////////////////////////////////////////////////////////////// Flags
+// When receivedPacked is processed, rQUIC type/scheme field is reused
 const (
-	MaskType   uint8 = 0x80
-	MaskScheme uint8 = 0x7F
-	// When receivedPacked is processed, rQUIC type/scheme field is reused
 	FlagObsolete uint8 = 0x01
 	FlagCoded    uint8 = 0x02
 	FlagSource   uint8 = 0x04 // Marks both source and decoded packets

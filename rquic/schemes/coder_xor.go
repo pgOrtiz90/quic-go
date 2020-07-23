@@ -40,7 +40,7 @@ func (r *redunBuilderXor) ReadyToSend(ratio float64) bool {
 func (r *redunBuilderXor) Finish() {
 	r.codedPkt[0] = 0
 	r.codedPkt[r.posRQuicHdr+rquic.FieldPosGenSize] = r.genSize
-	r.codedPkt[r.posRQuicHdr+rquic.FieldPosTypeScheme] = r.scheme
+	r.codedPkt[r.posRQuicHdr+rquic.FieldPosType] = r.scheme
 	r.finished = true
 }
 

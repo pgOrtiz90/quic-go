@@ -62,7 +62,7 @@ func (r *redunBuilderRlcSys) Finish() {
 	r.posRQuicHdr += unusedInt
 	posCoeffsNew := r.posCoeffs + unusedInt
 	posGenSize := r.posRQuicHdr + rquic.FieldPosGenSize
-	posScheme := r.posRQuicHdr + rquic.FieldPosTypeScheme
+	posScheme := r.posRQuicHdr + rquic.FieldPosType
 
 	for _, cod := range r.codedPkts {
 		cod[0] = unused

@@ -36,46 +36,42 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	d.obsoleteSrcChecked = false
 
 	rHdrPos := d.rQuicHdrPos()
-	ptype := raw[rHdrPos+rquic.FieldPosTypeScheme]
+	ptype := raw[rHdrPos+rquic.FieldPosType]
 
-	logUnknownPkt := func() {
-		if rLogger.IsEnabled() {
-			rLogger.Printf("Decoder Packet UNKNOWN pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-				len(raw), d.lenDCID, raw[:rHdrPos+rquic.CodHeaderSizeMax],
-			)
-		}
+	logPkt := func(pktType string, lenAfterDCID int) {
+		rLogger.Debugf("Decoder Packet %s pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+			pktType, len(raw), d.lenDCID, raw[:rHdrPos+lenAfterDCID],
+		)
 	}
 
 	// unprotected packet
-	if ptype == 0 {
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Decoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-				len(raw), d.lenDCID, raw[:rHdrPos+rquic.FieldSizeTypeScheme],
-			)
-		}
+	if ptype == rquic.TypeUnprotected {
+		logPkt("UNPROTECTED", rquic.FieldSizeType)
 		return rquic.TypeUnprotected, d.didRecover
 	}
 
 	// protected packet
-	if ptype&rquic.MaskType == 0 {
+	if ptype == rquic.TypeProtected {
 		if src := d.NewSrc(raw); src != nil {
+			logPkt("PROTECTED", rquic.SrcHeaderSize)
 			d.optimizeWithSrc(src, true)
 			return rquic.TypeProtected, d.didRecover
 		}
-		logUnknownPkt()
+		logPkt("UNKNOWN", rquic.CodHeaderSizeMax)
+		return rquic.TypeUnknown, d.didRecover
+	}
+
+	// unknown packet
+	if ptype >= rquic.TypeUnknown {
+		logPkt("UNKNOWN", rquic.CodHeaderSizeMax)
 		return rquic.TypeUnknown, d.didRecover
 	}
 
 	// coded packet
-	if ptype&rquic.MaskType != 0 {
-		d.NewCod(raw)
-		d.Recover()
-		return rquic.TypeCoded, d.didRecover
-	}
-
-	// Coded and unknown packets are not passed to QUIC
-	logUnknownPkt()
-	return rquic.TypeUnknown, d.didRecover
+	logPkt("CODED", rquic.CodPreHeaderSize + int(raw[rHdrPos+rquic.FieldPosGenSize]))
+	d.NewCod(raw)
+	d.Recover()
+	return rquic.TypeCoded, d.didRecover
 }
 
 func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
@@ -175,7 +171,7 @@ func (d *Decoder) NewCod(raw []byte) {
 
 	// Update scheme
 	// The use of different schemes at a time is very unlikely.
-	newScheme := raw[rHdrPos+rquic.FieldPosTypeScheme] & rquic.MaskScheme
+	newScheme := raw[rHdrPos+rquic.FieldPosType]
 	if d.lastScheme != newScheme {
 		d.coeff = schemes.MakeCoeffUnpacker(newScheme)
 		d.lastScheme = newScheme

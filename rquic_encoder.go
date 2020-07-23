@@ -92,8 +92,14 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 
 func (e *encoder) processUnprotected(raw []byte) {
 	rQuicHdrPos := e.rQuicHdrPos()
-	posTypeNew := e.rQuicSrcPldPos() - 1
-	raw[posTypeNew] = 0
+
+	// [1stB][      DCID      ][  0   0   0   0 ][ PN ][ Payload ]
+	// Type ---------posTypeNew--->-----------^
+	posTypeNew := rQuicHdrPos + rquic.FieldPosType + rquic.ProtMinusUnprotLen
+	raw[posTypeNew] = rquic.TypeUnprotected
+
+	// [1stB][      DCID      ][  0   0   0 Type][ PN ][ Payload ]
+	// [======================]--- move -->|
 	copy(raw[rquic.ProtMinusUnprotLen:posTypeNew], raw[:rQuicHdrPos])
 	raw = raw[rquic.ProtMinusUnprotLen:]
 
@@ -106,7 +112,7 @@ func (e *encoder) processProtected(raw []byte) {
 	//////// Complete rQUIC header
 	ofs := e.rQuicHdrPos()
 	pldPos := e.rQuicSrcPldPos()
-	raw[ofs+rquic.FieldPosTypeScheme] = rquic.MaskType | e.scheme // Sending current scheme (unencrypted!) for debugging
+	raw[ofs+rquic.FieldPosType] = rquic.TypeProtected
 	raw[ofs+rquic.FieldPosId] = e.rQuicId
 	raw[ofs+rquic.FieldPosLastGen] = e.rQuicGenId
 	raw[ofs+rquic.FieldPosOverlap] = e.overlap
