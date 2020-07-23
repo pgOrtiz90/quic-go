@@ -426,9 +426,7 @@ func (p *packetPacker) maybePackAppDataPacket() (*packedPacket, error) {
 		if p.coding {
 			prevMS := maxSize
 			maxSize -= protocol.ByteCount(rquic.Overhead())
-			if rLogger.IsDebugging() {
-				rLogger.Printf("Encoder Header Construction maxPldSize Orig:%d New:%d", prevMS, maxSize)
-			}
+			rLogger.Debugf("Encoder Header Construction maxPldSize Orig:%d New:%d", prevMS, maxSize)
 		}
 	}
 	// } rQUIC

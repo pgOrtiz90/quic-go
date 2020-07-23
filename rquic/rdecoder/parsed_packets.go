@@ -29,10 +29,7 @@ func (s *parsedSrc) OldestPkt() uint8 { return s.id }
 
 func (s *parsedSrc) markAsObsolete() {
 	*s.fwd |= rquic.FlagObsolete
-	if rLogger.IsDebugging() {
-		rLogger.Printf("Decoder ObsoleteSrc gen.ID:%d pkt.ID:%d", s.lastGen, s.id)
-	}
-
+	rLogger.Debugf("Decoder ObsoleteSrc gen.ID:%d pkt.ID:%d", s.lastGen, s.id)
 }
 
 type parsedCod struct {
@@ -58,9 +55,7 @@ func (c *parsedCod) OldestPkt() uint8 { return c.srcIds[len(c.srcIds)-1] }
 
 func (c *parsedCod) markAsObsolete() {
 	*c.fwd |= rquic.FlagObsolete
-	if rLogger.IsDebugging() {
-		rLogger.Printf("Decoder ObsoleteCod gen.ID:%d pkt.ID:%d", c.genId, c.id)
-	}
+	rLogger.Debugf("Decoder ObsoleteCod gen.ID:%d pkt.ID:%d", c.genId, c.id)
 }
 
 func (c *parsedCod) findSrcId(id uint8) (int, bool) {

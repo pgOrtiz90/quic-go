@@ -8,9 +8,7 @@ func (d *Decoder) optimizeWithSrc(src *parsedSrc, obsoleteCodNewCheck bool) {
 		d.obsoleteCodCheckedInd = 0
 	}
 
-	if rLogger.IsDebugging() {
-		rLogger.Printf("Decoder OptimizeSrc Pkt.ID:%d", src.id)
-	}
+	rLogger.Debugf("Decoder OptimizeSrc Pkt.ID:%d", src.id)
 
 	for i := 0; i < len(d.pktsCod); i++ {
 		if moreCod := d.handleObsoleteCod(i); !moreCod {
@@ -65,11 +63,9 @@ func (d *Decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc,
 	}
 
 	d.obsoleteSrcChecked = true
-	if rLogger.IsDebugging() {
-		rLogger.Printf("Decoder OptimizeCod gen.ID:%d pkt.ID:%d RxSrc:%d/%d",
-			cod.genId, cod.id, len(availableSrc), cod.remaining,
-		)
-	}
+	rLogger.Debugf("Decoder OptimizeCod gen.ID:%d pkt.ID:%d RxSrc:%d/%d",
+		cod.genId, cod.id, len(availableSrc), cod.remaining,
+	)
 
 	return
 }
@@ -89,9 +85,7 @@ func (d *Decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []
 	// if !codIsUseful --> cod.remaining == 1; cod.remaining == 0 --> this method is not called
 
 	if ns := d.NewSrcRec(cod); ns != nil {
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Decoder OptimizeCod Optimized remaining:%d", cod.remaining)
-		}
+		rLogger.Debugf("Decoder OptimizeCod Optimized remaining:%d", cod.remaining)
 		d.optimizeWithSrc(ns, true)
 	}
 	// When this method is called, COD is not stored yet, no need(way) to remove it from pktsCod.

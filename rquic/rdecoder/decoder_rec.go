@@ -16,9 +16,7 @@ func (d *Decoder) Recover() {
 
 	if d.doCheckMissingSrc {
 		d.srcMissUpdate()
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Decoder Recovery MissingSrcPkts:%d", d.srcMiss)
-		}
+		rLogger.Debugf("Decoder Recovery MissingSrcPkts:%d", d.srcMiss)
 	}
 	if len(d.srcMiss) == 0 {
 		return
@@ -43,9 +41,7 @@ func (d *Decoder) Recover() {
 		for r < numRows {
 			if _, ok := d.pktsCod[r].findSrcId(id); ok {
 				cod = d.pktsCod[r]
-				if rLogger.IsDebugging() {
-					rLogger.Printf("Decoder Recovery TopDown Row:%d srcIDs:%d coeffs:%d", r, cod.srcIds, cod.coeff)
-				}
+				rLogger.Debugf("Decoder Recovery TopDown Row:%d srcIDs:%d coeffs:%d", r, cod.srcIds, cod.coeff)
 				break
 			}
 			r++
@@ -58,15 +54,11 @@ func (d *Decoder) Recover() {
 		// scale the row
 		cod.scaleDown()
 		// log swap&scale
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Decoder Recovery SwapScale NewRow:%d coeffs:%d", topRow, cod.coeff)
-		}
+		rLogger.Debugf("Decoder Recovery SwapScale NewRow:%d coeffs:%d", topRow, cod.coeff)
 		// subtract scaled row from other rows with non-zero element
 		r++
 		for r < numRows {
-			if rLogger.IsDebugging() {
-				rLogger.Printf("Decoder Recovery AttachCod TgtRow:%d", r)
-			}
+			rLogger.Debugf("Decoder Recovery AttachCod TgtRow:%d", r)
 			d.pktsCod[r].attachCod(cod, 0)
 			r++
 		}
@@ -90,9 +82,7 @@ func (d *Decoder) Recover() {
 	for topRow >= 0 {
 		cod = d.pktsCod[topRow]
 		cod.wipeZeros()
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Decoder Recovery BottomUp Row:%d", topRow)
-		}
+		rLogger.Debugf("Decoder Recovery BottomUp Row:%d", topRow)
 		if cod.remaining == 0 {
 			d.removeCodNoOrder(topRow)
 			cod.markAsObsolete()
@@ -100,9 +90,7 @@ func (d *Decoder) Recover() {
 			ind = len(cod.coeff) - 1
 			for i := 0; i < topRow; i++ {
 				// 0 <= d.pktsCod[i].srcIds[0] - cod.srcIds[0] < 128
-				if rLogger.IsDebugging() {
-					rLogger.Printf("Decoder Recovery AttachCod TgtRow:%d", i)
-				}
+				rLogger.Debugf("Decoder Recovery AttachCod TgtRow:%d", i)
 				d.pktsCod[i].attachCod(cod, ind)
 			}
 			if cod.remaining == 1 {

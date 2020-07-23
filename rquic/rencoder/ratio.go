@@ -48,9 +48,7 @@ func (r *ratio) Change(newR float64) {
 	r.ratioMu.Lock()
 	r.ratio = newR
 	r.ratioMu.Unlock()
-	if rLogger.IsEnabled() {
-		rLogger.Printf("Encoder Ratio NewValue:%f", newR)
-	}
+	rLogger.Logf("Encoder Ratio NewValue:%f", newR)
 }
 
 func (r *ratio) IsDynamic() bool {
@@ -64,9 +62,7 @@ func (r *ratio) MakeStatic() {
 		<-r.stopMeasDone
 		r.dynamic = false
 	}
-	if rLogger.IsEnabled() {
-		rLogger.Printf("Encoder Ratio WasDynamic:%t IsNowDynamic:%t", was, r.dynamic)
-	}
+	rLogger.Logf("Encoder Ratio WasDynamic:%t IsNowDynamic:%t", was, r.dynamic)
 }
 
 func (r *ratio) MakeDynamic() {
@@ -77,9 +73,7 @@ func (r *ratio) MakeDynamic() {
 		go r.measureLoss()
 		r.dynamic = true
 	}
-	if rLogger.IsEnabled() {
-		rLogger.Printf("Encoder Ratio WasDynamic:%t IsNowDynamic:%t", was, r.dynamic)
-	}
+	rLogger.Logf("Encoder Ratio WasDynamic:%t IsNowDynamic:%t", was, r.dynamic)
 }
 
 func (r *ratio) UpdateUnAcked(lost, unAcked int) {
@@ -135,9 +129,7 @@ func (r *ratio) measureLoss() { // meas. thread
 			r.txMu.Unlock()
 
 			if tx > 0 || unAcked > 0 || lost > 0 {
-				if rLogger.IsEnabled() {
-					rLogger.Printf("Encoder Ratio Update Tx:%d Lost:%d UnAcked:%d", tx, lost, unAcked)
-				}
+				rLogger.Logf("Encoder Ratio Update Tx:%d Lost:%d UnAcked:%d", tx, lost, unAcked)
 				r.residual.update(float64(lost) / float64(tx-unAcked-lost))
 				r.update()
 			}
@@ -185,11 +177,9 @@ func MakeRatio(
 		r.MakeDynamic()
 	}
 
-	if rLogger.IsEnabled() {
-		rLogger.Printf("Encoder Ratio Config Dynamic:%t TMeasPeriod:%? NumPeriods:%d GammaTarget:%f DeltaRatio:%f",
-			dynamic, Tperiod, numPeriods, gammaTarget, deltaRatio,
-		)
-	}
+	rLogger.Logf("Encoder Ratio Config Dynamic:%t TMeasPeriod:%s NumPeriods:%d GammaTarget:%f DeltaRatio:%f",
+		dynamic, Tperiod.String(), numPeriods, gammaTarget, deltaRatio,
+	)
 
 	return r
 }

@@ -81,17 +81,12 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
 	rHdrPos := d.rQuicHdrPos()
 	srcPldPos := d.rQuicSrcPldPos()
-	if rLogger.IsDebugging() {
-		rLogger.Printf("Decoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-			len(raw), d.lenDCID, raw[:rHdrPos+srcPldPos],
-		)
-	}
 
 	ps := &parsedSrc{
 		id:      raw[rHdrPos+rquic.FieldPosId],
 		lastGen: raw[rHdrPos+rquic.FieldPosLastGen],
 		overlap: raw[rHdrPos+rquic.FieldPosOverlap],
-		fwd:     &raw[rHdrPos+rquic.FieldPosTypeScheme], // reusing scheme field
+		fwd:     &raw[rHdrPos+rquic.FieldPosType], // reusing scheme field
 		pld:     raw[srcPldPos:],
 	}
 	ps.codedLen = rquic.PldLenPrepare(len(ps.pld))
@@ -116,19 +111,15 @@ func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
 func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
 	// Recovered too late or already received in a retransmission? Discard.
 	if obsolete, duplicate := d.isObsoleteId(cod.srcIds[0]), d.srcAvblUpdate(cod.srcIds[0]); obsolete || duplicate {
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Decoder Packet Recovered DISCARDED pkt.ID:%d Obsolete:%t Duplicate:%t",
-				cod.srcIds[0], obsolete, duplicate,
-			)
-		}
+		rLogger.Debugf("Decoder Packet Recovered DISCARDED pkt.ID:%d Obsolete:%t Duplicate:%t",
+			cod.srcIds[0], obsolete, duplicate,
+		)
 		cod.markAsObsolete()
 		return nil
 	}
 	// cod.pld must be fully decoded. If not, discard.
 	if cod.remaining > 1 {
-		if rLogger.IsEnabled() {
-			rLogger.Printf("ERROR Decoder RecoveredPkt NotDecoded srcIDs:%d coeffs:%d", cod.srcIds, cod.coeff)
-		}
+		rLogger.Logf("ERROR Decoder RecoveredPkt NotDecoded srcIDs:%d coeffs:%d", cod.srcIds, cod.coeff)
 		cod.markAsObsolete()
 		return nil
 	}
@@ -162,11 +153,6 @@ func (d *Decoder) NewCod(raw []byte) {
 	rHdrPos := d.rQuicHdrPos()
 
 	rLogger.MaybeIncreaseRxCod()
-	if rLogger.IsDebugging() {
-		rLogger.Printf("Decoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-			len(raw), d.lenDCID, raw[:rHdrPos+rquic.CodHeaderSizeMax],
-		)
-	}
 
 	pc := &parsedCod{
 		genSize: raw[rHdrPos+rquic.FieldPosGenSize],
@@ -217,6 +203,7 @@ func (d *Decoder) NewCod(raw []byte) {
 }
 
 func MakeDecoder() *Decoder {
+	rLogger.Logf("Decoder New")
 	return &Decoder{ // if d.pollutionCount < 0 --> Close this path/connection
 		// if COD --> d.pollutionCount -= rquic.MinRate
 		// if SRC --> d.pollutionCount++

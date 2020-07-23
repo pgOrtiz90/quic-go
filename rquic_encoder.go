@@ -96,11 +96,10 @@ func (e *encoder) processUnprotected(raw []byte) {
 	raw[posTypeNew] = 0
 	copy(raw[rquic.ProtMinusUnprotLen:posTypeNew], raw[:rQuicHdrPos])
 	raw = raw[rquic.ProtMinusUnprotLen:]
-	if rLogger.IsDebugging() {
-		rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-			len(raw), e.lenDCID, raw[:rQuicHdrPos+rquic.FieldSizeTypeScheme],
-		)
-	}
+
+	rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+		len(raw), e.lenDCID, raw[:rQuicHdrPos+rquic.FieldSizeType],
+	)
 }
 
 func (e *encoder) processProtected(raw []byte) {
@@ -111,11 +110,9 @@ func (e *encoder) processProtected(raw []byte) {
 	raw[ofs+rquic.FieldPosId] = e.rQuicId
 	raw[ofs+rquic.FieldPosLastGen] = e.rQuicGenId
 	raw[ofs+rquic.FieldPosOverlap] = e.overlap
-	if rLogger.IsDebugging() {
-		rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-			len(raw), e.lenDCID, raw[:ofs+pldPos],
-		)
-	}
+	rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+		len(raw), e.lenDCID, raw[:ofs+pldPos],
+	)
 
 	//////// Prepare SRC to be coded
 	e.srcForCoding = e.srcForCoding[:cap(e.srcForCoding)]
@@ -208,11 +205,9 @@ func (e *encoder) assemble(rb *redunBuilder) {
 		// Add packet to the assembled packet list
 		e.newCodedPackets = append(e.newCodedPackets, &pdPkt)
 
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-				len(pdPkt.raw), e.lenDCID, pdPkt.raw[:rQHdrPos+rquic.CodHeaderSizeMax],
-			)
-		}
+		rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+			len(pdPkt.raw), e.lenDCID, pdPkt.raw[:rQHdrPos+rquic.CodHeaderSizeMax],
+		)
 	}
 }
 
@@ -230,9 +225,7 @@ func (e *encoder) maybeReduceCodingRatio(minPktsCwnd protocol.ByteCount) bool /*
 	newRatio := float64(minPktsCwnd)
 	doChange := newRatio < curRatio
 
-	if rLogger.IsEnabled() {
-		rLogger.Printf("Encoder Ratio MinPktsCWND:%f CurrentRatio:%f RatioChanged:%t", newRatio, curRatio, doChange)
-	}
+	rLogger.Logf("Encoder Ratio MinPktsCWND:%f CurrentRatio:%f RatioChanged:%t", newRatio, curRatio, doChange)
 
 	if doChange {
 		e.ratio.Change(newRatio)
@@ -266,6 +259,7 @@ func (e *encoder) addTransmissionCount() {
 }
 
 func MakeEncoder(conf *rquic.CConf) *encoder {
+	rLogger.Logf("Encoder New %+v", conf)
 	dynRatio := rencoder.MakeRatio(
 		conf.RatioVal,
 		conf.Dynamic > 0,

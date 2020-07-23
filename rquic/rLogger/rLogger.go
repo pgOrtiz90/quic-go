@@ -183,8 +183,7 @@ func CountersReport() string {
 }
 
 // Printf prepares the line for the log file. Log lines may come from concurrent
-// goroutines. This function creates a string and sends it to a channel, from which
-// another function takes it and and writes it to log file. A line break is always
+// goroutines. A line break is always
 // added before writing the line to the log file.
 //
 // Printf is unaware of channel's state and may attempt to write to a closed channel!
@@ -196,6 +195,20 @@ func CountersReport() string {
 //
 func Printf(format string, v ...interface{}) {
 	msgQ <- timestamp() + " " + fmt.Sprintf(format, v...) + "\n"
+}
+
+// Logf works exactly like Printf, but first checks if logging is enabled.
+func Logf(format string, v ...interface{}) {
+	if IsDebugging() {
+		msgQ <- timestamp() + " " + fmt.Sprintf(format, v...) + "\n"
+	}
+}
+
+// Debugf works exactly like Printf, but first checks if debugging is enabled.
+func Debugf(format string, v ...interface{}) {
+	if IsDebugging() {
+		msgQ <- timestamp() + " " + fmt.Sprintf(format, v...) + "\n"
+	}
 }
 
 func timestamp() string {
