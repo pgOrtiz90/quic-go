@@ -14,10 +14,7 @@ func (d *Decoder) Recover() {
 		return
 	} // Nothing to do
 
-	if d.doCheckMissingSrc {
-		d.srcMissUpdate()
-		rLogger.Debugf("Decoder Recovery MissingSrcPkts:%d", d.srcMiss)
-	}
+	d.srcMissUpdate()
 	if len(d.srcMiss) == 0 {
 		return
 	} // Everything is recovered so far, nothing to do

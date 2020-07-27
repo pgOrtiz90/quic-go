@@ -2,6 +2,7 @@ package rdecoder
 
 import (
 	"github.com/lucas-clemente/quic-go/rquic"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
 func (d *Decoder) lenNotProtected() int { return d.lenDCID + rquic.SrcHeaderSize }
@@ -9,62 +10,59 @@ func (d *Decoder) rQuicHdrPos() int     { return 1 /*1st byte*/ + d.lenDCID }
 func (d *Decoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + d.lenDCID + rquic.SrcHeaderSize }
 
 func idLolderR(older, newer uint8) bool {
-	// ">=" older, ">" older or equal
-	return (newer - older) > 128
-}
-
-func (d *Decoder) isObsoleteId(id uint8) bool {
-	// id == d.obsoleteXhold --> id is still valid
-	return (d.obsoleteXhold - id) > 128
-}
-
-func (d *Decoder) isObsoletePkt(pkt parsedPacket) bool {
-	//         | ,--- obsoleteXhold
-	//   [* * *|* * * * * * *] --- COD.coeffs, each protects its SRC
-	//   /     |           /
-	//  /                 /
-	//  coeff[0]         coeff[last]
-	//   Oldest             Newest
-	return (d.obsoleteXhold - pkt.OldestPkt()) > 128
-}
-
-// isObsoletePktAndUpdateXhold detects obsolete packets and updates d.obsoleteXhold,
-// which is used for recovery operations.
-//
-// This method has to be executed after updating lastSeenGen with d.updateScope(parsedPacket)
-func (d *Decoder) isObsoletePktAndUpdateXhold(pkt parsedPacket) bool {
-	// XXXX XXXX XXXX XXXX ------------------------------GenF   ________ Packets from previous gen-s are obsolete
-	//      XXXX XXXX XXXX XXXX -------------------------GenE       } Margin, not obsolete yet
-	//      T    XXXX XXXX XXXX   XXXX ------------------GenD   |\
-	//      |         XXXX XXXX   XXXX XXXX -------------GenC   || Packets from these gen-s
-	//      |              XXXX   XXXX XXXX XXXX --------GenB   || are not obsolete
-	//  the oldest                XXXX XXXX XXXX XXXX ---GenA   |/
-	//  valid pkt                \--- lastSeenGen ---/
-	//
-	// Any packet belongs to [overlap] generations, pkt.OldestGen() = pkt.NewestGen() - (overlap - 1)
-	// var obsolete bool = pkt.OldestGen() < lastValidGen // In this example, lastValidGen := GenE
-	//                     pkt.NewestGen() - (overlap - 1) < lastSeenGen - (overlap - 1) - Margin
-	//                     pkt.NewestGen() < lastSeenGen - Margin
-	// var L, R *int*; idLolderR(L,R) = (L <= R) = !(R < L) = (L < R+1) = (L-1 < R)
-	// (R < L) = !idLolderR(L, R)
-	//
-	obsolete := !idLolderR(d.lastSeenGen-rquic.GenMargin, pkt.NewestGen())
-	if obsolete {
-		if id := pkt.OldestPkt(); !d.isObsoleteId(id) {
-			d.obsoleteXhold = id
-		}
+	// older < newer
+	if newer == older {
+		return false
 	}
-	return obsolete
+	// older <= newer
+	return (newer - older) < rquic.AgeDiff
 }
 
-// updateScope updates lastSeenPkt and lastSeenGen
-func (d *Decoder) updateScope(pkt parsedPacket) bool {
-	sawNewPkt := pkt.NewestPkt()
-	sawNewGen := pkt.NewestGen()
-	if idLolderR(d.lastSeenPkt, sawNewPkt) {
-		d.lastSeenPkt = sawNewPkt
-		if idLolderR(d.lastSeenGen, sawNewGen) {
-			d.lastSeenGen = sawNewGen
+func (d *Decoder) isObsoletePktId(p uint8) bool {
+	// p == d.obsoleteXhold --> p is still valid
+	// p - d.obsoleteXhold < rquic.AgeDiffMax --> pkt ok
+	return (p - d.obsoleteXhold) >= rquic.AgeDiff
+}
+
+func (d *Decoder) isObsoleteGenId(g uint8) bool {
+	// g == d.lastValidGen --> g is still valid
+	// g - d.lastValidGen < rquic.AgeDiffMax --> pkt ok
+	return (g - d.lastValidGen) >= rquic.AgeDiff
+}
+
+// isObsolete detects obsolete packets.
+// It attempts to update d.obsoleteXhold when it detects an obsolete generation.
+// Use maybeUpdateXhold for updating d.obsoleteXhold based on lastSeenPkt.
+// This method should be executed after lastSeen method.
+func (d *Decoder) isObsolete(p, g byte) bool {
+	if d.isObsoletePktId(p) {
+		return true
+	}
+	if d.isObsoleteGenId(g) {
+		if newXhold := p + 1; idLolderR(d.obsoleteXhold, newXhold) {
+			d.obsoleteXhold = newXhold
+		}
+		return true
+	}
+	return false /*not obsolete*/
+}
+
+func (d *Decoder) maybeUpdateXhold() {
+	if newXhold := d.lastSeenPkt - d.distToLastValidId; idLolderR(d.obsoleteXhold, newXhold) {
+		d.obsoleteXhold = newXhold
+	}
+}
+
+// lastSeen updates lastSeenPkt and lastSeenGen
+func (d *Decoder) lastSeen(p, g byte) bool {
+	if idLolderR(d.lastSeenPkt, p) {
+		d.lastSeenPkt = p
+		if idLolderR(d.lastSeenGen, g) {
+			d.lastSeenGen = g
+			// Any packet belongs to [overlap] generations. Last [overlap] + Margin generations are valid.
+			lvg := d.lastValidGen
+			d.lastValidGen = d.lastSeenGen - d.lastSeenOverlap - rquic.GenMargin + 1
+			rLogger.Debugf("Updating lastValidGen Old:%d New:%d", lvg, d.lastValidGen)
 		}
 		return true // d.lastSeen* updated
 	}
@@ -72,7 +70,7 @@ func (d *Decoder) updateScope(pkt parsedPacket) bool {
 }
 
 func (d *Decoder) handleObsoleteSrc(ind int) bool /*there are more SRCs after ind*/ {
-	for d.isObsoletePkt(d.pktsSrc[ind]) {
+	for d.isObsolete(d.pktsSrc[ind].obsoleteCheckInputs()) {
 		d.pktsSrc[ind].markAsObsolete()
 		d.removeSrcNoOrder(ind)
 		if ind >= len(d.pktsSrc) {
@@ -87,7 +85,7 @@ func (d *Decoder) handleObsoleteCod(ind int) bool /*there are more CODs after in
 		return ind < len(d.pktsCod)
 	}
 	d.obsoleteCodCheckedInd = ind
-	for d.isObsoletePkt(d.pktsCod[ind]) {
+	for d.isObsolete(d.pktsCod[ind].obsoleteCheckInputs()) {
 		d.pktsCod[ind].markAsObsolete()
 		d.removeCodNoOrder(ind)
 		if ind >= len(d.pktsCod) {
@@ -117,8 +115,10 @@ func (d *Decoder) removeCodNoOrder(ind int) {
 	d.pktsCod = d.pktsCod[:last-1]
 }
 
+// srcAvblUpdate adds packet ID of new SRC to srcAvbl, an ordered list of SRC available in the system.
+// Obsolete elements are removed from srcAvbl in srcMissUpdate, which builds the list of missing SRC,
+// used in recovery.
 func (d *Decoder) srcAvblUpdate(id uint8) (repeatedSrc bool) {
-	// Obsolete elements are removed in another method
 	for i := len(d.srcAvbl) - 1; i >= 0; i-- {
 		if idLolderR(d.srcAvbl[i], id) {
 			d.srcAvbl = append(append(d.srcAvbl[:i+1], id), d.srcAvbl[i+1:]...)
@@ -135,12 +135,16 @@ func (d *Decoder) srcAvblUpdate(id uint8) (repeatedSrc bool) {
 
 func (d *Decoder) srcMissUpdate() {
 	// If multiple redun-s per gen., do not repeat this action.
+	if !d.doCheckMissingSrc {
+		return
+	}
 	d.doCheckMissingSrc = false // becomes true after d.lastSeenPkt update by new COD
+	defer rLogger.Debugf("Decoder MissingSrcPkts:%d", d.srcMiss)
 
 	// Remove obsolete pkt ids from srcAvbl list
-	if d.isObsoleteId(d.srcAvbl[0]) {
+	if d.isObsoletePktId(d.srcAvbl[0]) {
 		for i := 1; i < len(d.srcAvbl); i++ {
-			if !d.isObsoleteId(d.srcAvbl[i]) {
+			if !d.isObsoletePktId(d.srcAvbl[i]) {
 				d.srcAvbl = d.srcAvbl[i:]
 				break
 			}
@@ -155,12 +159,22 @@ func (d *Decoder) srcMissUpdate() {
 		return
 	} // nothing to do
 
+	// Check if there is any SRC available
+	srcAvblLen := len(d.srcAvbl)
+	if srcAvblLen == 0 {
+		for i, missId := 0, d.obsoleteXhold; i < srcMissLen; i++ {
+			d.srcMiss[i] = missId
+			missId++
+		}
+		return
+	}
+
 	// Check which expected SRC IDs haven't been received
 	var indAv, indMiss int
 	for missId := d.obsoleteXhold; idLolderR(missId, maxId); missId++ {
 		if d.srcAvbl[indAv] == missId {
 			indAv++
-			if indAv == len(d.srcAvbl) {
+			if indAv == srcAvblLen {
 				for indMiss < srcMissLen {
 					missId++
 					d.srcMiss[indMiss] = missId

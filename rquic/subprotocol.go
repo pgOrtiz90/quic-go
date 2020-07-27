@@ -70,15 +70,36 @@ const (
 
 ////////////////////////////////////////////////////////////////////////// Min & Max
 const (
-	MaxGf       int     = 255 // GF(2**8)
-	MaxGenSize  uint8   = 63  // The bigger, the smaller SRC size in RLNC
-	MinRatio    float64 = 2   // (g+r)(1-a) >= g; R = g/r <= (1-a)/a; a <= 1/(R+1)
-	MaxRatio    float64 = 255 // MaxGenSize // ?
-	RxRedunMarg float64 = 2   // If more COD than this --> Pollution!
-	GenMargin   uint8   = 1   // Older generations than the last one to keep
+	MaxGf       int     = 255          // GF(2**8)
+	MaxGenSize  uint8   = 63           // The bigger, the smaller SRC size in RLNC
+	MinRatio    float64 = 2            // (g+r)(1-a) >= g; R = g/r <= (1-a)/a; a <= 1/(R+1)
+	MaxRatio    float64 = 255          // MaxGenSize // ?
+	RxRedunMarg float64 = 2            // If more COD than this --> Pollution!
+	GenMargin   uint8   = 1            // Older generations than the last one to keep
+	AgeDiffMax  uint8   = 1 << (8 - 1) // The amount of pkt IDs
 )
 
-////////////////////////////////////////////////////////////////////////// functions
+// Max range of current packets.
+// newestPkt.ID - AgeDiff + 1 <= Pkt.ID <= newestPkt.ID
+// Packet IDs out of this range are considered obsolete.
+var AgeDiff uint8 = AgeDiffMax
+
+// AgeDiffSet calculates a reasonable value for AgeDiff, which
+// may vary throughout experiments. AgeDiff will be assigned
+// the minimum between the new value and AgeDiffMax.
+func AgeDiffSet() {
+	// Packets from present and overlapped generations:
+	// UsefulPackets := genSize + (overlap - 1) * (genSize / overlap) = 2 * genSize - 1/overlap
+	// As the overlap increases, UsefulPackets will tend to 2 * genSize
+	ageDiffReasonable := (2 + int(GenMargin)) * int(MaxGenSize)
+	if int(AgeDiffMax) < ageDiffReasonable {
+		AgeDiff = AgeDiffMax
+		return
+	}
+	AgeDiff = byte(ageDiffReasonable)
+}
+
+////////////////////////////////////////////////////////////////////////// Payload length {en, de}code
 
 func PldLenRead(slice []byte, ind int) (pldLen int) {
 	for i := 0; i < LenOfSrcLen; i++ {

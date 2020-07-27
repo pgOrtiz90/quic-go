@@ -6,13 +6,6 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
-type parsedPacket interface {
-	NewestGen() uint8
-	OldestGen() uint8
-	NewestPkt() uint8
-	OldestPkt() uint8
-}
-
 type parsedSrc struct {
 	id       uint8
 	lastGen  uint8
@@ -22,10 +15,7 @@ type parsedSrc struct {
 	codedLen []byte
 }
 
-func (s *parsedSrc) NewestGen() uint8 { return s.lastGen }
-func (s *parsedSrc) OldestGen() uint8 { return s.lastGen - s.overlap + 1 }
-func (s *parsedSrc) NewestPkt() uint8 { return s.id }
-func (s *parsedSrc) OldestPkt() uint8 { return s.id }
+func (s *parsedSrc) obsoleteCheckInputs() (uint8, uint8) { return s.id, s.lastGen }
 
 func (s *parsedSrc) markAsObsolete() {
 	*s.fwd |= rquic.FlagObsolete
@@ -48,10 +38,7 @@ type parsedCod struct {
 	codedPld []byte
 }
 
-func (c *parsedCod) NewestGen() uint8 { return c.genId }
-func (c *parsedCod) OldestGen() uint8 { return c.genId }
-func (c *parsedCod) NewestPkt() uint8 { return c.srcIds[0] }
-func (c *parsedCod) OldestPkt() uint8 { return c.srcIds[len(c.srcIds)-1] }
+func (s *parsedCod) obsoleteCheckInputs() (uint8, uint8) { return s.srcIds[0], s.genId }
 
 func (c *parsedCod) markAsObsolete() {
 	*c.fwd |= rquic.FlagObsolete
@@ -59,7 +46,7 @@ func (c *parsedCod) markAsObsolete() {
 }
 
 func (c *parsedCod) findSrcId(id uint8) (int, bool) {
-	if idLolderR(id, c.srcIds[0]) || idLolderR(c.OldestPkt(), id) {
+	if idLolderR(id, c.srcIds[0]) || idLolderR(c.srcIds[len(c.srcIds)-1], id) {
 		return 0, false
 	}
 	// https://yourbasic.org/golang/find-search-contains-slice/
