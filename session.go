@@ -487,6 +487,7 @@ func (s *session) rQuicSetup() {
 		s.decoderEnabled = true
 		s.decoder = rdecoder.MakeDecoder()
 		s.rQuicBuffer = newRQuicReceivedPacketList()
+		s.rQuicLastForwarded-- // Otherwise, the buffer won't deliver the very first packet
 	}
 }
 
