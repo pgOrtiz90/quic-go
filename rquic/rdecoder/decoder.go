@@ -165,6 +165,7 @@ func (d *Decoder) NewCod(raw []byte) {
 	pc := &parsedCod{
 		genSize: raw[rHdrPos+rquic.FieldPosGenSize],
 		genId:   raw[rHdrPos+rquic.FieldPosGenId],
+		fwd:     &raw[rHdrPos+rquic.FieldPosType], // reusing type field
 	}
 	// till pc is optimized at the end of this method, remaining == genSize
 	pc.remaining = int(pc.genSize)
@@ -197,6 +198,7 @@ func (d *Decoder) NewCod(raw []byte) {
 	pc.pld = raw[rHdrPos+rquic.FieldPosSeed+coeffsInHdr:protocol.MaxReceivePacketSize] // CODs are not coalesced
 	pc.codedLen = pc.pld[:rquic.LenOfSrcLen]
 	pc.codedPld = pc.pld[rquic.LenOfSrcLen:]
+	*pc.fwd = rquic.FlagCoded
 
 	// Remove existing SRC from this new COD
 	if srcs, inds, genNotFull := d.optimizeThisCodAim(pc); genNotFull {
