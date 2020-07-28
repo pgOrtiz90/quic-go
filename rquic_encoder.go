@@ -68,7 +68,7 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 
 	// Add SRC to the CODs under construction
 
-	e.firstByte = pdSrc.raw[0]
+	e.firstByte = pdSrc.raw[0] & 0xd0 // only unprotected bits
 	e.checkDCID(pdSrc.header.DestConnectionID.Bytes())
 	e.newCodedPackets = []*packedPacket{}
 
