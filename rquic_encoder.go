@@ -115,7 +115,7 @@ func (e *encoder) processProtected(raw []byte) {
 	raw[ofs+rquic.FieldPosType] = rquic.TypeProtected
 	raw[ofs+rquic.FieldPosId] = e.rQuicId
 	raw[ofs+rquic.FieldPosLastGen] = e.rQuicGenId
-	raw[ofs+rquic.FieldPosOverlap] = e.overlap
+	raw[ofs+rquic.FieldPosOverlap] = byte(len(e.redunBuilders)) // e.overlap
 	rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
 		len(raw), e.lenDCID, raw[:ofs+pldPos],
 	)
