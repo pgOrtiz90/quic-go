@@ -472,7 +472,7 @@ func (s *session) preSetup() {
 	}
 }
 
-// } rQUIC {
+// rQUIC {
 
 func (s *session) rQuicSetup() {
 	rConf := s.config.RQuic
@@ -493,6 +493,7 @@ func (s *session) rQuicSetup() {
 
 // rQuicDisable turns off coding and QUIC behaves normally
 func (s *session) rQuicDisable() {
+	// TODO: Create and send a control frame to inform the other endpoint
 	if s.encoderEnabled {
 		s.sentPacketHandler.CodingDisabled()
 		s.packer.CodingDisabled()
@@ -503,7 +504,7 @@ func (s *session) rQuicDisable() {
 	}
 }
 
-// } rQUIC {
+// } rQUIC
 
 // run the session main loop
 func (s *session) run() error {
@@ -802,7 +803,7 @@ func (s *session) maybeDecodeReceivedPacket(p *receivedPacket, hdr *wire.Header)
 
 	switch pktType {
 	case rquic.TypeUnprotected:
-		// Remove rQUIC header, which in this case is only TYPE/SCHEME field after DCID
+		// Remove rQUIC header, which in this case is only TYPE field after DCID
 		for i := s.srcConnIDLen /*+1 first byte -1 index adjustment*/ ; i >= 0; i-- {
 			p.data[i+rquic.FieldSizeType] = p.data[i]
 		}
@@ -874,9 +875,11 @@ func (s *session) rQuicBufferFwdAll() {
 }
 
 func (s *session) rQuicBufferFwd(e *rQuicReceivedPacket) {
-	rLogger.Debugf("Decoder Buffer Delivering pkt.ID:%d LastDelivered.ID:%d", *e.id, s.rQuicLastForwarded)
 	e.removeRQuicHeader()
-	s.handleSinglePacketFinish(e.rp, e.hdr)
+	d := s.handleSinglePacketFinish(e.rp, e.hdr)
+	rLogger.Debugf("Decoder Buffer Delivering pkt.ID:%d LastDelivered.ID:%d Delivered:%t",
+		*e.id, s.rQuicLastForwarded, d,
+	)
 	s.rQuicLastForwarded = *e.id
 }
 

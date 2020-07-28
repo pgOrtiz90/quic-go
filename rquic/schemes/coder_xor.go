@@ -37,11 +37,12 @@ func (r *redunBuilderXor) ReadyToSend(ratio float64) bool {
 	return float64(r.genSize) > ratio
 }
 
-func (r *redunBuilderXor) Finish() {
+func (r *redunBuilderXor) Finish() int {
 	r.codedPkt[0] = 0
 	r.codedPkt[r.posRQuicHdr+rquic.FieldPosGenSize] = r.genSize
 	r.codedPkt[r.posRQuicHdr+rquic.FieldPosType] = r.scheme
 	r.finished = true
+	return 0
 }
 
 func (r *redunBuilderXor) SeedMaxFieldSize() uint8 {

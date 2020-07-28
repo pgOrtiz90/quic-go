@@ -172,8 +172,8 @@ func CountersReport() string {
 	msg += fmt.Sprintf("    Source: %d\n", txSrc)
 	msg += fmt.Sprintf("    Coded:  %d\n", txCod)
 	msg += "  Received:\n"
-	msg += fmt.Sprintf("    Source: %d", rxSrc)
-	msg += fmt.Sprintf("    Coded : %d", txCod)
+	msg += fmt.Sprintf("    Source: %d\n", rxSrc)
+	msg += fmt.Sprintf("    Coded : %d\n", txCod)
 	msg += fmt.Sprintf("  Recovered: %d\n", rxRec)
 	msg += "\\====================/\n"
 	if IsEnabled() {

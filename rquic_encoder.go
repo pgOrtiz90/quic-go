@@ -46,9 +46,7 @@ type encoder struct {
 	ratioWasDynamic bool
 }
 
-func (e *encoder) lenNotProtected() int { return e.lenDCID + rquic.SrcHeaderSize }
-func (e *encoder) rQuicHdrPos() int     { return 1 /*1st byte*/ + e.lenDCID }
-func (e *encoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + e.lenDCID + rquic.SrcHeaderSize }
+func (e *encoder) offset() int { return 1 /*1st byte*/ + e.lenDCID }
 
 func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 	if e.doNotEncode {
@@ -91,7 +89,7 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 }
 
 func (e *encoder) processUnprotected(raw []byte) {
-	rQuicHdrPos := e.rQuicHdrPos()
+	rQuicHdrPos := e.offset()
 
 	// [1stB][      DCID      ][  0   0   0   0 ][ PN ][ Payload ]
 	// Type ---------posTypeNew--->-----------^
@@ -110,21 +108,21 @@ func (e *encoder) processUnprotected(raw []byte) {
 
 func (e *encoder) processProtected(raw []byte) {
 	//////// Complete rQUIC header
-	ofs := e.rQuicHdrPos()
-	pldPos := e.rQuicSrcPldPos()
+	ofs := e.offset()
+	pldPos := ofs + rquic.SrcHeaderSize
 	raw[ofs+rquic.FieldPosType] = rquic.TypeProtected
 	raw[ofs+rquic.FieldPosId] = e.rQuicId
 	raw[ofs+rquic.FieldPosLastGen] = e.rQuicGenId
 	raw[ofs+rquic.FieldPosOverlap] = byte(len(e.redunBuilders)) // e.overlap
 	rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-		len(raw), e.lenDCID, raw[:ofs+pldPos],
+		len(raw), e.lenDCID, raw[:pldPos],
 	)
 
 	//////// Prepare SRC to be coded
 	e.srcForCoding = e.srcForCoding[:cap(e.srcForCoding)]
 	// [  len(what remains)   ][          ][          ]
 	lng := rquic.LenOfSrcLen
-	copy(e.srcForCoding[:lng], rquic.PldLenPrepare(len(raw)-e.lenNotProtected()))
+	copy(e.srcForCoding[:lng], rquic.PldLenPrepare(len(raw)-(e.lenDCID + rquic.SrcHeaderSize)))
 	// [          ][          ][ 1st Byte ][          ]
 	e.srcForCoding[lng] = raw[0]
 	// [          ][          ][          ][ packet.number, packet.payload...
@@ -173,19 +171,19 @@ func (e *encoder) redunBuildersNew() *redunBuilder {
 		packets = append(packets, bf.Slice)
 	}
 	return &redunBuilder{
-		builder:    schemes.MakeRedunBuilder(e.scheme, packets, e.rQuicHdrPos()),
+		builder:    schemes.MakeRedunBuilder(e.scheme, packets, e.offset()),
 		buffers:    bfs,
 		rateScaler: e.overlapF64,
 	}
 }
 
 func (e *encoder) assemble(rb *redunBuilder) {
-	rb.builder.Finish()
+	gSize := rb.builder.Finish()
 
 	var pdPkt packedPacket
 	var ofs int
 	var lastElem int
-	rQHdrPos := e.rQuicHdrPos()
+	rQHdrPos := e.offset()
 	fieldPosId := rQHdrPos + rquic.FieldPosId
 	fieldPosGenId := rQHdrPos + rquic.FieldPosGenId
 
@@ -212,7 +210,7 @@ func (e *encoder) assemble(rb *redunBuilder) {
 		e.newCodedPackets = append(e.newCodedPackets, &pdPkt)
 
 		rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-			len(pdPkt.raw), e.lenDCID, pdPkt.raw[:rQHdrPos+rquic.CodHeaderSizeMax],
+			len(pdPkt.raw), e.lenDCID, pdPkt.raw[:rQHdrPos+rquic.CodPreHeaderSize+gSize],
 		)
 	}
 }

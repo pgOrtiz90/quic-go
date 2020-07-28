@@ -624,6 +624,7 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 	// rQUIC {
 	buffer.Write(bytes.Repeat([]byte{0}, rquicOv))
 	payloadOffset += rquicOv
+	dbgOffs := payloadOffset + 1 // For debugging
 	// } rQUIC
 
 	if payload.ack != nil {
@@ -660,10 +661,10 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 			rLogger.Printf("Encoder Header Construction Fields LenDCID:%d LenPN:%d",
 				header.DestConnectionID.Len(), header.PacketNumberLen,
 			)
-			rLogger.Printf("Encoder Header Construction NewHeader:[% X]", raw)
+			rLogger.Printf("Encoder Header Construction NewHeader:[% X]", raw[:dbgOffs])
 			copy(raw[pnOffset:], raw[pnOffset-rquicOv:payloadOffset-rquicOv])
-			rLogger.Printf("Encoder Header Construction MovedPktN:[% X]", raw)
-			defer rLogger.Printf("Encoder Header Construction Encrypted:[% X]", raw)
+			rLogger.Printf("Encoder Header Construction MovedPktN:[% X]", raw[:dbgOffs])
+			defer rLogger.Printf("Encoder Header Construction Encrypted:[% X]", raw[:dbgOffs])
 		} else {
 			copy(raw[pnOffset:], raw[pnOffset-rquicOv:payloadOffset-rquicOv])
 		}

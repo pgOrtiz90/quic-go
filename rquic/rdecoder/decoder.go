@@ -39,24 +39,18 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	d.didRecover = false
 	d.obsoleteSrcChecked = false
 
-	rHdrPos := d.rQuicHdrPos()
+	rHdrPos := d.offset()
 	ptype := raw[rHdrPos+rquic.FieldPosType]
-
-	logPkt := func(pktType string, lenAfterDCID int) {
-		rLogger.Debugf("Decoder Packet %s pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-			pktType, len(raw), d.lenDCID, raw[:rHdrPos+lenAfterDCID],
-		)
-	}
 
 	// unprotected packet
 	if ptype == rquic.TypeUnprotected {
-		logPkt("UNPROTECTED", rquic.FieldSizeType)
+		d.logPkt("UNPROTECTED", raw, rquic.FieldSizeType)
 		return rquic.TypeUnprotected, d.didRecover
 	}
 
 	// unknown packet
 	if ptype >= rquic.TypeUnknown {
-		logPkt("UNKNOWN", rquic.CodHeaderSizeMax)
+		d.logPkt("UNKNOWN", raw, rquic.CodHeaderSizeMax)
 		return rquic.TypeUnknown, d.didRecover
 	}
 
@@ -65,7 +59,7 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	g := raw[rHdrPos+rquic.FieldPosGenId] // last gen id
 	seenNew := d.lastSeen(p, g)
 	if d.isObsolete(p, g) {
-		logPkt("OBSOLETE", rquic.SrcHeaderSize)
+		d.logPkt("OBSOLETE", raw, rquic.SrcHeaderSize)
 		return rquic.TypeUnknown, d.didRecover
 	}
 	d.maybeUpdateXhold()
@@ -73,16 +67,14 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	// protected packet
 	if ptype == rquic.TypeProtected {
 		if src := d.NewSrc(raw); src != nil {
-			logPkt("PROTECTED", rquic.SrcHeaderSize)
 			d.optimizeWithSrc(src, true)
 			return rquic.TypeProtected, d.didRecover
 		}
-		logPkt("UNKNOWN", rquic.CodHeaderSizeMax)
+		d.logPkt("PROTECTED REPEATED", raw, rquic.CodHeaderSizeMax)
 		return rquic.TypeUnknown, d.didRecover
 	}
 
 	// coded packet
-	logPkt("CODED", rquic.CodPreHeaderSize+int(raw[rHdrPos+rquic.FieldPosGenSize]))
 	d.doCheckMissingSrc = seenNew
 	d.NewCod(raw)
 	d.Recover()
@@ -90,19 +82,20 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 }
 
 func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
-	rHdrPos := d.rQuicHdrPos()
-	srcPldPos := d.rQuicSrcPldPos()
+	rHdrPos := d.offset()
+	srcPldPos := rHdrPos + rquic.SrcHeaderSize
 
 	pktId := raw[rHdrPos+rquic.FieldPosId]
 	if d.srcAvblUpdate(pktId) {
 		return nil
 	} // Discard repeated packet
+	d.logPkt("PROTECTED", raw, srcPldPos)
 
 	ps := &parsedSrc{
 		id:      pktId,
 		lastGen: raw[rHdrPos+rquic.FieldPosLastGen],
 		overlap: raw[rHdrPos+rquic.FieldPosOverlap],
-		fwd:     &raw[rHdrPos+rquic.FieldPosType], // reusing scheme field
+		fwd:     &raw[rHdrPos+rquic.FieldPosType], // reusing type field
 		pld:     raw[srcPldPos:],
 	}
 	ps.codedLen = rquic.PldLenPrepare(len(ps.pld))
@@ -141,14 +134,14 @@ func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
 		// lastSeenGen: cod.genId
 		// overlap: 0
 		fwd: cod.fwd,
-		pld: cod.pld[rquic.LenOfSrcLen:rquic.PldLenRead(cod.pld, 0)],
+		pld: cod.codedPld[:rquic.PldLenRead(cod.codedLen, 0)],
 	}
 	d.pktsSrc = append(d.pktsSrc, ps)
 	d.didRecover = true
 
 	rLogger.MaybeIncreaseRxRec()
 	if rLogger.IsDebugging() {
-		srcPldPos := d.rQuicSrcPldPos()
+		srcPldPos := d.offset() + rquic.SrcHeaderSize
 		rLogger.Printf("Decoder Packet Recovered pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
 			srcPldPos+len(ps.pld), d.lenDCID, ps.pld[:srcPldPos],
 		)
@@ -158,7 +151,7 @@ func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
 }
 
 func (d *Decoder) NewCod(raw []byte) {
-	rHdrPos := d.rQuicHdrPos()
+	rHdrPos := d.offset()
 
 	rLogger.MaybeIncreaseRxCod()
 
@@ -193,9 +186,11 @@ func (d *Decoder) NewCod(raw []byte) {
 	if coeffsInHdr < 0 {
 		coeffsInHdr = (0 - coeffsInHdr) * pc.remaining
 	}
+	pldPos := rHdrPos+rquic.FieldPosSeed+coeffsInHdr
+	d.logPkt("CODED", raw, pldPos)
 	// The next line is necessary for Rx buffer correctly rescuing decoded pld
 	raw[rHdrPos+rquic.FieldPosGenSize] = uint8(coeffsInHdr)
-	pc.pld = raw[rHdrPos+rquic.FieldPosSeed+coeffsInHdr:protocol.MaxReceivePacketSize] // CODs are not coalesced
+	pc.pld = raw[pldPos:protocol.MaxReceivePacketSize] // CODs are not coalesced
 	pc.codedLen = pc.pld[:rquic.LenOfSrcLen]
 	pc.codedPld = pc.pld[rquic.LenOfSrcLen:]
 	*pc.fwd = rquic.FlagCoded
@@ -206,6 +201,12 @@ func (d *Decoder) NewCod(raw []byte) {
 			d.pktsCod = append(d.pktsCod, pc) // Store new parsed COD
 		}
 	}
+}
+
+func (d *Decoder) logPkt(pktType string, raw []byte, end int) {
+	rLogger.Debugf("Decoder Packet %s pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+		pktType, len(raw), d.lenDCID, raw[:end],
+	)
 }
 
 func MakeDecoder() *Decoder {

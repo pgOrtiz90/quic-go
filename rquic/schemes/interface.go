@@ -4,7 +4,7 @@ type RedunBuilder interface {
 	//updateCoeffs()
 	AddSrc([]byte)
 	ReadyToSend(float64) bool // takes ratio as input
-	Finish()
+	Finish() int
 	SeedMaxFieldSize() uint8
 	Scheme() byte
 	Reduns() int

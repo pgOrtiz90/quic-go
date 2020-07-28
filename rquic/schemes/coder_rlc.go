@@ -56,7 +56,7 @@ func (r *redunBuilderRlcSys) ReadyToSend(ratio float64) bool {
 	return float64(r.genSize)/float64(r.redun) > ratio
 }
 
-func (r *redunBuilderRlcSys) Finish() {
+func (r *redunBuilderRlcSys) Finish() int {
 	unused := rquic.MaxGenSize - r.genSize
 	unusedInt := int(unused)
 	r.posRQuicHdr += unusedInt
@@ -72,6 +72,7 @@ func (r *redunBuilderRlcSys) Finish() {
 	}
 
 	r.finished = true
+	return int(r.genSize)
 }
 
 func (r *redunBuilderRlcSys) SeedMaxFieldSize() uint8 { // TODO: limit SRC payload length

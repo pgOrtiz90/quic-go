@@ -5,9 +5,7 @@ import (
 	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
-func (d *Decoder) lenNotProtected() int { return d.lenDCID + rquic.SrcHeaderSize }
-func (d *Decoder) rQuicHdrPos() int     { return 1 /*1st byte*/ + d.lenDCID }
-func (d *Decoder) rQuicSrcPldPos() int  { return 1 /*1st byte*/ + d.lenDCID + rquic.SrcHeaderSize }
+func (d *Decoder) offset() int { return 1 /*1st byte*/ + d.lenDCID }
 
 func idLolderR(older, newer uint8) bool {
 	// older < newer
