@@ -96,6 +96,7 @@ func (r *ratio) AddTxCount() {
 }
 
 func (r *ratio) measureLoss() { // meas. thread
+	var tx, lost, unAcked uint32
 
 	r.residual.reset()
 
@@ -118,19 +119,19 @@ func (r *ratio) measureLoss() { // meas. thread
 		case <-r.timer.C:
 
 			r.unAckedMu.Lock()
-			lost := r.lost
+			lost = r.lost
 			r.lost = 0
-			unAcked := r.unAcked
+			unAcked = r.unAcked
 			r.unAckedMu.Unlock()
 
 			r.txMu.Lock()
-			tx := r.tx
+			tx = r.tx
 			r.tx = 0
 			r.txMu.Unlock()
 
 			if tx > 0 || unAcked > 0 || lost > 0 {
 				rLogger.Logf("Encoder Ratio Update Tx:%d Lost:%d UnAcked:%d", tx, lost, unAcked)
-				r.residual.update(float64(lost) / float64(tx-unAcked-lost))
+				r.residual.update(float64(lost) / float64(tx-unAcked-lost)) // Lost / Delivered
 				r.update()
 			}
 

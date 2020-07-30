@@ -42,6 +42,7 @@ const ( //---------------------------------------------------------------- Field
 	ProtMinusUnprotLen int = SrcHeaderSize - FieldSizeType
 	CodPreHeaderSize   int = FieldSizeType + FieldSizeId + FieldSizeGenId + FieldSizeGenSize
 	LenOfSrcLen        int = 2 // COD payload header, shows decoded SRC length
+	CodedOverhead      int = LenOfSrcLen + 1 // Pld len. and 1st byte are protected and inserted b/w rQUIC hdr & pld
 
 	OverheadNoCoeff  int = CodPreHeaderSize + LenOfSrcLen + 1 /*1st byte*/
 	OverheadMax      int = OverheadNoCoeff + int(MaxGenSize)

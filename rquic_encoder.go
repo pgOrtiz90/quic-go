@@ -89,21 +89,24 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 }
 
 func (e *encoder) processUnprotected(raw []byte) {
-	rQuicHdrPos := e.offset()
+	rHPos := e.offset()
 
 	// [1stB][      DCID      ][  0   0   0   0 ][ PN ][ Payload ]
 	// Type ---------posTypeNew--->-----------^
-	posTypeNew := rQuicHdrPos + rquic.FieldPosType + rquic.ProtMinusUnprotLen
+	posTypeNew := rHPos + rquic.FieldPosType + rquic.ProtMinusUnprotLen
 	raw[posTypeNew] = rquic.TypeUnprotected
 
 	// [1stB][      DCID      ][  0   0   0 Type][ PN ][ Payload ]
 	// [======================]--- move -->|
-	copy(raw[rquic.ProtMinusUnprotLen:posTypeNew], raw[:rQuicHdrPos])
+	copy(raw[rquic.ProtMinusUnprotLen:posTypeNew], raw[:rHPos])
 	raw = raw[rquic.ProtMinusUnprotLen:]
 
-	rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-		len(raw), e.lenDCID, raw[:rQuicHdrPos+rquic.FieldSizeType],
-	)
+	if rLogger.IsDebugging() {
+		rPPos := rHPos + rquic.FieldSizeType
+		rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X  % X]",
+			len(raw), e.lenDCID, raw[:rHPos], raw[rHPos:rPPos],
+		)
+	}
 }
 
 func (e *encoder) processProtected(raw []byte) {
@@ -114,15 +117,15 @@ func (e *encoder) processProtected(raw []byte) {
 	raw[ofs+rquic.FieldPosId] = e.rQuicId
 	raw[ofs+rquic.FieldPosLastGen] = e.rQuicGenId
 	raw[ofs+rquic.FieldPosOverlap] = byte(len(e.redunBuilders)) // e.overlap
-	rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-		len(raw), e.lenDCID, raw[:pldPos],
+	rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X  % X]",
+		len(raw), e.lenDCID, raw[:ofs], raw[ofs:pldPos],
 	)
 
 	//////// Prepare SRC to be coded
 	e.srcForCoding = e.srcForCoding[:cap(e.srcForCoding)]
 	// [  len(what remains)   ][          ][          ]
 	lng := rquic.LenOfSrcLen
-	copy(e.srcForCoding[:lng], rquic.PldLenPrepare(len(raw)-(e.lenDCID + rquic.SrcHeaderSize)))
+	copy(e.srcForCoding[:lng], rquic.PldLenPrepare(len(raw)-pldPos))
 	// [          ][          ][ 1st Byte ][          ]
 	e.srcForCoding[lng] = raw[0]
 	// [          ][          ][          ][ packet.number, packet.payload...
@@ -181,9 +184,9 @@ func (e *encoder) assemble(rb *redunBuilder) {
 	gSize := rb.builder.Finish()
 
 	var pdPkt packedPacket
-	var ofs int
 	var lastElem int
-	rQHdrPos := e.offset()
+	rQHdrPos := rb.builder.RHdrPos()
+	unused := rb.builder.UnusedCoeffSpace()
 	fieldPosId := rQHdrPos + rquic.FieldPosId
 	fieldPosGenId := rQHdrPos + rquic.FieldPosGenId
 
@@ -191,8 +194,7 @@ func (e *encoder) assemble(rb *redunBuilder) {
 
 		// sendQueue (send_queue.go) only uses p.raw and p.buffer.Release()
 		pdPkt = packedPacket{buffer: bf}
-		ofs = int(bf.Slice[0])
-		pdPkt.raw = bf.Slice[ofs:]
+		pdPkt.raw = bf.Slice[unused:] // rb.builder.Finish has already shifted the header to payload.
 		// After linear combination, last useful bytes might become 0. Decoder can handle this.
 		lastElem = len(pdPkt.raw) - 1
 		for pdPkt.raw[lastElem] == 0 {
@@ -209,9 +211,17 @@ func (e *encoder) assemble(rb *redunBuilder) {
 		// Add packet to the assembled packet list
 		e.newCodedPackets = append(e.newCodedPackets, &pdPkt)
 
-		rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
-			len(pdPkt.raw), e.lenDCID, pdPkt.raw[:rQHdrPos+rquic.CodPreHeaderSize+gSize],
-		)
+		if rLogger.IsDebugging() {
+			rCPos := rQHdrPos + rquic.CodPreHeaderSize
+			rPPos := rCPos + gSize
+			rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X  % X  % X  % X]",
+				len(pdPkt.raw), e.lenDCID,
+				pdPkt.raw[:rQHdrPos],
+				pdPkt.raw[rQHdrPos:rCPos],
+				pdPkt.raw[rCPos:rPPos],
+				pdPkt.raw[rPPos:rPPos+rquic.CodedOverhead],
+			)
+		}
 	}
 }
 

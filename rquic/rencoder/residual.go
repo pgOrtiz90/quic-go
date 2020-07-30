@@ -14,6 +14,7 @@ type residualLoss struct {
 	lastLossInd int
 	cumLoss     float64
 	numPeriods  int
+	numPeriodsF float64
 }
 
 func (r *residualLoss) update(newLoss float64) { // meas. thread
@@ -28,7 +29,7 @@ func (r *residualLoss) update(newLoss float64) { // meas. thread
 func (r *residualLoss) LossValue() float64 { // meas. thread
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.cumLoss / float64(r.numPeriods)
+	return r.cumLoss / r.numPeriodsF
 }
 
 func (r *residualLoss) reset() { // executed only when when meas. thread is starting
@@ -53,6 +54,7 @@ func (r *residualLoss) ChangeNumPeriods(newNum int) { // may actally interfere w
 	if numDif := newNum - r.numPeriods; numDif > 0 {
 		r.losses = append(r.losses[:next], append(make([]float64, numDif), r.losses[next:]...)...)
 		r.numPeriods = newNum
+		r.numPeriodsF = float64(newNum)
 		return
 	}
 
@@ -86,12 +88,14 @@ func (r *residualLoss) ChangeNumPeriods(newNum int) { // may actally interfere w
 	}
 
 	r.numPeriods = newNum
+	r.numPeriodsF = float64(newNum)
 	//}
 }
 
 func makeResidualLoss(num int) *residualLoss {
 	return &residualLoss{
 		numPeriods:  num,
+		numPeriodsF: float64(num),
 		losses:      make([]float64, num),
 		lastLossInd: 0,
 		cumLoss:     0,

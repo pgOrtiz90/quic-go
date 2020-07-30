@@ -8,6 +8,8 @@ type RedunBuilder interface {
 	SeedMaxFieldSize() uint8
 	Scheme() byte
 	Reduns() int
+	RHdrPos() int
+	UnusedCoeffSpace() int
 }
 
 type CoeffUnpacker interface {
