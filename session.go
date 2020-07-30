@@ -796,6 +796,14 @@ func (s *session) maybeDecodeReceivedPacket(p *receivedPacket, hdr *wire.Header)
 		panic("Trying to decode without a decoder")
 	}
 
+	/* PACKET LOSS SIMULATION, TODO: Remove or comment
+	if ofs := 1 + s.srcConnIDLen; p.data[ofs+rquic.FieldPosType] & rquic.TypeProtected > 0 {
+		if p.data[ofs+rquic.FieldPosId] % 20 == 3 {
+			return false
+		}
+	}
+	*/
+
 	pktType, thereAreRecovered := s.decoder.Process(p.data, s.srcConnIDLen)
 	if thereAreRecovered {
 		s.rQuicBuffer.order()
@@ -1203,6 +1211,8 @@ func (s *session) handleAckFrame(frame *wire.AckFrame, pn protocol.PacketNumber,
 		s.cryptoStreamHandler.SetLargest1RTTAcked(frame.LargestAcked())
 		// rQUIC {
 		// Lost and in-flight packets information has to be updated upon ACK reception.
+		// Although all sent packets are unAcked before an ACK frame is received,
+		// lost packets are detected with ACK frames.
 		if s.encoderEnabled {
 			s.encoder.updateUnAcked(s.sentPacketHandler.AllUnAcked())
 		}

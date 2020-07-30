@@ -129,6 +129,7 @@ func (h *sentPacketHandler) AllUnAcked() (int, int) {
 	// All of them are UnAcked.
 	lastLosses := h.lastLosses
 	h.lastLosses = 0
+	//h.unAcked = 0 // Legacy rQUIC approach
 	return lastLosses, h.unAcked
 }
 // } rQUIC
