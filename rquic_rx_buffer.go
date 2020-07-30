@@ -36,33 +36,38 @@ func (p *rQuicReceivedPacket) isObsolete() bool { return *p.fwd&rquic.FlagObsole
 func (p *rQuicReceivedPacket) isSource() bool   { return *p.fwd&rquic.FlagSource != 0 }
 func (p *rQuicReceivedPacket) wasCoded() bool   { return *p.fwd&rquic.FlagCoded != 0 }
 
-func (p *rQuicReceivedPacket) removeRQuicHeader() {
-	pldEnd := len(p.rp.data)
+func (p *rQuicReceivedPacket) removeRQuicHeader() *receivedPacket {
+	// Removing rQUIC header in e.rp.data will impair
+	// further decoder's operations on this packet.
+	rp := p.rp.Clone()
+	rp.buffer = getPacketBuffer()
+	rp.data = rp.buffer.Slice
+	var rpPos int // Position at rp.data where next data will be copied
+
+	// Copy to rp 1st byte and DCID and find the length of the packet
+	pktEnd := len(p.rp.data)
 	var pos int // will end up pointing at payload
 	if p.wasCoded() {
 		pos = p.rHdrPos + rquic.CodPreHeaderSize + int(*p.coeffLen) // length of decoded payload
 		pldLen := rquic.PldLenRead(p.rp.data, pos)
 		pos += rquic.LenOfSrcLen
-		p.rp.data[0] = p.rp.data[pos] // recover decoded partially encrypted 1st byte
-		pos += 1                      // decoded payload
-		if newPldEnd := pos + pldLen; newPldEnd > pldEnd {
+		rp.data[rpPos] = p.rp.data[pos] // recover decoded partially encrypted 1st byte
+		rpPos++
+		pos += 1 // decoded payload
+		if newPktEnd := pos + pldLen; newPktEnd > pktEnd {
 			// TODO: Stack overflow? Panic or close conn.
+			panic("")
 		} else {
-			pldEnd = newPldEnd
+			pktEnd = newPktEnd
 		}
 	} else {
 		pos = p.rHdrPos + rquic.SrcHeaderSize
 	}
-	// Close the gap between 1st byte and DCID, and the payload
-	posOrig := p.rHdrPos - 1
-	posDest := pos
-	for posOrig >= 0 {
-		posDest--
-		p.rp.data[posDest] = p.rp.data[posOrig]
-		posOrig--
-	}
-	// posDest now is pointing at the beginning of the reconstructed QUIC packet
-	p.rp.data = p.rp.data[posDest:pldEnd]
+	rpPos += copy(rp.data[rpPos:p.rHdrPos], p.rp.data[rpPos:p.rHdrPos]) // 1st Byte & DCID
+
+	rpPos += copy(rp.data[rpPos:], p.rp.data[pos:pktEnd]) // decoded payload
+	rp.data = rp.data[:rpPos]
+	return rp
 }
 
 // Newer returns the newer list element or nil.
@@ -175,6 +180,8 @@ func (l *rQuicReceivedPacketList) remove(e *rQuicReceivedPacket) *rQuicReceivedP
 		e.older = nil // avoid memory leaks
 		e.list = nil
 		l.len--
+		e.rp.buffer.Decrement()
+		e.rp.buffer.MaybeRelease()
 	}
 	rLogger.Debugf("Decoder Buffer Removing pkt.ID:%d IsObsolete:%t IsSource:%t WasCoded:%t",
 		*e.id, e.isObsolete(), e.isSource(), e.wasCoded(),

@@ -842,8 +842,6 @@ func (s *session) rQuicBufferFwdAll() {
 				//  }
 			}
 			s.rQuicBuffer.remove(e)
-			e.rp.buffer.Decrement()
-			e.rp.buffer.MaybeRelease()
 			continue
 		}
 		// packet is neither delivered nor obsolete
@@ -875,8 +873,8 @@ func (s *session) rQuicBufferFwdAll() {
 }
 
 func (s *session) rQuicBufferFwd(e *rQuicReceivedPacket) {
-	e.removeRQuicHeader()
-	d := s.handleSinglePacketFinish(e.rp, e.hdr)
+	rp := e.removeRQuicHeader()
+	d := s.handleSinglePacketFinish(rp, e.hdr)
 	rLogger.Debugf("Decoder Buffer Delivering pkt.ID:%d LastDelivered.ID:%d Delivered:%t",
 		*e.id, s.rQuicLastForwarded, d,
 	)
