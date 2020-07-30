@@ -98,7 +98,7 @@ func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
 		fwd:     &raw[rHdrPos+rquic.FieldPosType], // reusing type field
 		pld:     raw[srcPldPos:],
 	}
-	ps.codedLen = rquic.PldLenPrepare(len(ps.pld))
+	ps.ovh2code = append(rquic.PldLenPrepare(len(ps.pld)), raw[0])
 	d.lastSeenOverlap = ps.overlap
 
 	*ps.fwd = rquic.FlagSource
@@ -133,8 +133,9 @@ func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
 		//// These fields are consulted only when brand new packet is received
 		// lastSeenGen: cod.genId
 		// overlap: 0
-		fwd: cod.fwd,
-		pld: cod.codedPld[:rquic.PldLenRead(cod.codedLen, 0)],
+		fwd:      cod.fwd,
+		pld:      cod.codedPld[:rquic.PldLenRead(cod.codedOvh, 0)],
+		ovh2code: cod.codedOvh,
 	}
 	d.pktsSrc = append(d.pktsSrc, ps)
 	d.didRecover = true
@@ -191,8 +192,8 @@ func (d *Decoder) NewCod(raw []byte) {
 	// The next line is necessary for Rx buffer correctly rescuing decoded pld
 	raw[rHdrPos+rquic.FieldPosGenSize] = uint8(coeffsInHdr)
 	pc.pld = raw[pldPos:protocol.MaxReceivePacketSize] // CODs are not coalesced
-	pc.codedLen = pc.pld[:rquic.LenOfSrcLen]
-	pc.codedPld = pc.pld[rquic.LenOfSrcLen:]
+	pc.codedOvh = pc.pld[:rquic.LenOfSrcLen+1]
+	pc.codedPld = pc.pld[rquic.LenOfSrcLen+1:]
 	*pc.fwd = rquic.FlagCoded
 
 	// Remove existing SRC from this new COD

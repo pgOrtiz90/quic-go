@@ -12,7 +12,7 @@ type parsedSrc struct {
 	overlap  uint8
 	fwd      *byte
 	pld      []byte
-	codedLen []byte
+	ovh2code []byte
 }
 
 func (s *parsedSrc) obsoleteCheckInputs() (uint8, uint8) { return s.id, s.lastGen }
@@ -33,9 +33,9 @@ type parsedCod struct {
 	genId  uint8
 	fwd    *byte
 
-	pld      []byte
-	codedLen []byte
-	codedPld []byte
+	pld       []byte
+	codedOvh  []byte
+	codedPld  []byte
 }
 
 func (s *parsedCod) obsoleteCheckInputs() (uint8, uint8) { return s.srcIds[0], s.genId }
@@ -64,16 +64,16 @@ func (c *parsedCod) findSrcId(id uint8) (int, bool) {
 func (c *parsedCod) removeSrc(src *parsedSrc, ind int) {
 	cf := c.coeff[ind]
 	if cf == 1 {
-		for i, v := range src.codedLen {
-			c.codedLen[i] ^= v
+		for i, v := range src.ovh2code {
+			c.codedOvh[i] ^= v
 		}
 		for i, v := range src.pld {
 			c.codedPld[i] ^= v
 		}
 		return
 	}
-	for i, v := range src.codedLen {
-		c.codedLen[i] ^= gf.Mult(cf, v)
+	for i, v := range src.ovh2code {
+		c.codedOvh[i] ^= gf.Mult(cf, v)
 	}
 	for i, v := range src.pld {
 		c.codedPld[i] ^= gf.Mult(cf, v)
