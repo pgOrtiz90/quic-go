@@ -100,7 +100,7 @@ func (d *Decoder) removeSrcNoOrder(ind int) {
 		d.pktsSrc[ind] = d.pktsSrc[last]
 	}
 	d.pktsSrc[last] = nil // prevent memory leaks
-	d.pktsSrc = d.pktsSrc[:last-1]
+	d.pktsSrc = d.pktsSrc[:last]
 }
 
 func (d *Decoder) removeCodNoOrder(ind int) {
@@ -110,7 +110,7 @@ func (d *Decoder) removeCodNoOrder(ind int) {
 		d.pktsCod[ind] = d.pktsCod[last]
 	}
 	d.pktsCod[last] = nil // prevent memory leaks
-	d.pktsCod = d.pktsCod[:last-1]
+	d.pktsCod = d.pktsCod[:last]
 }
 
 // srcAvblUpdate adds packet ID of new SRC to srcAvbl, an ordered list of SRC available in the system.
