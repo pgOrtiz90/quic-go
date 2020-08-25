@@ -137,7 +137,7 @@ func (d *Decoder) srcMissUpdate() {
 		return
 	}
 	d.doCheckMissingSrc = false // becomes true after d.lastSeenPkt update by new COD
-	defer rLogger.Debugf("Decoder MissingSrcPkts:%d", d.srcMiss)
+	defer func() { rLogger.Debugf("Decoder MissingSrcPkts:%d", d.srcMiss) }()
 
 	// Remove obsolete pkt ids from srcAvbl list
 	if d.isObsoletePktId(d.srcAvbl[0]) {

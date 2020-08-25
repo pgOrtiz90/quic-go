@@ -130,7 +130,7 @@ func (c *parsedCod) attachCod(cod *parsedCod, codInd int) {
 	if rLogger.IsDebugging() {
 		rLogger.Printf("Decoder Recovery AttachCod Orig.  srcIDs:%d coeffs:%d", c.srcIds, c.coeff)
 		rLogger.Printf("Decoder Recovery AttachCod Attach srcIDs:%d coeffs:%d coeffInd:%d", cod.srcIds, cod.coeff, codInd)
-		defer rLogger.Printf("Decoder Recovery AttachCod Result srcIDs:%d coeffs:%d", c.srcIds, c.coeff)
+		defer func() { rLogger.Printf("Decoder Recovery AttachCod Result srcIDs:%d coeffs:%d", c.srcIds, c.coeff) }()
 	}
 
 	j := 0 // aux. var. for iteration over  --< cod.srcIds >--
