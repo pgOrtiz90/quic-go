@@ -5,6 +5,7 @@ import (
 
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/gf"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
 )
 
 //////////////////////////////////////////////////////////////////////// redunBuilder
@@ -31,20 +32,43 @@ func (r *redunBuilderRlcSys) AddSrc(src []byte) {
 	if r.finished {
 		return
 	}
-	if len(src) > r.codedPldLen {
+	srcLen := len(src)
+	if srcLen > r.codedPldLen {
+		rLogger.Logf("Encoder ERROR SrcPldLen:%d > CodPldLen:%d", srcLen, r.codedPldLen)
 		return
 	} // Packets that are filled here are max size
 
 	var cf uint8
+	if r.genSize > 0 {
+		for _, cod := range r.codedPkts {
+			// Update coefficients
+			cf = newCoeff()
+			cod[r.posNewCoeff] = cf
+			// Add SRC
+			cod = cod[r.posPld:]
+			for i, v := range src {
+				cod[i] ^= gf.Mult(v, cf)
+			}
+		}
+		r.posNewCoeff++
+		r.genSize++
+		return
+	}
+	// The slice returned in packetBuffer is not clean.
 	for _, cod := range r.codedPkts {
 		// Update coefficients
 		cf = newCoeff()
 		cod[r.posNewCoeff] = cf
 		// Add SRC
 		cod = cod[r.posPld:]
-		for i, v := range src {
-			cod[i] ^= gf.Mult(v, cf)
+		var i int
+		for i = 0; i < srcLen; i++ {
+			cod[i] = gf.Mult(src[i], cf)
 		}
+		for ; i < r.codedPldLen; i++ {
+			cod[i] = 0
+		}
+
 	}
 	r.posNewCoeff++
 	r.genSize++
