@@ -191,7 +191,12 @@ func (d *Decoder) NewCod(raw []byte) {
 	d.logPkt("CODED", raw, pldPos)
 	// The next line is necessary for Rx buffer correctly rescuing decoded pld
 	raw[rHdrPos+rquic.FieldPosGenSize] = uint8(coeffsInHdr)
-	pc.pld = raw[pldPos:protocol.MaxReceivePacketSize] // CODs are not coalesced
+	pc.pld = raw[pldPos:protocol.MaxReceivePacketSize] // CODs are not coalesced. Original COD could have been bigger.
+	for i := len(raw) - pldPos; i < len(pc.pld); i++ {
+		// These values need to be 0.
+		// sync.Pool (getPacketBuffer) does not set values to allocated memory.
+		pc.pld[i] = 0
+	}
 	pc.codedOvh = pc.pld[:rquic.LenOfSrcLen+1]
 	pc.codedPld = pc.pld[rquic.LenOfSrcLen+1:]
 	*pc.fwd = rquic.FlagCoded
