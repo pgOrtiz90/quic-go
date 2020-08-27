@@ -3,6 +3,7 @@
 package quic
 
 import (
+	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/rLogger"
@@ -42,31 +43,46 @@ func (p *rQuicReceivedPacket) removeRQuicHeader() *receivedPacket {
 	rp := p.rp.Clone()
 	rp.buffer = getPacketBuffer()
 	rp.data = rp.buffer.Slice
-	var rpPos int // Position at rp.data where next data will be copied
 
-	// Copy to rp 1st byte and DCID and find the length of the packet
-	pktEnd := len(p.rp.data)
-	var pos int // will end up pointing at payload
-	if p.wasCoded() {
-		pos = p.rHdrPos + rquic.CodPreHeaderSize + int(*p.coeffLen) // length of decoded payload
-		pldLen := rquic.PldLenRead(p.rp.data, pos)
-		pos += rquic.LenOfSrcLen
-		rp.data[rpPos] = p.rp.data[pos] // recover decoded partially encrypted 1st byte
-		rpPos++
-		pos += 1 // decoded payload
-		if newPktEnd := pos + pldLen; newPktEnd > pktEnd {
-			// TODO: Stack overflow? Panic or close conn.
-			panic("")
-		} else {
-			pktEnd = newPktEnd
-		}
-	} else {
-		pos = p.rHdrPos + rquic.SrcHeaderSize
+	var rpLen int
+
+	// Remove rQUIC header from SRC
+	// [1B][ DCID ][  rQUIC hdr   ][ Protected payload... ]  <--  p.rp.data
+	// [1B][ DCID ]                [ Protected payload... ]  <--  rp.data
+	if !p.wasCoded() {
+		rpLen += copy(rp.data[:p.rHdrPos], p.rp.data[:p.rHdrPos])
+		rpLen += copy(rp.data[p.rHdrPos:], p.rp.data[p.rHdrPos+rquic.SrcHeaderSize:])
+		rp.data = rp.data[:rpLen]
+		return rp
 	}
-	rpPos += copy(rp.data[rpPos:p.rHdrPos], p.rp.data[rpPos:p.rHdrPos]) // 1st Byte & DCID
 
-	rpPos += copy(rp.data[rpPos:], p.rp.data[pos:pktEnd]) // decoded payload
-	rp.data = rp.data[:rpPos]
+	// Remove rQUIC header from decoded COD
+	// [--][ DCID ][  rQUIC hdr   ][ Coefficients ][length][1B][ Protected payload... ]  <--  p.rp.data[pos]
+	// [1B][ DCID ]                                            [ Protected payload... ]  <--  rp.data
+
+	// Recover QUIC header and find packet length
+	// [--][ DCID ][  rQUIC hdr   ][ Coefficients ][length][1B][
+	// [1B][ DCID ]                                            [
+	rpLen++ // Skip 1st Byte
+	rpLen += copy(rp.data[1:p.rHdrPos], p.rp.data[1:p.rHdrPos])
+	pos := p.rHdrPos + rquic.CodPreHeaderSize + int(*p.coeffLen) // [length] position
+	pldLen := rquic.PldLenRead(p.rp.data, pos)
+	pos += rquic.LenOfSrcLen // Decoded [1B] position
+	rp.data[0] = p.rp.data[pos]
+	pos++ // [ Protected payload... ] position
+
+	// Check if decoded payload length exceeds the actual length
+	pktEnd := rpLen + pldLen
+	if len(rp.data) < pktEnd {
+		panic("Recovered source packet is excessively big.")
+	}
+
+	// Copy protected payload
+	rpLen += copy(rp.data[p.rHdrPos:pktEnd], p.rp.data[pos:protocol.MaxReceivePacketSize])
+	for ; rpLen < pktEnd; rpLen++ {
+		rp.data[rpLen] = 0
+	}
+	rp.data = rp.data[:rpLen]
 	return rp
 }
 
