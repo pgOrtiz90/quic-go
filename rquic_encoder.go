@@ -48,26 +48,26 @@ type encoder struct {
 
 func (e *encoder) offset() int { return 1 /*1st byte*/ + e.lenDCID }
 
-func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
+func (e *encoder) process(p *packedPacket) []*packedPacket {
 	if e.doNotEncode {
-		e.processUnprotected(pdSrc.raw)
+		e.processUnprotected(p)
 		return []*packedPacket{}
 	}
 
-	e.lenDCID = pdSrc.header.DestConnectionID.Len()
+	e.lenDCID = p.header.DestConnectionID.Len()
 	e.addTransmissionCount()
 
 	// Add rQUIC header to SRC. Prepare SRC for coding if necessary.
-	if !pdSrc.IsAckEliciting() { // Not protected
-		e.processUnprotected(pdSrc.raw)
+	if !p.IsAckEliciting() { // Not protected
+		e.processUnprotected(p)
 		return e.newCodedPackets
 	}
-	e.processProtected(pdSrc.raw)
+	e.processProtected(p.raw)
 
 	// Add SRC to the CODs under construction
 
-	e.firstByte = pdSrc.raw[0] & 0xd0 // only unprotected bits
-	e.checkDCID(pdSrc.header.DestConnectionID.Bytes())
+	e.firstByte = p.raw[0] & 0xd0 // only unprotected bits
+	e.checkDCID(p.header.DestConnectionID.Bytes())
 	e.newCodedPackets = []*packedPacket{}
 
 	for i, rb := range e.redunBuilders {
@@ -88,30 +88,34 @@ func (e *encoder) process(pdSrc *packedPacket) []*packedPacket {
 	return e.newCodedPackets
 }
 
-func (e *encoder) processUnprotected(raw []byte) {
-	rHPos := e.offset()
+func (e *encoder) processUnprotected(p *packedPacket) {
+	ofs := e.offset()
+	pldPos := ofs + rquic.FieldSizeType
 
-	// [1stB][      DCID      ][  0   0   0   0 ][ PN ][ Payload ]
-	// Type ---------posTypeNew--->-----------^
-	posTypeNew := rHPos + rquic.FieldPosType + rquic.ProtMinusUnprotLen
-	raw[posTypeNew] = rquic.TypeUnprotected
+	//////// Move unencrypted part of the header to the beginning
+	// [  0   0   0   0 ][1stB][      DCID      ][ PN ][ Payload ]
+	// XXXXXXXXXXXXX|<---[======================]
+	p.raw = p.raw[rquic.SrcHeaderSize-rquic.FieldSizeType:]
+	copy(p.raw, p.raw[rquic.FieldSizeType:pldPos])
 
-	// [1stB][      DCID      ][  0   0   0 Type][ PN ][ Payload ]
-	// [======================]--- move -->|
-	copy(raw[rquic.ProtMinusUnprotLen:posTypeNew], raw[:rHPos])
-	raw = raw[rquic.ProtMinusUnprotLen:]
+	// [1stB][      DCID      ][  ? ][ PN ][ Payload ]
+	//                         [Type]
+	p.raw[ofs] = rquic.TypeUnprotected
 
-	if rLogger.IsDebugging() {
-		rPPos := rHPos + rquic.FieldSizeType
-		rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X  % X]",
-			len(raw), e.lenDCID, raw[:rHPos], raw[rHPos:rPPos],
-		)
-	}
+	rLogger.Debugf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X  % X]",
+		len(p.raw), e.lenDCID, p.raw[:ofs], p.raw[ofs:pldPos],
+	)
 }
 
 func (e *encoder) processProtected(raw []byte) {
-	//////// Complete rQUIC header
 	ofs := e.offset()
+
+	//////// Move unencrypted part of the header to the beginning
+	// [  0   0   0   0 ][1stB][      DCID      ][ PN ][ Payload ]
+	// |<---- copy  -----[======================]
+	copy(raw, raw[rquic.SrcHeaderSize:rquic.SrcHeaderSize+ofs])
+
+	//////// Complete rQUIC header
 	pldPos := ofs + rquic.SrcHeaderSize
 	raw[ofs+rquic.FieldPosType] = rquic.TypeProtected
 	raw[ofs+rquic.FieldPosId] = e.rQuicId

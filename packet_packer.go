@@ -615,17 +615,13 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 			rquicOv = rquic.SrcHeaderSize
 		}
 	}
+	buffer.Write(bytes.Repeat([]byte{0}, rquicOv))
 	// } rQUIC
 
 	if err := header.Write(buffer, p.version); err != nil {
 		return nil, err
 	}
 	payloadOffset := buffer.Len()
-	// rQUIC {
-	buffer.Write(bytes.Repeat([]byte{0}, rquicOv))
-	payloadOffset += rquicOv
-	dbgOffs := payloadOffset + 1 // For debugging
-	// } rQUIC
 
 	if payload.ack != nil {
 		if err := payload.ack.Write(buffer, p.version); err != nil {
@@ -650,29 +646,19 @@ func (p *packetPacker) writeAndSealPacketWithPadding(
 	}
 
 	raw := buffer.Bytes()
-	_ = sealer.Seal(raw[payloadOffset:payloadOffset], raw[payloadOffset:], header.PacketNumber, raw[:payloadOffset])
+	// rQUIC {
+	//_ = sealer.Seal(raw[payloadOffset:payloadOffset], raw[payloadOffset:], header.PacketNumber, raw[:payloadOffset])
+	_ = sealer.Seal(raw[payloadOffset:payloadOffset], raw[payloadOffset:], header.PacketNumber, raw[rquicOv:payloadOffset])
+	// } rQUIC
 	raw = raw[0 : buffer.Len()+sealer.Overhead()]
 
 	pnOffset := payloadOffset - int(header.PacketNumberLen)
-	// rQUIC {
-	// Move packet number right before the payload
-	if rquicOv > 0 {
-		if rLogger.IsDebugging() {
-			rLogger.Printf("Encoder Header Construction Fields LenDCID:%d LenPN:%d",
-				header.DestConnectionID.Len(), header.PacketNumberLen,
-			)
-			rLogger.Printf("Encoder Header Construction NewHeader:[% X]", raw[:dbgOffs])
-			copy(raw[pnOffset:], raw[pnOffset-rquicOv:payloadOffset-rquicOv])
-			rLogger.Printf("Encoder Header Construction MovedPktN:[% X]", raw[:dbgOffs])
-			defer rLogger.Printf("Encoder Header Construction Encrypted:[% X]", raw[:dbgOffs])
-		} else {
-			copy(raw[pnOffset:], raw[pnOffset-rquicOv:payloadOffset-rquicOv])
-		}
-	}
-	// } rQUIC
 	sealer.EncryptHeader(
 		raw[pnOffset+4:pnOffset+4+16],
-		&raw[0],
+		// rQUIC {
+		//&raw[0],
+		&raw[rquicOv],
+		// } rQUIC
 		raw[pnOffset:payloadOffset],
 	)
 
