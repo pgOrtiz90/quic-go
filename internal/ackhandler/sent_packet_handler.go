@@ -112,6 +112,7 @@ func NewSentPacketHandler(
 func (h *sentPacketHandler) CodingEnabled() {
 	h.coding = true
 	h.alarm = time.Time{} // Disable early retransmit & PTO alarm
+	// TODO: Try: Probe = last (re)coded packets
 }
 func (h *sentPacketHandler) CodingDisabled() {
 	h.coding = false
@@ -242,6 +243,7 @@ func (h *sentPacketHandler) ReceivedAck(ackFrame *wire.AckFrame, withPacketNumbe
 		// If the packet was recovered from a coded one,
 		// rcvTime > rcvTimeThatTheLostOriginalPacketWouldHave
 		// Ignore these packets for RTT update.
+		// TODO: Adjust this for pure RLNC (NewSRC.ID == NewestExpected --> UpdateRTT)
 		if !h.processingCoded {
 			// } rQUIC
 			h.rttStats.UpdateRTT(rcvTime.Sub(p.SendTime), ackDelay, rcvTime)

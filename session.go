@@ -533,11 +533,6 @@ func (s *session) run() error {
 
 	var closeErr closeError
 
-	// rQUIC {
-	// TODO: Try: Probe = last (re)coded packets
-	var rcvTime time.Time
-	// } rQUIC
-
 runLoop:
 	for {
 		// Close immediately if requested
@@ -565,18 +560,7 @@ runLoop:
 			// Only reset the timers if this packet was actually processed.
 			// This avoids modifying any state when handling undecryptable packets,
 			// which could be injected by an attacker.
-			// rQUIC {
-			rcvTime = p.rcvTime
-			// } rQUIC
 			if wasProcessed := s.handlePacketImpl(p); !wasProcessed {
-				// rQUIC {
-				// handlePacketImpl has been changed to call buffering methods,
-				// necessary for in-order delivery of decoded packets.
-				// Some attributes should be updated as the packet is received,
-				// not by the time it will be delivered.
-				s.lastPacketReceivedTime = rcvTime
-				s.keepAlivePingSent = false // TODO: Consider increasing nextKeepAliveTime
-				// } rQUIC
 				continue
 			}
 		case <-s.handshakeCompleteChan:
@@ -819,6 +803,7 @@ func (s *session) maybeDecodeReceivedPacket(p *receivedPacket, hdr *wire.Header)
 		//Process the packet as usual
 		return s.handleSinglePacketFinish(p, hdr)
 	case rquic.TypeCoded, rquic.TypeProtected:
+		// TODO: Consider increasing s.keepAliveInterval and s.idleTimeout
 		s.rQuicBuffer.addNewReceivedPacket(p, hdr)
 		s.rQuicBufferFwdAll()
 		return true
