@@ -191,7 +191,7 @@ func (l *rQuicReceivedPacketList) remove(e *rQuicReceivedPacket) *rQuicReceivedP
 func (l *rQuicReceivedPacketList) insertOrdered(v *rQuicReceivedPacket) *rQuicReceivedPacket {
 	for ref := l.newest(); ref != nil; ref = ref.getOlder() {
 		if v.newerThan(ref) {
-			return l.insert(v, ref.older)
+			return l.insert(v, ref)
 		}
 	}
 	return l.insert(v, &l.root)
