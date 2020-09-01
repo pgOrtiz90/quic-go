@@ -102,23 +102,6 @@ func (e *rQuicReceivedPacket) getOlder() *rQuicReceivedPacket {
 	return nil
 }
 
-func (e *rQuicReceivedPacket) shouldGoAfter(ref *rQuicReceivedPacket) bool {
-	if ref == nil {
-		return false
-	}
-	if e.list != ref.list {
-		return false
-	}
-	// OLDEST -- ... -- ref -- <e?> -- ref.nxt -- ... -- NEWEST
-	if e.olderThan(ref) {
-		return false
-	}
-	if nxt := ref.getNewer(); nxt != nil {
-		return e.olderThan(nxt)
-	}
-	return true
-}
-
 func (e *rQuicReceivedPacket) shouldGoBefore(ref *rQuicReceivedPacket) bool {
 	if ref == nil {
 		return false
@@ -236,16 +219,6 @@ func (l *rQuicReceivedPacketList) moveBefore(e, mark *rQuicReceivedPacket) {
 		return
 	}
 	l.insert(l.remove(e), mark.older)
-}
-
-// MoveAfter moves element e to its new position after mark.
-// If e or mark is not an element of l, or e == mark, the list is not modified.
-// The element and mark must not be nil.
-func (l *rQuicReceivedPacketList) moveAfter(e, mark *rQuicReceivedPacket) {
-	if e.list != l || e == mark || mark.list != l {
-		return
-	}
-	l.insert(l.remove(e), mark)
 }
 
 func (l *rQuicReceivedPacketList) order() {
