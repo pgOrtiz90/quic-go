@@ -127,6 +127,7 @@ func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
 	}
 	cod.scaleDown()
 	*cod.fwd |= rquic.FlagSource
+	*cod.rid = cod.srcIds[0]
 
 	ps := &parsedSrc{
 		id: cod.srcIds[0],
@@ -160,6 +161,7 @@ func (d *Decoder) NewCod(raw []byte) {
 		genSize: raw[rHdrPos+rquic.FieldPosGenSize],
 		genId:   raw[rHdrPos+rquic.FieldPosGenId],
 		fwd:     &raw[rHdrPos+rquic.FieldPosType], // reusing type field
+		rid:     &raw[rHdrPos+rquic.FieldPosId], // necessary for rQuicBuffer
 	}
 	// till pc is optimized at the end of this method, remaining == genSize
 	pc.remaining = int(pc.genSize)

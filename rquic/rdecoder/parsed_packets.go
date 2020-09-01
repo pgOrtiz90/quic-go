@@ -32,6 +32,7 @@ type parsedCod struct {
 	srcIds []uint8
 	genId  uint8
 	fwd    *byte
+	rid    *byte
 
 	pld       []byte
 	codedOvh  []byte
