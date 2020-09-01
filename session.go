@@ -821,7 +821,7 @@ func (s *session) rQuicBufferFwdAll() {
 		isObsolete = e.isObsolete()
 		if e.delivered {
 			if isObsolete {
-				s.rQuicBuffer.remove(e)
+				e = s.rQuicBuffer.remove(e)
 			}
 			continue
 		}
@@ -834,17 +834,16 @@ func (s *session) rQuicBufferFwdAll() {
 				//      Increased e.rp.rcvTime should not affect reno (the default) CC
 				//  }
 			}
-			s.rQuicBuffer.remove(e)
+			e = s.rQuicBuffer.remove(e)
 			continue
 		}
 		// packet is neither delivered nor obsolete
 		if *e.id == s.rQuicLastForwarded {
 			if isSource {
 				rLogger.Logf("ERROR Decoder Buffer UndeliveredSrc pkt.ID:%d", *e.id)
-			} else {
-				// Coded packet, do nothing
-				continue
-			}
+				e = s.rQuicBuffer.remove(e) // Just in case, this packet won't be passed to QUIC
+			} // else --> Coded packet, do nothing
+			continue
 		}
 		if *e.id == s.rQuicLastForwarded+1 {
 			if isSource {

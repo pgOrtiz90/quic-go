@@ -129,6 +129,7 @@ type rQuicReceivedPacketList struct {
 func (l *rQuicReceivedPacketList) init() *rQuicReceivedPacketList {
 	l.root.newer = &l.root
 	l.root.older = &l.root
+	l.root.list = l
 	l.len = 0
 	return l
 }
@@ -166,10 +167,10 @@ func (l *rQuicReceivedPacketList) insert(e, at *rQuicReceivedPacket) *rQuicRecei
 	return e
 }
 
-// Remove removes e from l if e is an element of list l.
+// popout removes e from l if e is an element of list l.
 // It returns the element value e.
 // The element must not be nil.
-func (l *rQuicReceivedPacketList) remove(e *rQuicReceivedPacket) *rQuicReceivedPacket {
+func (l *rQuicReceivedPacketList) popout(e *rQuicReceivedPacket) *rQuicReceivedPacket {
 	if e.list == l {
 		// if e.list == l, l must have been initialized when e was inserted
 		// in l or l == nil (e is a zero Element) and l.remove will crash
@@ -179,13 +180,20 @@ func (l *rQuicReceivedPacketList) remove(e *rQuicReceivedPacket) *rQuicReceivedP
 		e.older = nil // avoid memory leaks
 		e.list = nil
 		l.len--
-		e.rp.buffer.Decrement()
-		e.rp.buffer.MaybeRelease()
+		rLogger.Debugf("Decoder Buffer PoppingOut pkt.ID:%d", *e.id)
 	}
+	return e
+}
+
+func (l *rQuicReceivedPacketList) remove(e *rQuicReceivedPacket) *rQuicReceivedPacket {
+	ePrev := e.older
+	l.popout(e)
+	e.rp.buffer.Decrement()
+	e.rp.buffer.MaybeRelease()
 	rLogger.Debugf("Decoder Buffer Removing pkt.ID:%d IsObsolete:%t IsSource:%t WasCoded:%t",
 		*e.id, e.isObsolete(), e.isSource(), e.wasCoded(),
 	)
-	return e
+	return ePrev
 }
 
 func (l *rQuicReceivedPacketList) insertOrdered(v *rQuicReceivedPacket) *rQuicReceivedPacket {
@@ -218,7 +226,7 @@ func (l *rQuicReceivedPacketList) moveBefore(e, mark *rQuicReceivedPacket) {
 	if e.list != l || e == mark || mark.list != l {
 		return
 	}
-	l.insert(l.remove(e), mark.older)
+	l.insert(l.popout(e), mark.older)
 }
 
 func (l *rQuicReceivedPacketList) order() {
