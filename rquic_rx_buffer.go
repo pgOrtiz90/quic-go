@@ -223,25 +223,12 @@ func (l *rQuicReceivedPacketList) moveBefore(e, mark *rQuicReceivedPacket) {
 
 func (l *rQuicReceivedPacketList) order() {
 ScanLoop:
-	for e := l.oldest(); e != nil; e = e.getNewer() {
-		//e.MaybeRecoverDecoded()
-		if older := e.getOlder(); older != nil {
-			if e.olderThan(older) {
-				for np := older; np != nil; np = np.getOlder() {
-					if e.shouldGoBefore(np) {
-						l.moveBefore(e, np)
-						continue ScanLoop
-					}
-				}
-			}
-		}
-		if newer := e.getNewer(); newer != nil {
-			if e.newerThan(newer) {
-				for np := newer; np != nil; np = np.getNewer() {
-					if e.shouldGoAfter(np) {
-						l.moveAfter(e, np)
-						continue ScanLoop
-					}
+	for e := l.oldest().getNewer(); e != nil; e = e.getNewer() {
+		if older := e.getOlder(); e.olderThan(older) {
+			for np := older; np != nil; np = np.getOlder() {
+				if e.shouldGoBefore(np) {
+					l.moveBefore(e, np)
+					continue ScanLoop
 				}
 			}
 		}
