@@ -208,6 +208,9 @@ func (l *rQuicReceivedPacketList) insertOrdered(v *rQuicReceivedPacket) *rQuicRe
 func (l *rQuicReceivedPacketList) addNewReceivedPacket(p *receivedPacket, hdr *wire.Header) {
 	// Add new packet to the buffer
 	rHdrPos := 1 /*1st byte*/ + hdr.DestConnectionID.Len()
+	if p.data[rHdrPos+rquic.FieldPosType] & rquic.FlagObsolete != 0 /* is obsolete */ {
+		return
+	}
 	rqrp := &rQuicReceivedPacket{
 		hdr:      hdr,
 		rp:       p,

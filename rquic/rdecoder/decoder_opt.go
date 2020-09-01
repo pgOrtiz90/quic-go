@@ -50,6 +50,9 @@ func (d *Decoder) optimizeThisCodAim(cod *parsedCod) (availableSrc []*parsedSrc,
 		rLogger.Debugf("Decoder OptimizeCod gen.ID:%d pkt.ID:%d RxSrc:%d/%d",
 			cod.genId, cod.id, len(availableSrc), cod.remaining,
 		)
+		if !notFull {
+			cod.markAsObsolete()
+		}
 	}()
 
 	for i := 0; i < len(d.pktsSrc); i++ {
