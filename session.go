@@ -815,57 +815,64 @@ func (s *session) maybeDecodeReceivedPacket(p *receivedPacket, hdr *wire.Header)
 	}
 }
 
+// rQuicBufferFwdAll delivers source packets to QUIC if they
+// are consecutive or stayed in the buffer for too long.
+// MUST be executed after the buffer has been ordered.
 func (s *session) rQuicBufferFwdAll() {
-	var isSource, isObsolete bool
-	for e := s.rQuicBuffer.oldest(); e != nil; e = e.getNewer() {
-		isObsolete = e.isObsolete()
+	var e *rQuicReceivedPacket
+	var msg string
+	defer func() { rLogger.Debugf("Decoder Buffer FwdAttemptEnd InspectedAll:%t", e == nil) }()
+
+	// Remove and deliver obsolete packets
+	rLogger.Debugf("Decoder Buffer ObsoleteRm")
+	for e = s.rQuicBuffer.oldest(); e.isObsolete(); {
+		if !e.delivered && e.isSource() {
+			s.rQuicBufferFwd(e)
+		}
+		//  if e.wasCoded() --> Increased e.rp.rcvTime should not affect reno (the default) CC
+		e = s.rQuicBuffer.remove(e).getNewer()
+		if e == nil {
+			return
+		} // all packets were obsolete...
+	}
+
+	// Forward packets if possible
+	for e = s.rQuicBuffer.oldestNotDelivered(); e != nil; e = e.getNewer() {
+		msg = fmt.Sprintf("Decoder Buffer Processing pkt.ID:%d pkt.Type:%s... ", *e.id, e.pktType())
 		if e.delivered {
-			if isObsolete {
-				e = s.rQuicBuffer.remove(e)
-			}
+			rLogger.Debugf(msg + "Delivered") // This shows oldestNotDelivered() failure
 			continue
 		}
-		// the packet has not been delivered yet
-		isSource = e.isSource()
-		if isObsolete {
-			if isSource {
-				s.rQuicBufferFwd(e)
-				//  if e.wasCoded() {
-				//      Increased e.rp.rcvTime should not affect reno (the default) CC
-				//  }
-			}
-			e = s.rQuicBuffer.remove(e)
+		if !e.isSource() {
+			// Coded packet in use, skip it.
+			rLogger.Debugf(msg + "Skipping")
 			continue
 		}
-		// packet is neither delivered nor obsolete
 		if *e.id == s.rQuicLastForwarded {
-			if isSource {
-				rLogger.Logf("ERROR Decoder Buffer UndeliveredSrc pkt.ID:%d", *e.id)
-				e = s.rQuicBuffer.remove(e) // Just in case, this packet won't be passed to QUIC
-			} // else --> Coded packet, do nothing
+			rLogger.Logf("ERROR Decoder Buffer UndeliveredSrc pkt.ID:%d", *e.id)
+			e = s.rQuicBuffer.remove(e) // Just in case, this packet won't be passed to QUIC
 			continue
 		}
 		if *e.id == s.rQuicLastForwarded+1 {
-			if isSource {
-				if e.wasCoded() {
-					s.sentPacketHandler.ProcessingCoded()
-					s.rQuicBufferFwd(e)
-					s.sentPacketHandler.ProcessingCodedFinished()
-				} else {
-					s.rQuicBufferFwd(e)
-				}
-				e.rp.buffer.MaybeRelease()
-				e.delivered = true
+			rLogger.Debugf(msg + "Delivering")
+			if e.wasCoded() {
+				s.sentPacketHandler.ProcessingCoded()
+				s.rQuicBufferFwd(e)
+				s.sentPacketHandler.ProcessingCodedFinished()
+			} else {
+				s.rQuicBufferFwd(e)
 			}
 			continue
 		}
-		// Neither obsolete nor consecutive
+		// No more consecutive SRC
+		rLogger.Debugf(msg + "NotConsecutive")
 		return
 	}
 }
 
 func (s *session) rQuicBufferFwd(e *rQuicReceivedPacket) {
 	rp := e.removeRQuicHeader()
+	s.rQuicBuffer.delivered(e)
 	d := s.handleSinglePacketFinish(rp, e.hdr)
 	rLogger.Debugf("Decoder Buffer Delivering pkt.ID:%d LastDelivered.ID:%d Delivered:%t",
 		*e.id, s.rQuicLastForwarded, d,

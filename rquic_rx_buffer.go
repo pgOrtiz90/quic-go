@@ -3,6 +3,7 @@
 package quic
 
 import (
+	"fmt"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/rquic"
@@ -31,11 +32,22 @@ type rQuicReceivedPacket struct {
 }
 
 func (p *rQuicReceivedPacket) newerThan(other *rQuicReceivedPacket) bool { return *p.id-*other.id < 128 }
-func (p *rQuicReceivedPacket) olderThan(other *rQuicReceivedPacket) bool { return *other.id-*p.id < 128 }
+func (p *rQuicReceivedPacket) olderThan(other *rQuicReceivedPacket) bool { return *other.id-*p.id < 128 } // or equal
 
 func (p *rQuicReceivedPacket) isObsolete() bool { return *p.fwd&rquic.FlagObsolete != 0 }
 func (p *rQuicReceivedPacket) isSource() bool   { return *p.fwd&rquic.FlagSource != 0 }
 func (p *rQuicReceivedPacket) wasCoded() bool   { return *p.fwd&rquic.FlagCoded != 0 }
+
+func (p *rQuicReceivedPacket) pktType() string {
+	if p.isSource() {
+		if p.wasCoded() {
+			return "REC"
+		} else {
+			return "SRC"
+		}
+	}
+	return "COD"
+}
 
 func (p *rQuicReceivedPacket) removeRQuicHeader() *receivedPacket {
 	// Removing rQUIC header in e.rp.data will impair
@@ -123,6 +135,13 @@ func (e *rQuicReceivedPacket) shouldGoBefore(ref *rQuicReceivedPacket) bool {
 type rQuicReceivedPacketList struct {
 	root rQuicReceivedPacket // sentinel list element, only &root, root.older, and root.newer are used
 	len  int                 // current list length excluding (this) sentinel element
+
+	lastDelivered *rQuicReceivedPacket
+}
+
+// newRQuicReceivedPacketList returns an initialized list.
+func newRQuicReceivedPacketList() *rQuicReceivedPacketList {
+	return new(rQuicReceivedPacketList).init()
 }
 
 // Init initializes or clears list l.
@@ -132,11 +151,6 @@ func (l *rQuicReceivedPacketList) init() *rQuicReceivedPacketList {
 	l.root.list = l
 	l.len = 0
 	return l
-}
-
-// newRQuicReceivedPacketList returns an initialized list.
-func newRQuicReceivedPacketList() *rQuicReceivedPacketList {
-	return new(rQuicReceivedPacketList).init()
 }
 
 // Oldest returns the first element of list l or nil if the list is empty.
@@ -155,6 +169,33 @@ func (l *rQuicReceivedPacketList) newest() *rQuicReceivedPacket {
 	return l.root.older
 }
 
+func (l *rQuicReceivedPacketList) addNewReceivedPacket(p *receivedPacket, hdr *wire.Header) {
+	// Add new packet to the buffer
+	rHdrPos := 1 /*1st byte*/ + hdr.DestConnectionID.Len()
+	fwd := &p.data[rHdrPos+rquic.FieldPosType]
+	if *fwd & rquic.FlagObsolete != 0 /* is obsolete */ {
+		return
+	}
+	rqrp := &rQuicReceivedPacket{
+		hdr:      hdr,
+		rp:       p,
+		id:       &p.data[rHdrPos+rquic.FieldPosId],
+		fwd:      fwd,
+		coeffLen: &p.data[rHdrPos+rquic.FieldPosGenSize],
+		rHdrPos:  rHdrPos,
+	}
+	l.insertOrdered(rqrp)
+}
+
+func (l *rQuicReceivedPacketList) insertOrdered(v *rQuicReceivedPacket) *rQuicReceivedPacket {
+	for ref := l.newest(); ref != nil; ref = ref.getOlder() {
+		if v.newerThan(ref) {
+			return l.insert(v, ref)
+		}
+	}
+	return l.insert(v, &l.root)
+}
+
 // insert inserts e after at, increments l.len, and returns e.
 func (l *rQuicReceivedPacketList) insert(e, at *rQuicReceivedPacket) *rQuicReceivedPacket {
 	n := at.newer
@@ -164,7 +205,47 @@ func (l *rQuicReceivedPacketList) insert(e, at *rQuicReceivedPacket) *rQuicRecei
 	n.older = e
 	e.list = l
 	l.len++
+	if rLogger.IsDebugging() {
+		msg := fmt.Sprintf("Decoder Buffer Inserting pkt.ID:%d between ", *e.id)
+		if e.older == &l.root {
+			msg += "BOTTOM and "
+		} else {
+			msg += fmt.Sprintf("pkt.ID:%d and ", *e.older.id)
+		}
+		if e.newer == &l.root {
+			msg += "TOP"
+		} else {
+			msg += fmt.Sprintf("pkt.ID:%d", *e.newer.id)
+		}
+		rLogger.Printf(msg)
+	}
 	return e
+}
+
+func (l *rQuicReceivedPacketList) order() {
+	rLogger.Debugf("Decoder Buffer Ordering started")
+	defer rLogger.Debugf("Decoder Buffer Ordering finished")
+ScanLoop:
+	for e := l.oldest().getNewer(); e != nil; e = e.getNewer() {
+		if older := e.getOlder(); e.olderThan(older) {
+			for np := older; np != nil; np = np.getOlder() {
+				if e.shouldGoBefore(np) {
+					l.moveBefore(e, np)
+					continue ScanLoop
+				}
+			}
+		}
+	}
+}
+
+// MoveBefore moves element e to its new position before mark.
+// If e or mark is not an element of l, or e == mark, the list is not modified.
+// The element and mark must not be nil.
+func (l *rQuicReceivedPacketList) moveBefore(e, mark *rQuicReceivedPacket) {
+	if e.list != l || e == mark || mark.list != l {
+		return
+	}
+	l.insert(l.popout(e), mark.older)
 }
 
 // popout removes e from l if e is an element of list l.
@@ -186,62 +267,27 @@ func (l *rQuicReceivedPacketList) popout(e *rQuicReceivedPacket) *rQuicReceivedP
 }
 
 func (l *rQuicReceivedPacketList) remove(e *rQuicReceivedPacket) *rQuicReceivedPacket {
+	if l.lastDelivered == e {
+		l.lastDelivered = nil
+	} // This is not expected to happen
 	ePrev := e.older
 	l.popout(e)
 	e.rp.buffer.Decrement()
 	e.rp.buffer.MaybeRelease()
-	rLogger.Debugf("Decoder Buffer Removing pkt.ID:%d IsObsolete:%t IsSource:%t WasCoded:%t",
-		*e.id, e.isObsolete(), e.isSource(), e.wasCoded(),
+	rLogger.Debugf("Decoder Buffer Removing pkt.ID:%d pkt.Type:%s IsObsolete:%t",
+		*e.id, e.pktType(), e.isObsolete(),
 	)
 	return ePrev
 }
 
-func (l *rQuicReceivedPacketList) insertOrdered(v *rQuicReceivedPacket) *rQuicReceivedPacket {
-	for ref := l.newest(); ref != nil; ref = ref.getOlder() {
-		if v.newerThan(ref) {
-			return l.insert(v, ref)
-		}
+func (l *rQuicReceivedPacketList) oldestNotDelivered() *rQuicReceivedPacket {
+	if l.lastDelivered != nil {
+		return l.lastDelivered.getNewer()
 	}
-	return l.insert(v, &l.root)
+	return l.oldest()
 }
 
-func (l *rQuicReceivedPacketList) addNewReceivedPacket(p *receivedPacket, hdr *wire.Header) {
-	// Add new packet to the buffer
-	rHdrPos := 1 /*1st byte*/ + hdr.DestConnectionID.Len()
-	if p.data[rHdrPos+rquic.FieldPosType] & rquic.FlagObsolete != 0 /* is obsolete */ {
-		return
-	}
-	rqrp := &rQuicReceivedPacket{
-		hdr:      hdr,
-		rp:       p,
-		id:       &p.data[rHdrPos+rquic.FieldPosId],
-		fwd:      &p.data[rHdrPos+rquic.FieldPosType],
-		coeffLen: &p.data[rHdrPos+rquic.FieldPosGenSize],
-		rHdrPos:  rHdrPos,
-	}
-	l.insertOrdered(rqrp)
-}
-
-// MoveBefore moves element e to its new position before mark.
-// If e or mark is not an element of l, or e == mark, the list is not modified.
-// The element and mark must not be nil.
-func (l *rQuicReceivedPacketList) moveBefore(e, mark *rQuicReceivedPacket) {
-	if e.list != l || e == mark || mark.list != l {
-		return
-	}
-	l.insert(l.popout(e), mark.older)
-}
-
-func (l *rQuicReceivedPacketList) order() {
-ScanLoop:
-	for e := l.oldest().getNewer(); e != nil; e = e.getNewer() {
-		if older := e.getOlder(); e.olderThan(older) {
-			for np := older; np != nil; np = np.getOlder() {
-				if e.shouldGoBefore(np) {
-					l.moveBefore(e, np)
-					continue ScanLoop
-				}
-			}
-		}
-	}
+func (l *rQuicReceivedPacketList) delivered(e *rQuicReceivedPacket) {
+	l.lastDelivered = e
+	e.delivered = true
 }
