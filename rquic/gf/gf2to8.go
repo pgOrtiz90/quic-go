@@ -1,7 +1,7 @@
 package gf
 //package main
 
-import "fmt"
+import "github.com/lucas-clemente/quic-go/rquic/rLogger"
 
 var galois_log = []uint16 {
     0,  0,  1, 25,  2, 50, 26,198,  3,223, 51,238, 27,104,199, 75,
@@ -96,7 +96,7 @@ func Div(a uint8, b uint8) uint8 {
     }
     
     if b == 0 {
-        fmt.Println("ZeroDivisionError: one cannot simply divide by zero, not even in Galois Field")
+        rLogger.Logf("ZeroDivisionError: one cannot simply divide by zero, not even in Galois Field")
         return 0
     }
     

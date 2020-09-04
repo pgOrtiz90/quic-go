@@ -84,6 +84,7 @@ func (r *ratio) UpdateUnAcked(lost, unAcked int) {
 	r.lost += uint32(lost)
 	r.unAcked = uint32(unAcked)
 	r.unAckedMu.Unlock()
+	rLogger.Debugf("Encoder Ratio ProcessedACK Lost:%d UnACKed:%d", lost, unAcked)
 }
 
 func (r *ratio) AddTxCount() {

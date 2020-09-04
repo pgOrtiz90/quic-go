@@ -226,7 +226,7 @@ func main() {
 
 	t := float64(end.Sub(start)) / 1000 // us from conn. establishment to end of data Tx
 	thput := float64(bytesSent*8) / t
-	fmt.Printf("Server - Sent: %d  bytes, Thput: %f Mbps, %f us\n", bytesSent, thput, t)
+	fmt.Printf("Server - Sent: %d/%d  bytes, Thput: %f Mbps, %f us\n", bytesSent, max_send_bytes, thput, t)
 	//fmt.Printf("Start: %s, End: %s\n", start.String(), end.String())
 	if rLogger.IsEnabled() {
 		rLogger.Printf(prefix+"Connection Closed Stats Transmitted(MB):%d Time(us):%f Throughput(Mbps):%f",

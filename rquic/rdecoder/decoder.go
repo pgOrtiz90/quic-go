@@ -44,13 +44,13 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 
 	// unprotected packet
 	if ptype == rquic.TypeUnprotected {
-		d.logPkt("UNPROTECTED", raw, rquic.FieldSizeType)
+		d.logPkt("UNPROTECTED", raw, rHdrPos+rquic.FieldPosType+rquic.FieldSizeType)
 		return rquic.TypeUnprotected, d.didRecover
 	}
 
 	// unknown packet
 	if ptype >= rquic.TypeUnknown {
-		d.logPkt("UNKNOWN", raw, rquic.CodHeaderSizeMax)
+		d.logPkt("UNKNOWN", raw, rHdrPos+rquic.CodHeaderSizeMax)
 		return rquic.TypeUnknown, d.didRecover
 	}
 
@@ -59,7 +59,7 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 	g := raw[rHdrPos+rquic.FieldPosGenId] // last gen id
 	seenNew := d.lastSeen(p, g)
 	if d.isObsolete(p, g) {
-		d.logPkt("OBSOLETE", raw, rquic.SrcHeaderSize)
+		d.logPkt("OBSOLETE", raw, rHdrPos+rquic.SrcHeaderSize)
 		return rquic.TypeUnknown, d.didRecover
 	}
 	d.maybeUpdateXhold()
@@ -70,7 +70,8 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 			d.optimizeWithSrc(src, true)
 			return rquic.TypeProtected, d.didRecover
 		}
-		d.logPkt("PROTECTED REPEATED", raw, rquic.CodHeaderSizeMax)
+		// NewSrc has returned nil, which means that this SRC is repeated
+		d.logPkt("PROTECTED REPEATED", raw, rHdrPos+rquic.SrcHeaderSize)
 		return rquic.TypeUnknown, d.didRecover
 	}
 
@@ -144,7 +145,7 @@ func (d *Decoder) NewSrcRec(cod *parsedCod) *parsedSrc {
 	rLogger.MaybeIncreaseRxRec()
 	if rLogger.IsDebugging() {
 		srcPldPos := d.offset() + rquic.SrcHeaderSize
-		rLogger.Printf("Decoder Packet Recovered pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+		rLogger.Printf("Decoder Packet RECOVERED pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
 			srcPldPos+len(ps.pld), d.lenDCID, ps.pld[:srcPldPos],
 		)
 	}
@@ -189,7 +190,7 @@ func (d *Decoder) NewCod(raw []byte) {
 	if coeffsInHdr < 0 {
 		coeffsInHdr = (0 - coeffsInHdr) * pc.remaining
 	}
-	pldPos := rHdrPos+rquic.FieldPosSeed+coeffsInHdr
+	pldPos := rHdrPos + rquic.FieldPosSeed + coeffsInHdr
 	d.logPkt("CODED", raw, pldPos)
 	// The next line is necessary for Rx buffer correctly rescuing decoded pld
 	raw[rHdrPos+rquic.FieldPosGenSize] = uint8(coeffsInHdr)
@@ -212,7 +213,10 @@ func (d *Decoder) NewCod(raw []byte) {
 }
 
 func (d *Decoder) logPkt(pktType string, raw []byte, end int) {
-	rLogger.Debugf("Decoder Packet %s pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
+	if !rLogger.IsDebugging() {
+		return
+	}
+	rLogger.Printf("Decoder Packet %s pkt.Len:%d DCID.Len:%d hdr(hex):[% X]",
 		pktType, len(raw), d.lenDCID, raw[:end],
 	)
 }

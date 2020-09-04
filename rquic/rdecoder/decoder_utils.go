@@ -60,7 +60,7 @@ func (d *Decoder) lastSeen(p, g byte) bool {
 			// Any packet belongs to [overlap] generations. Last [overlap] + Margin generations are valid.
 			lvg := d.lastValidGen
 			d.lastValidGen = d.lastSeenGen - d.lastSeenOverlap - rquic.GenMargin + 1
-			rLogger.Debugf("Updating lastValidGen Old:%d New:%d", lvg, d.lastValidGen)
+			rLogger.Debugf("Decoder Updating lastValidGen Old:%d New:%d", lvg, d.lastValidGen)
 		}
 		return true // d.lastSeen* updated
 	}

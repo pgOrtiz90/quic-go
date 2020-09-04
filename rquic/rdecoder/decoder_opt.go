@@ -90,7 +90,6 @@ func (d *Decoder) optimizeThisCodFire(cod *parsedCod, srcs []*parsedSrc, inds []
 	// if !codIsUseful --> cod.remaining == 1; cod.remaining == 0 --> this method is not called
 
 	if ns := d.NewSrcRec(cod); ns != nil {
-		rLogger.Debugf("Decoder OptimizeCod Optimized remaining:%d", cod.remaining)
 		d.optimizeWithSrc(ns, true)
 	}
 	// When this method is called, COD is not stored yet, no need(way) to remove it from pktsCod.

@@ -39,7 +39,6 @@ const ( //---------------------------------------------------------------- Field
 	// FieldSizeSeed    // This will depend on the scheme
 
 	SrcHeaderSize      int = FieldSizeType + FieldSizeId + FieldSizeLastGen + FieldSizeOverlap
-	ProtMinusUnprotLen int = SrcHeaderSize - FieldSizeType
 	CodPreHeaderSize   int = FieldSizeType + FieldSizeId + FieldSizeGenId + FieldSizeGenSize
 	LenOfSrcLen        int = 2 // COD payload header, shows decoded SRC length
 	CodedOverhead      int = LenOfSrcLen + 1 // Pld len. and 1st byte are protected and inserted b/w rQUIC hdr & pld
