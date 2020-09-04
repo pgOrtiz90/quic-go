@@ -54,8 +54,8 @@ func (e *encoder) process(p *packedPacket) []*packedPacket {
 		return []*packedPacket{}
 	}
 
-	e.lenDCID = p.header.DestConnectionID.Len()
-	e.addTransmissionCount()
+	e.newCodedPackets = []*packedPacket{}
+	e.checkDCID(p.header.DestConnectionID.Bytes())
 
 	// Add rQUIC header to SRC. Prepare SRC for coding if necessary.
 	if !p.IsAckEliciting() { // Not protected
@@ -63,12 +63,11 @@ func (e *encoder) process(p *packedPacket) []*packedPacket {
 		return e.newCodedPackets
 	}
 	e.processProtected(p.raw)
+	e.ratio.AddTxCount()
 
 	// Add SRC to the CODs under construction
 
 	e.firstByte = p.raw[0] & 0xd0 // only unprotected bits
-	e.checkDCID(p.header.DestConnectionID.Bytes())
-	e.newCodedPackets = []*packedPacket{}
 
 	for i, rb := range e.redunBuilders {
 		rb.builder.AddSrc(e.srcForCoding)
@@ -140,16 +139,14 @@ func (e *encoder) processProtected(raw []byte) {
 }
 
 func (e *encoder) checkDCID(newDCID []byte) {
-	if e.currentDCID != nil {
-		if !bytes.Equal(e.currentDCID, newDCID) {
-			// https://github.com/go101/go101/wiki/How-to-perfectly-clone-a-slice%3F
-			e.currentDCID = append(newDCID[0:0], newDCID...)
-			e.redunBuildersPurge()
-			e.redunBuildersInit()
-		}
-	} else {
-		e.currentDCID = append(newDCID[0:0], newDCID...)
+	if bytes.Equal(e.currentDCID, newDCID) {
+		return
 	}
+	// https://github.com/go101/go101/wiki/How-to-perfectly-clone-a-slice%3F
+	e.currentDCID = append(newDCID[0:0], newDCID...)
+	e.lenDCID = len(newDCID)
+	e.redunBuildersPurge()
+	e.redunBuildersInit()
 }
 
 func (e *encoder) redunBuildersPurge() {
@@ -273,10 +270,6 @@ func (e *encoder) enableCoding() {
 
 func (e *encoder) updateUnAcked(loss, unAcked int) {
 	e.ratio.UpdateUnAcked(loss, unAcked)
-}
-
-func (e *encoder) addTransmissionCount() {
-	e.ratio.AddTxCount()
 }
 
 func MakeEncoder(conf *rquic.CConf) *encoder {
