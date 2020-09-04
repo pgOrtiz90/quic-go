@@ -3,18 +3,20 @@ package schemes
 import (
 	"github.com/lucas-clemente/quic-go/rquic"
 	"github.com/lucas-clemente/quic-go/rquic/rLogger"
+	"github.com/lucas-clemente/quic-go/internal/utils"
 )
 
 //////////////////////////////////////////////////////////////////////// redunBuilder
 
 type redunBuilderXor struct {
-	scheme      uint8
-	genSize     uint8
-	posRQuicHdr int
-	posPld      int
-	codedPkt    []byte // only 1 pkt per gen
-	codedPldLen int
-	finished    bool
+	scheme         uint8
+	genSize        uint8
+	posRQuicHdr    int
+	posPld         int
+	codedPkt       []byte // only 1 pkt per gen
+	codedPldLen    int
+	codedPldLenMax int
+	finished       bool
 }
 
 func (r *redunBuilderXor) AddSrc(src []byte) {
@@ -22,29 +24,27 @@ func (r *redunBuilderXor) AddSrc(src []byte) {
 		return
 	}
 	srcLen := len(src)
-	if srcLen > r.codedPldLen {
-		rLogger.Logf("Encoder ERROR SrcPldLen:%d > CodPldLen:%d", srcLen, r.codedPldLen)
+	if srcLen > r.codedPldLenMax {
+		rLogger.Logf("Encoder ERROR SrcPldLen:%d > CodPldLen:%d", srcLen, r.codedPldLenMax)
 		return
 	} // Packets that are filled here are max size
 
 	// Add SRC
 	cod := r.codedPkt[r.posPld:]
-	if r.genSize > 0 {
-		for i, v := range src {
-			cod[i] ^= v
-		}
-		r.genSize++
+	r.genSize++
+
+	var i int
+	endLoop := utils.Min(srcLen, r.codedPldLen)
+	for ; i < endLoop; i++ {
+		cod[i] ^= src[i]
+	}
+	if endLoop == srcLen {
 		return
 	}
-	// The slice returned in packetBuffer is not clean.
-	var i int
-	for i = 0; i < srcLen; i++ {
+	for ; i < srcLen; i++ {
 		cod[i] = src[i]
 	}
-	for ; i < r.codedPldLen; i++ {
-		cod[i] = 0
-	}
-	r.genSize++
+	r.codedPldLen = srcLen
 }
 
 func (r *redunBuilderXor) ReadyToSend(ratio float64) bool {
@@ -54,11 +54,11 @@ func (r *redunBuilderXor) ReadyToSend(ratio float64) bool {
 	return float64(r.genSize) >= ratio
 }
 
-func (r *redunBuilderXor) Finish() int {
+func (r *redunBuilderXor) Finish() (int, int) {
 	r.codedPkt[r.posRQuicHdr+rquic.FieldPosGenSize] = r.genSize
 	r.codedPkt[r.posRQuicHdr+rquic.FieldPosType] = r.scheme
 	r.finished = true
-	return 0
+	return 0, r.codedPldLen
 }
 
 func (r *redunBuilderXor) SeedMaxFieldSize() uint8 { return 0 }
@@ -74,7 +74,7 @@ func makeRedunBuilderXor(packets [][]byte, posRQuicHdr int) *redunBuilderXor {
 		posPld:      posRQuicHdr + rquic.CodPreHeaderSize,
 		codedPkt:    packets[0],
 	}
-	rb.codedPldLen = len(rb.codedPkt) - rb.posPld
+	rb.codedPldLenMax = len(rb.codedPkt) - rb.posPld
 	return &rb
 }
 

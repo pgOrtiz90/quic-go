@@ -3,24 +3,26 @@ package schemes
 import (
 	"math/rand"
 
+	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/rquic"
-	"github.com/lucas-clemente/quic-go/rquic/gf"
 	"github.com/lucas-clemente/quic-go/rquic/rLogger"
+	"github.com/lucas-clemente/quic-go/rquic/gf"
 )
 
 //////////////////////////////////////////////////////////////////////// redunBuilder
 
 type redunBuilderRlcSys struct {
-	scheme      uint8
-	genSize     uint8
-	posRQuicHdr int
-	posCoeffs   int
-	posNewCoeff int
-	posPld      int
-	codedPkts   [][]byte
-	codedPldLen int
-	redun       int // coded packets in this gen
-	finished    bool
+	scheme         uint8
+	genSize        uint8
+	posRQuicHdr    int
+	posCoeffs      int
+	posNewCoeff    int
+	posPld         int
+	codedPkts      [][]byte
+	codedPldLen    int
+	codedPldLenMax int
+	redun          int // coded packets in this gen
+	finished       bool
 }
 
 func newCoeff() uint8 {
@@ -33,43 +35,32 @@ func (r *redunBuilderRlcSys) AddSrc(src []byte) {
 		return
 	}
 	srcLen := len(src)
-	if srcLen > r.codedPldLen {
-		rLogger.Logf("Encoder ERROR SrcPldLen:%d > CodPldLen:%d", srcLen, r.codedPldLen)
+	if srcLen > r.codedPldLenMax {
+		rLogger.Logf("Encoder ERROR SrcPldLen:%d > CodPldLen:%d", srcLen, r.codedPldLenMax)
 		return
 	} // Packets that are filled here are max size
 
 	var cf uint8
-	if r.genSize > 0 {
-		for _, cod := range r.codedPkts {
-			// Update coefficients
-			cf = newCoeff()
-			cod[r.posNewCoeff] = cf
-			// Add SRC
-			cod = cod[r.posPld:]
-			for i, v := range src {
-				cod[i] ^= gf.Mult(v, cf)
-			}
-		}
-		r.posNewCoeff++
-		r.genSize++
-		return
-	}
-	// The slice returned in packetBuffer is not clean.
+	var i int
+	endLoop := utils.Min(srcLen, r.codedPldLen)
 	for _, cod := range r.codedPkts {
 		// Update coefficients
 		cf = newCoeff()
 		cod[r.posNewCoeff] = cf
+
 		// Add SRC
 		cod = cod[r.posPld:]
-		var i int
-		for i = 0; i < srcLen; i++ {
+		for ; i < endLoop; i++ {
+			cod[i] ^= gf.Mult(src[i], cf)
+		}
+		if endLoop == srcLen {
+			continue
+		}
+		for ; i < srcLen; i++ {
 			cod[i] = gf.Mult(src[i], cf)
 		}
-		for ; i < r.codedPldLen; i++ {
-			cod[i] = 0
-		}
-
 	}
+	r.codedPldLen = srcLen
 	r.posNewCoeff++
 	r.genSize++
 }
@@ -81,7 +72,7 @@ func (r *redunBuilderRlcSys) ReadyToSend(ratio float64) bool {
 	return float64(r.genSize)/float64(r.redun) >= ratio
 }
 
-func (r *redunBuilderRlcSys) Finish() int {
+func (r *redunBuilderRlcSys) Finish() (int, int) {
 	unused := r.UnusedCoeffSpace()
 	r.posRQuicHdr += unused
 	posCoeffsNew := r.posCoeffs + unused
@@ -95,7 +86,7 @@ func (r *redunBuilderRlcSys) Finish() int {
 	}
 
 	r.finished = true
-	return int(r.genSize)
+	return int(r.genSize), r.codedPldLen
 }
 
 func (r *redunBuilderRlcSys) SeedMaxFieldSize() uint8 { return rquic.MaxGenSize }
@@ -112,14 +103,14 @@ func makeRedunBuilderRlcSys(packets [][]byte, posRQuicHdr int) *redunBuilderRlcS
 	posCoeffs := posRQuicHdr + rquic.FieldPosSeed
 	posPld := posCoeffs + int(rquic.MaxGenSize)
 	return &redunBuilderRlcSys{
-		scheme:      rquic.SchemeRlcSys,
-		posRQuicHdr: posRQuicHdr,
-		posCoeffs:   posCoeffs,
-		posNewCoeff: posCoeffs,
-		posPld:      posPld,
-		codedPkts:   packets,
-		codedPldLen: len(packets[0]) - posPld,
-		redun:       redun,
+		scheme:         rquic.SchemeRlcSys,
+		posRQuicHdr:    posRQuicHdr,
+		posCoeffs:      posCoeffs,
+		posNewCoeff:    posCoeffs,
+		posPld:         posPld,
+		codedPkts:      packets,
+		codedPldLenMax: len(packets[0]) - posPld,
+		redun:          redun,
 	}
 }
 

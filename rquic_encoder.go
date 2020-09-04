@@ -185,11 +185,15 @@ func (e *encoder) redunBuildersNew() *redunBuilder {
 }
 
 func (e *encoder) assemble(rb *redunBuilder) {
-	gSize := rb.builder.Finish()
+	coeffsLen, codLen := rb.builder.Finish()
+	if codLen == 0 {
+		return
+	} // No SRC, no COD, nothing to assemble
 
 	var pdPkt packedPacket
 	var lastElem int
 	rQHdrPos := rb.builder.RHdrPos()
+	rQPldPos := rQHdrPos + rquic.CodPreHeaderSize + coeffsLen
 	unused := rb.builder.UnusedCoeffSpace()
 	fieldPosId := rQHdrPos + rquic.FieldPosId
 	fieldPosGenId := rQHdrPos + rquic.FieldPosGenId
@@ -198,8 +202,8 @@ func (e *encoder) assemble(rb *redunBuilder) {
 
 		// sendQueue (send_queue.go) only uses p.raw and p.buffer.Release()
 		pdPkt = packedPacket{buffer: bf}
-		pdPkt.raw = bf.Slice[unused:] // rb.builder.Finish has already shifted the header to payload.
-		// After linear combination, last useful bytes might become 0. Decoder can handle this.
+		pdPkt.raw = bf.Slice[unused:rQPldPos+codLen] // rb.builder.Finish has already shifted the header to payload.
+		// After linear combination, last useful bytes might become 0. Decoder can handle a packet without them.
 		lastElem = len(pdPkt.raw) - 1
 		for pdPkt.raw[lastElem] == 0 {
 			lastElem--
@@ -217,13 +221,12 @@ func (e *encoder) assemble(rb *redunBuilder) {
 
 		if rLogger.IsDebugging() {
 			rCPos := rQHdrPos + rquic.CodPreHeaderSize
-			rPPos := rCPos + gSize
 			rLogger.Printf("Encoder Packet pkt.Len:%d DCID.Len:%d hdr(hex):[% X  % X  % X  % X]",
 				len(pdPkt.raw), e.lenDCID,
 				pdPkt.raw[:rQHdrPos],
 				pdPkt.raw[rQHdrPos:rCPos],
-				pdPkt.raw[rCPos:rPPos],
-				pdPkt.raw[rPPos:rPPos+rquic.CodedOverhead],
+				pdPkt.raw[rCPos:rQPldPos],
+				pdPkt.raw[rQPldPos:rQPldPos+rquic.CodedOverhead],
 			)
 		}
 	}
