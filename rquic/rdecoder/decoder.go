@@ -70,8 +70,7 @@ func (d *Decoder) Process(raw []byte, currentSCIDLen int) (uint8, bool) {
 			d.optimizeWithSrc(src, true)
 			return rquic.TypeProtected, d.didRecover
 		}
-		// NewSrc has returned nil, which means that this SRC is repeated
-		d.logPkt("PROTECTED REPEATED", raw, rHdrPos+rquic.SrcHeaderSize)
+		// src == nil --> Could not process SRC, discard it.
 		return rquic.TypeUnknown, d.didRecover
 	}
 
@@ -87,9 +86,10 @@ func (d *Decoder) NewSrc(raw []byte) *parsedSrc {
 	srcPldPos := rHdrPos + rquic.SrcHeaderSize
 
 	pktId := raw[rHdrPos+rquic.FieldPosId]
-	if d.srcAvblUpdate(pktId) {
+	if d.srcAvblUpdate(pktId) /* SRC is repeated */ {
+		d.logPkt("PROTECTED REPEATED", raw, srcPldPos)
 		return nil
-	} // Discard repeated packet
+	}
 	d.logPkt("PROTECTED", raw, srcPldPos)
 
 	ps := &parsedSrc{
