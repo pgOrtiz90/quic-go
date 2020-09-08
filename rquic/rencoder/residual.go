@@ -10,20 +10,58 @@ import (
 
 type residualLoss struct {
 	mu          sync.Mutex
-	losses      []float64
+	dlvdBff     []uint32
+	lostBff     []uint32
 	lastLossInd int
 	cumLoss     float64
 	numPeriods  int
 	numPeriodsF float64
+	threshold   float64
 }
 
-func (r *residualLoss) update(newLoss float64) { // meas. thread
+func (r *residualLoss) update(dlvd, lost uint32) { // meas. thread
+	var oldL, newL float64
 	r.mu.Lock()
+	prevInd := r.lastLossInd
 	r.lastLossInd = (r.lastLossInd + 1) % r.numPeriods
-	r.cumLoss += newLoss - r.losses[r.lastLossInd]
-	r.losses[r.lastLossInd] = newLoss
-	rLogger.Logf("Encoder Ratio ResidualLoss New:%f Avg:%f", newLoss,  r.cumLoss / float64(r.numPeriods))
+
+	// If there are more losses than deliveries,
+	// these losses must be from previous period
+	if lost >= dlvd {
+		if updatedLost := r.lostBff[prevInd] + lost; updatedLost < r.dlvdBff[prevInd] {
+			oldL = r.localLoss(prevInd)
+			r.lostBff[prevInd] = updatedLost
+			lost = 0
+			newL = r.localLoss(prevInd)
+			r.cumLoss += newL - oldL
+			rLogger.Logf("Encoder Ratio ResidualLoss PrevPeriodLossUpdate Old:%f New:%f Avg:%f",
+				oldL, newL, r.cumLoss / r.numPeriodsF,
+			)
+		} else {
+			// There has been more losses in the previous periods, hard to guess where.
+			// Store threshold as new local loss.
+			dlvd = uint32(float64(lost) * (1/r.threshold - 1))
+			rLogger.Logf("Encoder Ratio ResidualLoss PrevPeriodLossUpdate New:ResidualThreshold")
+		}
+	}
+
+	// Update
+	oldL = r.localLoss(r.lastLossInd)
+	r.dlvdBff[r.lastLossInd] = dlvd
+	r.lostBff[r.lastLossInd] = lost
+	newL = r.localLoss(r.lastLossInd)
+	r.cumLoss += newL - oldL
+
+	rLogger.Logf("Encoder Ratio ResidualLoss New:%f Avg:%f", newL, r.cumLoss / r.numPeriodsF)
 	r.mu.Unlock()
+}
+
+func (r *residualLoss) localLoss(i int) float64 {
+	//i = (i % r.numPeriods + r.numPeriods) % r.numPeriods
+	if r.lostBff[i] == 0 {
+		return 0
+	}
+	return float64(r.lostBff[i]) / float64(r.dlvdBff[i] - r.lostBff[i])
 }
 
 func (r *residualLoss) LossValue() float64 { // meas. thread
@@ -32,16 +70,23 @@ func (r *residualLoss) LossValue() float64 { // meas. thread
 	return r.cumLoss / r.numPeriodsF
 }
 
+func (r *residualLoss) AboveThreshold() bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.cumLoss / r.numPeriodsF > r.threshold
+}
+
 func (r *residualLoss) reset() { // executed only when when meas. thread is starting
 	r.mu.Lock()
 	r.cumLoss = 0
-	for i := range r.losses {
-		r.losses[i] = 0
+	for i := 0; i < r.numPeriods; i++ {
+		r.dlvdBff[i] = 0
+		r.lostBff[i] = 0
 	}
 	r.mu.Unlock()
 }
 
-func (r *residualLoss) ChangeNumPeriods(newNum int) { // may actally interfere with meas. thread
+func (r *residualLoss) ChangeNumPeriods(newNum int) { // may actually interfere with meas. thread
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -52,7 +97,8 @@ func (r *residualLoss) ChangeNumPeriods(newNum int) { // may actally interfere w
 	next := r.lastLossInd + 1
 
 	if numDif := newNum - r.numPeriods; numDif > 0 {
-		r.losses = append(r.losses[:next], append(make([]float64, numDif), r.losses[next:]...)...)
+		r.dlvdBff = append(r.dlvdBff[:next], append(make([]uint32, numDif), r.dlvdBff[next:]...)...)
+		r.lostBff = append(r.lostBff[:next], append(make([]uint32, numDif), r.lostBff[next:]...)...)
 		r.numPeriods = newNum
 		r.numPeriodsF = float64(newNum)
 		return
@@ -64,20 +110,22 @@ func (r *residualLoss) ChangeNumPeriods(newNum int) { // may actally interfere w
 	// update r.cumLoss
 	if newNum > r.numPeriods/2 {
 		for i := next; i != nextValid; i = (i + 1) % r.numPeriods {
-			r.cumLoss -= r.losses[i]
+			r.cumLoss -= r.localLoss(i)
 		}
 	} else { // if there is too much to subtract, sum what remains
 		r.cumLoss = 0
 		for i := nextValid; i != next; i = (i + 1) % r.numPeriods {
-			r.cumLoss += r.losses[i]
+			r.cumLoss += r.localLoss(i)
 		}
 	}
 
-	// remove oldest elements from r.losses
+	// remove oldest elements
 	if nextValid > r.lastLossInd {
-		r.losses = append(r.losses[:next], r.losses[nextValid:]...)
+		r.dlvdBff = append(r.dlvdBff[:next], r.dlvdBff[nextValid:]...)
+		r.lostBff = append(r.lostBff[:next], r.lostBff[nextValid:]...)
 	} else {
-		r.losses = r.losses[nextValid:next]
+		r.dlvdBff = r.dlvdBff[nextValid:next]
+		r.lostBff = r.lostBff[nextValid:next]
 	}
 
 	// update r.lastLossInd if necessary
@@ -92,13 +140,15 @@ func (r *residualLoss) ChangeNumPeriods(newNum int) { // may actally interfere w
 	//}
 }
 
-func makeResidualLoss(num int) *residualLoss {
+func makeResidualLoss(num int, threshold float64) *residualLoss {
 	return &residualLoss{
 		numPeriods:  num,
 		numPeriodsF: float64(num),
-		losses:      make([]float64, num),
+		dlvdBff:     make([]uint32, num),
+		lostBff:     make([]uint32, num),
 		lastLossInd: 0,
 		cumLoss:     0,
+		threshold:   threshold,
 	}
 }
 

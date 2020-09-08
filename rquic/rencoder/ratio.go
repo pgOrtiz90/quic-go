@@ -26,8 +26,8 @@ type ratio struct {
 	MeasPeriod     time.Duration
 	timer          *time.Timer
 	residual       *residualLoss
-	residualTarget float64
-	ratioDelta     float64
+	ratioDecrease  float64
+	ratioIncrease  float64
 	stopMeas       chan struct{}
 	stopMeasDone   chan struct{}
 
@@ -132,7 +132,9 @@ func (r *ratio) measureLoss() { // meas. thread
 
 			if tx > 0 || unAcked > 0 || lost > 0 {
 				rLogger.Logf("Encoder Ratio Update Tx:%d Lost:%d UnAcked:%d", tx, lost, unAcked)
-				r.residual.update(float64(lost) / float64(tx-unAcked-lost)) // Lost / Delivered
+				// UnACKed packets have been delivered? No idea, subtract them from the transmitted ones.
+				tx -= unAcked // original rQUIC does not subtract
+				r.residual.update(tx, lost)
 				r.update()
 			}
 
@@ -145,10 +147,10 @@ func (r *ratio) update() { // meas. thread
 
 	ratio := r.Check()
 
-	if r.residual.LossValue() > r.residualTarget {
-		ratio *= 1 - r.ratioDelta
+	if r.residual.AboveThreshold() {
+		ratio *= r.ratioDecrease
 	} else {
-		ratio *= 1 + r.ratioDelta
+		ratio *= r.ratioIncrease
 	} // TODO: MAYBE change gamma, delta, T & N on-the-fly (will need more mutexes)
 
 	if ratio < rquic.MinRatio {
@@ -168,20 +170,18 @@ func MakeRatio(
 	gammaTarget float64,
 	deltaRatio  float64,
 ) *ratio {
+	rLogger.Logf("Encoder Ratio Config Dynamic:%t TMeasPeriod:%s NumPeriods:%d GammaTarget:%f DeltaRatio:%f",
+		dynamic, Tperiod.String(), numPeriods, gammaTarget, deltaRatio,
+	)
 	r := &ratio{
 		ratio:          ratioVal,
 		MeasPeriod:     Tperiod,
-		residual:       makeResidualLoss(numPeriods),
-		residualTarget: gammaTarget,
-		ratioDelta:     deltaRatio,
+		residual:       makeResidualLoss(numPeriods, gammaTarget),
+		ratioDecrease:  1-deltaRatio,
+		ratioIncrease:  1+deltaRatio,
 	}
 	if dynamic {
 		r.MakeDynamic()
 	}
-
-	rLogger.Logf("Encoder Ratio Config Dynamic:%t TMeasPeriod:%s NumPeriods:%d GammaTarget:%f DeltaRatio:%f",
-		dynamic, Tperiod.String(), numPeriods, gammaTarget, deltaRatio,
-	)
-
 	return r
 }
