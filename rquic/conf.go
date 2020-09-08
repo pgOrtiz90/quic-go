@@ -15,8 +15,7 @@ func (c *Conf) Populate() {
 		return
 	}
 	if c.CodingConf == nil {
-		newCConf := CConfDefault
-		c.CodingConf = &newCConf
+		c.CodingConf = GetCConfDefault()
 		return
 	}
 	c.CodingConf.Populate()
@@ -36,79 +35,124 @@ type CConf struct {
 
 func (c *CConf) Populate() {
 	if c.Scheme == 0 {
-		c.Scheme = CConfDefault.Scheme
+		c.Scheme = DefaultScheme
 	}
 	if c.Overlap == 0 {
-		c.Overlap = CConfDefault.Overlap
+		c.Overlap = DefaultOverlap
 	}
 	if c.Reduns == 0 {
-		c.Reduns = CConfDefault.Reduns
+		c.Reduns = DefaultReduns
 	}
 	if c.RatioVal == 0 {
-		c.RatioVal = CConfDefault.RatioVal
+		c.RatioVal = DefaultRatioVal
 	}
 	if c.Dynamic == 0 {
-		c.Dynamic = CConfDefault.Dynamic
+		c.Dynamic = DefaultDynamic
 	}
 	if c.TPeriod.String() == new(time.Duration).String() {
-		c.TPeriod = CConfDefault.TPeriod
+		c.TPeriod = DefaultTPeriod
 	}
 	if c.NumPeriods == 0 {
-		c.NumPeriods = CConfDefault.NumPeriods
+		c.NumPeriods = DefaultNumPeriods
 	}
 	if c.GammaTarget == 0 {
-		c.GammaTarget = CConfDefault.GammaTarget
+		c.GammaTarget = DefaultGammaTarget
 	}
 	if c.DeltaRatio == 0 {
-		c.DeltaRatio = CConfDefault.DeltaRatio
+		c.DeltaRatio = DefaultDeltaRatio
 	}
 }
 
 //-------------------------------------- CConf templates
 
-var CConfGlobecom2019 CConf = CConf{
-	Scheme:   SchemeXor,
-	Overlap:  1,
-	Reduns:   1,
-	RatioVal: 10,
-	Dynamic:  1,
+// Globecom 2019 values
+const (
+	Globecom2019Scheme           = SchemeXor
+	Globecom2019Overlap  int     = 1
+	Globecom2019Reduns   int     = 1
+	Globecom2019RatioVal float64 = 10
+	Globecom2019Dynamic  int     = 1
 	// TPeriod := 3 * RTT <-- 10.1109/GLOBECOM38437.2019.9013401
 	// rQUIC can take SRTT and multply it by 3.
 	// For tests in controlled testbeds, TPeriod can be specified directly.
-	TPeriod:     time.Duration(3 * 25 * time.Millisecond),
-	NumPeriods:  3,
-	GammaTarget: 0.01,
-	DeltaRatio:  0.33,
+	Globecom2019TPeriod         = 3 * 25 * time.Millisecond
+	Globecom2019NumPeriods  int = 3
+	Globecom2019GammaTarget     = 0.01
+	Globecom2019DeltaRatio      = 0.33
+)
+
+// Default values
+const (
+	DefaultScheme      = Globecom2019Scheme
+	DefaultOverlap     = Globecom2019Overlap
+	DefaultReduns      = Globecom2019Reduns
+	DefaultRatioVal    = Globecom2019RatioVal
+	DefaultDynamic     = Globecom2019Dynamic
+	DefaultTPeriod     = Globecom2019TPeriod
+	DefaultNumPeriods  = Globecom2019NumPeriods
+	DefaultGammaTarget = Globecom2019GammaTarget
+	DefaultDeltaRatio  = Globecom2019DeltaRatio
+)
+
+func GetCConfGlobecom2019() *CConf {
+	return &CConf{
+		Scheme:      Globecom2019Scheme,
+		Overlap:     Globecom2019Overlap,
+		Reduns:      Globecom2019Reduns,
+		RatioVal:    Globecom2019RatioVal,
+		Dynamic:     Globecom2019Dynamic,
+		TPeriod:     Globecom2019TPeriod,
+		NumPeriods:  Globecom2019NumPeriods,
+		GammaTarget: Globecom2019GammaTarget,
+		DeltaRatio:  Globecom2019DeltaRatio,
+	}
 }
 
-var CConfDefault CConf = CConf{
-	Scheme:      CConfGlobecom2019.Scheme,
-	Overlap:     CConfGlobecom2019.Overlap,
-	Reduns:      CConfGlobecom2019.Reduns,
-	RatioVal:    CConfGlobecom2019.RatioVal,
-	Dynamic:     CConfGlobecom2019.Dynamic,
-	TPeriod:     CConfGlobecom2019.TPeriod,
-	NumPeriods:  CConfGlobecom2019.NumPeriods,
-	GammaTarget: CConfGlobecom2019.GammaTarget,
-	DeltaRatio:  CConfGlobecom2019.DeltaRatio,
+func GetCConfDefault() *CConf {
+	return &CConf{
+		Scheme:      DefaultScheme,
+		Overlap:     DefaultOverlap,
+		Reduns:      DefaultReduns,
+		RatioVal:    DefaultRatioVal,
+		Dynamic:     DefaultDynamic,
+		TPeriod:     DefaultTPeriod,
+		NumPeriods:  DefaultNumPeriods,
+		GammaTarget: DefaultGammaTarget,
+		DeltaRatio:  DefaultDeltaRatio,
+	}
 }
 
 //-------------------------------------- Conf templates
 
-var ConfDefault Conf = Conf{
-	EnableEncoder: true,
-	EnableDecoder: true,
-	CodingConf:    &CConfDefault,
+func GetConf(c *CConf) *Conf {
+	if c == nil {
+		c = GetCConfDefault()
+	}
+	return &Conf{
+		EnableEncoder: true,
+		EnableDecoder: true,
+		CodingConf:    c,
+	}
 }
 
-var ConfTx Conf = Conf{
-	EnableEncoder: true,
-	EnableDecoder: false,
-	CodingConf:    &CConfDefault,
+func GetConfTx(c *CConf) *Conf {
+	if c == nil {
+		c = GetCConfDefault()
+	}
+	return &Conf{
+		EnableEncoder: true,
+		EnableDecoder: false,
+		CodingConf:    c,
+	}
 }
 
-var ConfRx Conf = Conf{
-	EnableEncoder: false,
-	EnableDecoder: true,
-	CodingConf:    &CConfDefault,
+func GetConfRx(c *CConf) *Conf {
+	if c == nil {
+		c = GetCConfDefault()
+	}
+	return &Conf{
+		EnableEncoder: false,
+		EnableDecoder: true,
+		CodingConf:    c,
+	}
 }

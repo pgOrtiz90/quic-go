@@ -267,7 +267,9 @@ func populateConfig(config *Config) *Config {
 		StatelessResetKey:                     config.StatelessResetKey,
 		TokenStore:                            config.TokenStore,
 		QuicTracer:                            config.QuicTracer,
+		// rQUIC {
 		RQuic:                                 config.RQuic,
+		// } rQUIC
 	}
 }
 
