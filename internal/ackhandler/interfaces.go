@@ -50,6 +50,15 @@ type SentPacketHandler interface {
 
 	// report some congestion statistics. For tracing only.
 	GetStats() *quictrace.TransportState
+	// rQUIC {
+
+	CodingEnabled()
+	CodingDisabled()
+	ProcessingCoded()
+	ProcessingCodedFinished()
+	GetCongestionWindow() protocol.ByteCount // Depending on logging needs, might need to use h.GetStats() instead.
+	AckStatsUpdate() (int, int, int)
+	// } rQUIC
 }
 
 type sentPacketTracker interface {

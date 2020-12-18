@@ -17,6 +17,7 @@ require (
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	gonum.org/v1/gonum v0.8.2 // indirect
 	google.golang.org/protobuf v1.23.0
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

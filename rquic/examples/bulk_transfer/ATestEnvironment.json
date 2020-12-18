@@ -1,0 +1,35 @@
+{
+    "Cmds": [
+        "./sim_campaign_network.sh",
+        "./sim_campaign_server.sh",
+        "./sim_campaign_client.sh"
+    ],
+    "Networks": [
+        { "BW": 20, "RTT": 25 },
+        { "BW": 10, "RTT": 100 },
+        { "BW": 1.5, "RTT": 400 }
+    ],
+    "BulkFileSizes": [20, 20, 5],
+    "LossRates": [0, 1, 2, 3, 5],
+    "RunTCP": true,
+    "WhoEncodes": [
+        { "Srv": false, "Cli": false },
+        { "Srv": true,  "Cli": false }
+    ],
+    "Encoders": [
+        {
+            "Schemes": ["SchemeXor"],
+            "Overlaps": [1],
+            "Redundancies": [1],
+            "RatioValues": [10],
+            "DynamicRatio": [1],
+            "TPeriodsMS": [],
+            "RTTtoPeriodRatio": [3],
+            "NumPeriods": [3],
+            "GammaTarget": [0.01],
+            "DeltaRatio": [0.33]
+        }
+    ],
+    "Iterations": 100,
+    "IterBWNetw": 10
+}

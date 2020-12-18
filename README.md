@@ -1,3 +1,13 @@
+# rQUIC
+
+An experimental version of QUIC enhanced with FEC.
+
+[FEC](https://en.wikipedia.org/wiki/Forward_error_correction) (Forward Error Correction) makes a communication more robust (**r**obust QUIC -> rQUIC) by sending redundant information, from which the lost one can be recovered before it is retransmitted. FEC significantly reduces latency, especially in shared access media, such as WiFi.
+
+This project started as a collaboration between University of Cantabria and Simula Research Laboratory. Since then more institutions have been involved: Ikerlan Technology Research Centre and University of Oslo.
+
+The code on this branch is under development. If you want to see the code used for [IFIP Networking 2019](https://www.researchgate.net/publication/332802775_Poster_rQUIC_Integrating_FEC_with_QUIC_for_Robust_Wireless_Communications) and [IEEE GLOBECOM 2019](https://www.researchgate.net/publication/335096281_rQUIC_Integrating_FEC_with_QUIC_for_Robust_Wireless_Communications) papers, you should check [globecom19-quic-fec](https://github.com/pgOrtiz90/quic-go-fec/tree/globecom19-quic-fec) branch.
+
 # A QUIC implementation in pure Go
 
 <img src="docs/quic.png" width=303 height=124>

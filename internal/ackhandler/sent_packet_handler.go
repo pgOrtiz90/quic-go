@@ -86,6 +86,14 @@ type sentPacketHandler struct {
 	traceCallback func(quictrace.Event)
 	tracer        logging.ConnectionTracer
 	logger        utils.Logger
+	// rQUIC {
+
+	coding          bool
+	processingCoded bool
+	lastDelivered   int
+	lastLosses      int
+	unAcked         int // Num. of not lost and not ACKed packets
+	// } rQUIC
 }
 
 var _ SentPacketHandler = &sentPacketHandler{}
@@ -120,6 +128,23 @@ func newSentPacketHandler(
 		logger:                         logger,
 	}
 }
+// rQUIC {
+
+func (h *sentPacketHandler) CodingEnabled()  { h.coding = true }
+func (h *sentPacketHandler) CodingDisabled() { h.coding = false }
+
+func (h *sentPacketHandler) ProcessingCoded()         { h.processingCoded = true }
+func (h *sentPacketHandler) ProcessingCodedFinished() { h.processingCoded = false }
+
+func (h *sentPacketHandler) GetCongestionWindow() protocol.ByteCount {
+	return h.congestion.GetCongestionWindow()
+}
+
+func (h *sentPacketHandler) AckStatsUpdate() (int, int, int) {
+	defer func(){ h.lastLosses, h.lastDelivered = 0, 0 }()
+	return h.lastLosses, h.lastDelivered, h.unAcked
+}
+// } rQUIC
 
 func (h *sentPacketHandler) DropPackets(encLevel protocol.EncryptionLevel) {
 	if h.perspective == protocol.PerspectiveClient && encLevel == protocol.EncryptionInitial {
@@ -285,7 +310,17 @@ func (h *sentPacketHandler) ReceivedAck(ack *wire.AckFrame, encLevel protocol.En
 		if encLevel == protocol.Encryption1RTT {
 			ackDelay = utils.MinDuration(ack.DelayTime, h.rttStats.MaxAckDelay())
 		}
+		// rQUIC {
+		// If the packet was recovered from a coded one,
+		// rcvTime > rcvTimeThatTheLostOriginalPacketWouldHave
+		// Ignore these packets for RTT update.
+		// TODO: Adjust this for pure RLNC (NewSRC.ID == NewestExpected --> UpdateRTT)
+		if !h.processingCoded {
+			// } rQUIC
 		h.rttStats.UpdateRTT(rcvTime.Sub(p.SendTime), ackDelay, rcvTime)
+			// rQUIC {
+		}
+		// } rQUIC
 		if h.logger.Debug() {
 			h.logger.Debugf("\tupdated RTT: %s (σ: %s)", h.rttStats.SmoothedRTT(), h.rttStats.MeanDeviation())
 		}
@@ -300,6 +335,9 @@ func (h *sentPacketHandler) ReceivedAck(ack *wire.AckFrame, encLevel protocol.En
 	if err != nil || len(ackedPackets) == 0 {
 		return err
 	}
+	// rQUIC {
+	h.lastDelivered += len(ackedPackets)
+	// } rQUIC
 	lostPackets, err := h.detectAndRemoveLostPackets(rcvTime, encLevel)
 	if err != nil {
 		return err
@@ -515,8 +553,14 @@ func (h *sentPacketHandler) detectAndRemoveLostPackets(now time.Time, encLevel p
 	lostSendTime := now.Add(-lossDelay)
 
 	var lostPackets []*Packet
+	// rQUIC {
+	h.unAcked = 0
+	// } rQUIC
 	if err := pnSpace.history.Iterate(func(packet *Packet) (bool, error) {
 		if packet.PacketNumber > pnSpace.largestAcked {
+			// rQUIC {
+			h.unAcked++
+			// } rQUIC
 			return false, nil
 		}
 
@@ -542,6 +586,11 @@ func (h *sentPacketHandler) detectAndRemoveLostPackets(now time.Time, encLevel p
 	}); err != nil {
 		return nil, err
 	}
+	// rQUIC {
+	if h.coding && encLevel == protocol.Encryption1RTT {
+		h.lastLosses += len(lostPackets)
+	}
+	// } rQUIC
 
 	if h.logger.Debug() && len(lostPackets) > 0 {
 		pns := make([]protocol.PacketNumber, len(lostPackets))

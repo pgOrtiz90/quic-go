@@ -22,6 +22,11 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/logging"
 	"github.com/lucas-clemente/quic-go/quictrace"
+	// rQUIC {
+	"github.com/lucas-clemente/quic-go/rquic"
+	"github.com/lucas-clemente/quic-go/rquic/rdecoder"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
+	// } rQUIC
 )
 
 type unpacker interface {
@@ -208,6 +213,13 @@ type session struct {
 	logID  string
 	tracer logging.ConnectionTracer
 	logger utils.Logger
+	// rQUIC {
+	encoder            *encoder
+	decoder            *rdecoder.Decoder
+	encoderEnabled     bool
+	decoderEnabled     bool
+	rQuicBuffer        *rQuicReceivedPacketList
+	// } rQUIC
 }
 
 var _ Session = &session{}
@@ -337,6 +349,9 @@ var newSession = func(
 	)
 	s.unpacker = newPacketUnpacker(cs, s.version)
 	s.cryptoStreamManager = newCryptoStreamManager(cs, initialStream, handshakeStream, s.oneRTTStream)
+	// rQUIC {
+	s.rQuicSetup(params)
+	// } rQUIC
 	return s
 }
 
@@ -464,6 +479,9 @@ var newClientSession = func(
 			s.packer.SetToken(token.data)
 		}
 	}
+	// rQUIC {
+	s.rQuicSetup(params)
+	// } rQUIC
 	return s
 }
 
@@ -508,6 +526,53 @@ func (s *session) preSetup() {
 		}
 	}
 }
+// rQUIC {
+
+func (s *session) rQuicSetup(tp *wire.TransportParameters) {
+	var rConf *rquic.Conf
+	if s.config.RQuic == nil {
+		// Try to read rQUIC conf from /working/directory/rQuicConf.json
+		if rConf, _ = rquic.ReadConfFromJson("rQuicConf.json"); rConf == nil {
+			return
+		}
+		s.config.RQuic = rConf // for debugging
+	} else {
+		rConf = s.config.RQuic
+	}
+	if rConf.EnableEncoder {
+		s.encoderEnabled = true
+		rConf.Populate()
+		s.encoder = MakeEncoder(rConf.CodingConf)
+		s.encoder.getCongestionWindow = s.sentPacketHandler.GetCongestionWindow
+		s.encoder.smoothedRTT = s.rttStats.SmoothedRTT
+		s.encoder.localMaxAckDelay = tp.MaxAckDelay
+		s.sentPacketHandler.CodingEnabled()
+		s.packer.SetFecEncoder(s.encoder)
+		s.packer.CodingEnabled()
+	}
+	if rConf.EnableDecoder {
+		s.decoderEnabled = true
+		s.decoder = rdecoder.MakeDecoder()
+		s.rQuicBuffer = newRQuicReceivedPacketList()
+		// We will start using our own MaxAckDelay for the buffer timeout.
+		s.rQuicBuffer.setTimeoutDuration(tp.MaxAckDelay)
+	}
+}
+
+// rQuicDisable turns off coding and QUIC behaves normally
+func (s *session) RQuicDisable() {
+	// TODO: Create and send a control frame to inform the other endpoint
+	if s.encoderEnabled {
+		s.encoder.disableCoding()
+		s.sentPacketHandler.CodingDisabled()
+		s.packer.CodingDisabled()
+		s.encoderEnabled = false
+	}
+	if s.decoderEnabled {
+		s.decoderEnabled = false
+	}
+}
+// } rQUIC
 
 // run the session main loop
 func (s *session) run() error {
@@ -579,6 +644,15 @@ runLoop:
 		}
 
 		now := time.Now()
+		// rQUIC {
+		if s.decoderEnabled {
+			if rQBAlarm := s.rQuicBuffer.alarm; !rQBAlarm.IsZero() && rQBAlarm.Before(now) {
+				rLogger.Debugf("Decoder Buffer SessionRunTimeout Read")
+				s.rQuicBufferFwdAll()
+				continue
+			}
+		}
+		// } rQUIC
 		if timeout := s.sentPacketHandler.GetLossDetectionTimeout(); !timeout.IsZero() && timeout.Before(now) {
 			// This could cause packets to be retransmitted.
 			// Check it before trying to send packets.
@@ -669,6 +743,14 @@ func (s *session) maybeResetTimer() {
 	if !s.pacingDeadline.IsZero() {
 		deadline = utils.MinTime(deadline, s.pacingDeadline)
 	}
+	// rQUIC {
+	if s.decoderEnabled {
+		if !s.rQuicBuffer.alarm.IsZero() {
+			rLogger.Debugf("Decoder Buffer SessionRunTimeout Setting")
+			deadline = utils.MinTime(deadline, s.rQuicBuffer.alarm)
+		}
+	}
+	// } rQUIC
 
 	s.timer.Reset(deadline)
 }
@@ -708,6 +790,7 @@ func (s *session) handleHandshakeComplete() {
 func (s *session) handlePacketImpl(rp *receivedPacket) bool {
 	if wire.IsVersionNegotiationPacket(rp.data) {
 		s.handleVersionNegotiationPacket(rp)
+		rLogger.Logf("QUIC Packet is VERSION NEGOTIATION")
 		return false
 	}
 
@@ -773,6 +856,9 @@ func (s *session) handlePacketImpl(rp *receivedPacket) bool {
 }
 
 func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /* was the packet successfully processed */ {
+	// rQUIC {
+	/*          //  moving defer ... p.bufferDecrement  \\
+	  // } rQUIC
 	var wasQueued bool
 
 	defer func() {
@@ -781,8 +867,12 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 			p.buffer.Decrement()
 		}
 	}()
+	// rQUIC {
+	*///        \\  to handleSinglePacketFinish         //
+	// } rQUIC
 
 	if hdr.Type == protocol.PacketTypeRetry {
+		rLogger.Logf("QUIC Packet Retry")
 		return s.handleRetryPacket(hdr, p.data)
 	}
 
@@ -793,13 +883,164 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 			s.tracer.DroppedPacket(logging.PacketTypeFromHeader(hdr), p.Size(), logging.PacketDropUnknownConnectionID)
 		}
 		s.logger.Debugf("Dropping %s packet (%d bytes) with unexpected source connection ID: %s (expected %s)", hdr.PacketType(), p.Size(), hdr.SrcConnectionID, s.handshakeDestConnID)
+		rLogger.Logf("QUIC Packet with unexpected SCID")
 		return false
 	}
 	// drop 0-RTT packets, if we are a client
 	if s.perspective == protocol.PerspectiveClient && hdr.Type == protocol.PacketType0RTT {
 		s.tracer.DroppedPacket(logging.PacketType0RTT, p.Size(), logging.PacketDropKeyUnavailable)
+		rLogger.Logf("QUIC Packet 0-RTT received by client")
 		return false
 	}
+	// rQUIC {
+
+	if !hdr.IsLongHeader && s.decoderEnabled {
+		return s.maybeDecodeReceivedPacket(p, hdr)
+	}
+	return s.handleSinglePacketFinish(p, hdr)
+}
+
+func (s *session) maybeDecodeReceivedPacket(p *receivedPacket, hdr *wire.Header) bool {
+	if s.decoder == nil {
+		panic("Trying to decode without a decoder")
+	}
+
+	/* PACKET LOSS SIMULATION, TODO: Remove or comment
+	period  := byte(30)
+	brstLen := byte(3)
+	brstOfs := byte(2)
+	///////////////////////////
+	brstEnd := (brstOfs + brstLen) % period
+	if ofs := 1 + s.srcConnIDLen; p.data[ofs+rquic.FieldPosType] >= rquic.TypeProtected {
+		rIDmod := p.data[ofs+rquic.FieldPosId] % period
+		for i := brstOfs; i != brstEnd; i++ { if rIDmod == i { return false } }
+		//if rIDmod == 7 { p.data[ofs+rquic.FieldPosId]-- }                 // Insert Repeated
+		//if rIDmod == 10 { p.data[ofs+rquic.FieldPosId] += rquic.AgeDiff } // Insert Obsolete
+	}
+	*/
+
+	pktType, thereAreRecovered := s.decoder.Process(p.data, s.srcConnIDLen)
+	if thereAreRecovered {
+		s.rQuicBuffer.order()
+	}
+
+	switch pktType {
+	case rquic.TypeUnprotected:
+		// Remove rQUIC header, which in this case is only TYPE field after DCID
+		for i := s.srcConnIDLen /*+1 first byte -1 index adjustment*/ ; i >= 0; i-- {
+			p.data[i+rquic.FieldSizeType] = p.data[i]
+		}
+		p.data = p.data[rquic.FieldSizeType:]
+		//Process the packet as usual
+		return s.handleSinglePacketFinish(p, hdr)
+	case rquic.TypeCoded, rquic.TypeProtected:
+		// TODO: Consider increasing s.keepAliveInterval and s.idleTimeout
+		if s.rQuicBuffer.addNewReceivedPacket(p, hdr) {
+			s.rQuicBufferFwdAll()
+		}
+		return true
+	case rquic.TypeUnknown:
+		// This packet can be discarded
+		rLogger.Logf("QUIC Packet with wrong rQUIC header")
+		return false
+	default:
+		panic("rQUIC packet is not recognized even as Unknown packet")
+	}
+}
+
+// rQuicBufferFwdAll delivers source packets to QUIC if they
+// are consecutive or stayed in the buffer for too long.
+// MUST be executed after the buffer has been ordered.
+func (s *session) rQuicBufferFwdAll() {
+	s.rQuicBuffer.unsetAlarm()
+	prefix := "Decoder Buffer Processing "
+
+	var inspectedAll bool
+	e := s.rQuicBuffer.oldest()
+	if rLogger.IsDebugging() {
+		rLogger.Printf("Decoder Buffer NumPkts:%d OldestPkt: %s", s.rQuicBuffer.len, e.pktInfo())
+		inspectedAll = inspectedAll || e == nil // variable not updated, but the end of buffer was reached
+		defer func() { rLogger.Printf("Decoder Buffer FwdAttemptEnd InspectedAll:%t", inspectedAll) }()
+	}
+
+	// Remove and deliver obsolete packets.
+	for ; e != nil; e = s.rQuicBuffer.oldest() {
+		if !e.isObsolete() {
+			break
+		}
+		if !e.doNotFwd && e.isSource() {
+			s.rQuicBufferFwd(e)
+		}
+		rLogger.Debugf(prefix + e.pktInfo() + "Removing")
+		s.rQuicBuffer.remove(e)
+	}
+
+	// Forward packets if possible
+	for ; e != nil; e = e.getNewer() {
+		if e.doNotFwd || !e.isSource() {
+			rLogger.Debugf(prefix + e.pktInfo() + "Skipping")
+			continue
+		}
+		if s.rQuicBuffer.len == 1 {
+			s.rQuicBufferFwd(e)
+			rLogger.Debugf(prefix + e.pktInfo() + "AloneInBuff")
+			continue
+		}
+		if e.isConsecutive() {
+			s.rQuicBufferFwd(e)
+			if !e.wasCoded() {
+				rLogger.Debugf(prefix + e.pktInfo() + "Consecutive")
+				continue
+			}
+			if n := e.getNewer(); n == nil || !n.doNotFwd {
+				rLogger.Debugf(prefix + e.pktInfo() + "Rescued")
+				continue
+			}
+			// The packet is surely useless
+			rLogger.Debugf(prefix + e.pktInfo() + "Recovered")
+			continue
+		}
+		if e.isHoldingBuffer() {
+			s.rQuicBufferFwd(e)
+			rLogger.Debugf(prefix + e.pktInfo() + "PktXhold")
+			continue
+		}
+		if e.isWaitingTooLong(s.rttStats.SmoothedRTT()) {
+			s.rQuicBufferFwd(e)
+			rLogger.Debugf(prefix + e.pktInfo() + "Timeout")
+			continue
+		}
+		// No more consecutive SRC
+		rLogger.Debugf(prefix + e.pktInfo() + "OnHold")
+		inspectedAll = s.rQuicBuffer.newest() == e
+		return
+	}
+	inspectedAll = true
+}
+
+func (s *session) rQuicBufferFwd(e *rQuicReceivedPacket) {
+	if e.wasCoded() {
+		// Increased e.rp.rcvTime should not affect reno (the default) CC
+		s.sentPacketHandler.ProcessingCoded()
+		defer func(){ s.sentPacketHandler.ProcessingCodedFinished() }()
+	}
+	rp := e.removeRQuicHeader()
+	e.doNotFwd = true
+	e.delivered = s.handleSinglePacketFinish(rp, e.hdr)
+}
+
+func (s *session) handleSinglePacketFinish(p *receivedPacket, hdr *wire.Header) bool {
+
+	// Moving this piece of code from handleSinglePacket
+	var wasQueued bool
+
+	defer func() {
+		// Put back the packet buffer if the packet wasn't queued for later decryption.
+		if !wasQueued {
+			p.buffer.Decrement()
+		}
+	}()
+	// } rQUIC
 
 	packet, err := s.unpacker.Unpack(hdr, p.rcvTime, p.data)
 	if err != nil {
@@ -824,6 +1065,9 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 			}
 			s.logger.Debugf("Dropping %s packet (%d bytes) that could not be unpacked. Error: %s", hdr.PacketType(), p.Size(), err)
 		}
+		// rQUIC {
+		rLogger.Logf("QUIC Packet Unpacked: " + err.Error())
+		// } rQUIC
 		return false
 	}
 
@@ -837,11 +1081,17 @@ func (s *session) handleSinglePacket(p *receivedPacket, hdr *wire.Header) bool /
 		if s.tracer != nil {
 			s.tracer.DroppedPacket(logging.PacketTypeFromHeader(hdr), p.Size(), logging.PacketDropDuplicate)
 		}
+		// rQUIC {
+		rLogger.Logf("QUIC Packet repeated")
+		// } rQUIC
 		return false
 	}
 
 	if err := s.handleUnpackedPacket(packet, p.rcvTime, p.Size()); err != nil {
 		s.closeLocal(err)
+		// rQUIC {
+		rLogger.Logf("QUIC Packet Unpacked and Unhandled: " + err.Error())
+		// } rQUIC
 		return false
 	}
 	return true
@@ -1228,6 +1478,11 @@ func (s *session) handleAckFrame(frame *wire.AckFrame, encLevel protocol.Encrypt
 		return err
 	}
 	if encLevel == protocol.Encryption1RTT {
+		// rQUIC {
+		if s.encoderEnabled {
+			s.encoder.ackStatsUpdate(s.sentPacketHandler.AckStatsUpdate())
+		}
+		// } rQUIC
 		s.cryptoStreamHandler.SetLargest1RTTAcked(frame.LargestAcked())
 	}
 	return nil
@@ -1401,6 +1656,11 @@ func (s *session) processTransportParametersImpl(params *wire.TransportParameter
 	s.frameParser.SetAckDelayExponent(params.AckDelayExponent)
 	s.connFlowController.UpdateSendWindow(params.InitialMaxData)
 	s.rttStats.SetMaxAckDelay(params.MaxAckDelay)
+	// rQUIC {
+	if s.decoderEnabled {
+		s.rQuicBuffer.setTimeoutDuration(params.MaxAckDelay)
+	}
+	// } rQUIC
 	s.connIDGenerator.SetMaxActiveConnIDs(params.ActiveConnectionIDLimit)
 	if params.StatelessResetToken != nil {
 		s.connIDManager.SetStatelessResetToken(*params.StatelessResetToken)
@@ -1551,6 +1811,12 @@ func (s *session) sendPacket() (bool, error) {
 }
 
 func (s *session) sendPackedPacket(packet *packedPacket) {
+	// rQUIC {
+	var codedPkts []*packetBuffer
+	if s.encoderEnabled {
+		codedPkts = s.encoder.retrieveCodedPackets()
+	}
+	// } rQUIC
 	now := time.Now()
 	if s.firstAckElicitingPacketAfterIdleSentTime.IsZero() && packet.IsAckEliciting() {
 		s.firstAckElicitingPacketAfterIdleSentTime = now
@@ -1559,6 +1825,13 @@ func (s *session) sendPackedPacket(packet *packedPacket) {
 	s.connIDManager.SentPacket()
 	s.logPacket(now, packet)
 	s.sendQueue.Send(packet.buffer)
+	// rQUIC {
+	// TODO: Rethink sending coded packets. In this way, they are not paced.
+	for _, coded := range codedPkts { // Send coded packets
+		s.connIDManager.SentPacket()
+		s.sendQueue.Send(coded)
+	}
+	// } rQUIC
 }
 
 func (s *session) sendConnectionClose(quicErr *qerr.QuicError) ([]byte, error) {

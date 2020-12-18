@@ -11,6 +11,9 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/handshake"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/quictrace"
+	// rQUIC {
+	"github.com/lucas-clemente/quic-go/rquic"
+	// } rQUIC
 )
 
 // RetireBugBackwardsCompatibilityMode controls a backwards compatibility mode, necessary due to a bug in
@@ -260,6 +263,9 @@ type Config struct {
 	// Warning: Experimental. This API should not be considered stable and will change soon.
 	QuicTracer quictrace.Tracer
 	Tracer     logging.Tracer
+	// rQUIC {
+	RQuic *rquic.Conf
+	// } rQUIC
 }
 
 // A Listener for incoming QUIC connections

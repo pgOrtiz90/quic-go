@@ -6,6 +6,10 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/logging"
+
+	// rQUIC {
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
+	// } rQUIC
 )
 
 const (
@@ -165,6 +169,16 @@ func (c *cubicSender) OnPacketLost(
 	lostBytes protocol.ByteCount,
 	priorInFlight protocol.ByteCount,
 ) {
+	// rQUIC {
+	cwnd := c.congestionWindow
+	defer func(){
+		if cwnd == c.congestionWindow {
+			return
+		}
+		rLogger.Trace(cwnd, "")
+		rLogger.Trace(c.congestionWindow, "")
+	}()
+	// } rQUIC
 	// TCP NewReno (RFC6582) says that once a loss occurs, any losses in packets
 	// already sent should be treated as a single loss event, since it's expected.
 	if packetNumber <= c.largestSentAtLastCutback {
@@ -206,6 +220,16 @@ func (c *cubicSender) maybeIncreaseCwnd(
 	if c.congestionWindow >= c.maxCongestionWindow {
 		return
 	}
+	// rQUIC {
+	cwnd := c.congestionWindow
+	defer func(){
+		if cwnd == c.congestionWindow {
+			return
+		}
+		rLogger.Trace(cwnd, "")
+		rLogger.Trace(c.congestionWindow, "")
+	}()
+	// } rQUIC
 	if c.InSlowStart() {
 		// TCP slow start, exponential growth, increase by one for each ACK.
 		c.congestionWindow += maxDatagramSize
@@ -252,6 +276,16 @@ func (c *cubicSender) OnRetransmissionTimeout(packetsRetransmitted bool) {
 	if !packetsRetransmitted {
 		return
 	}
+	// rQUIC {
+	cwnd := c.congestionWindow
+	defer func(){
+		if cwnd == c.congestionWindow {
+			return
+		}
+		rLogger.Trace(cwnd, "")
+		rLogger.Trace(c.congestionWindow, "")
+	}()
+	// } rQUIC
 	c.hybridSlowStart.Restart()
 	c.cubic.Reset()
 	c.slowStartThreshold = c.congestionWindow / 2
@@ -260,6 +294,16 @@ func (c *cubicSender) OnRetransmissionTimeout(packetsRetransmitted bool) {
 
 // OnConnectionMigration is called when the connection is migrated (?)
 func (c *cubicSender) OnConnectionMigration() {
+	// rQUIC {
+	cwnd := c.congestionWindow
+	defer func(){
+		if cwnd == c.congestionWindow {
+			return
+		}
+		rLogger.Trace(cwnd, "")
+		rLogger.Trace(c.congestionWindow, "")
+	}()
+	// } rQUIC
 	c.hybridSlowStart.Restart()
 	c.largestSentPacketNumber = protocol.InvalidPacketNumber
 	c.largestAckedPacketNumber = protocol.InvalidPacketNumber

@@ -1,0 +1,16 @@
+{
+  "EnableEncoder": true,
+  "EnableDecoder": false,
+  "CConfJson": {
+    "Scheme":      "SchemeXor",
+    "Overlap":     1,
+    "Reduns":      1,
+    "RatioVal":    10,
+    "Dynamic":     1,
+    "TPeriodMS":   75,
+    "NumPeriods":  3,
+    "GammaTarget": 0.01,
+    "DeltaRatio":  0.33
+  }
+}
+

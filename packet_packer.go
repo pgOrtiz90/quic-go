@@ -14,6 +14,10 @@ import (
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
+	// rQUIC {
+	"github.com/lucas-clemente/quic-go/rquic"
+	"github.com/lucas-clemente/quic-go/rquic/rLogger"
+	// } rQUIC
 )
 
 type packer interface {
@@ -25,6 +29,11 @@ type packer interface {
 
 	HandleTransportParameters(*wire.TransportParameters)
 	SetToken([]byte)
+	// rQUIC {
+	SetFecEncoder(*encoder)
+	CodingEnabled()
+	CodingDisabled()
+	// } rQUIC
 }
 
 type sealer interface {
@@ -164,6 +173,11 @@ type packetPacker struct {
 
 	maxPacketSize          protocol.ByteCount
 	numNonAckElicitingAcks int
+	// rQUIC {
+	coding       bool
+	codingActive bool
+	encoder      *encoder
+	// } rQUIC
 }
 
 var _ packer = &packetPacker{}
@@ -197,6 +211,23 @@ func newPacketPacker(
 		maxPacketSize:       getMaxPacketSize(remoteAddr),
 	}
 }
+// rQUIC {
+
+func (p *packetPacker) SetFecEncoder(encoder *encoder) { p.encoder = encoder }
+func (p *packetPacker) CodingEnabled()                 { p.coding = p.encoder != nil }
+func (p *packetPacker) CodingDisabled()                { p.coding = false }
+//
+//func (p *packetPacker) CodingOnOrPaused(coding bool) {
+//	if p.coding == codingOff {
+//		return
+//	}
+//	if coding {
+//		p.coding = codingOn
+//		return
+//	}
+//	p.coding = codingPaused
+//}
+// } rQUIC
 
 // PackConnectionClose packs a packet that ONLY contains a ConnectionCloseFrame
 func (p *packetPacker) PackConnectionClose(quicErr *qerr.QuicError) (*coalescedPacket, error) {
@@ -501,6 +532,18 @@ func (p *packetPacker) maybeAppendAppDataPacket(buffer *packetBuffer, maxPacketS
 	headerLen := header.GetLength(p.version)
 
 	maxSize := maxPacketSize - buffer.Len() - protocol.ByteCount(sealer.Overhead()) - headerLen
+	// rQUIC {
+	if p.coding && encLevel == protocol.Encryption1RTT {
+		p.codingActive = p.encoder.encodingNotPaused()
+		prevMS := maxSize
+		if p.codingActive {
+			maxSize -= protocol.ByteCount(rquic.Overhead())
+		} else {
+			maxSize -= protocol.ByteCount(rquic.FieldSizeType)
+		}
+		rLogger.Debugf("Encoder Header Construction maxPldSize Orig:%d New:%d", prevMS, maxSize)
+	}
+	// } rQUIC
 	payload := p.composeNextPacket(maxSize, encLevel == protocol.Encryption1RTT && buffer.Len() == 0)
 
 	// check if we have anything to send
@@ -701,6 +744,26 @@ func (p *packetPacker) appendPacket(
 
 	hdrOffset := buffer.Len()
 	buf := bytes.NewBuffer(buffer.Data)
+	// rQUIC {
+	var rquicOv int
+	if p.coding && encLevel == protocol.Encryption1RTT {
+		if p.codingActive && ackhandler.HasAckElicitingFrames(payload.frames) {
+			rquicOv = rquic.SrcHeaderSize
+		} else {
+			rquicOv = rquic.FieldSizeType
+		}
+		buf.Write(bytes.Repeat([]byte{0}, rquicOv))
+		hdrOffset += protocol.ByteCount(rquicOv)
+		defer func() {
+			// Packet will be ready. Apply FEC.
+			p.encoder.process(
+				buffer.Data[hdrOffset:],
+				header.DestConnectionID.Bytes(),
+				ackhandler.HasAckElicitingFrames(payload.frames),
+			)
+		}()
+	}
+	// } rQUIC
 	if err := header.Write(buf, p.version); err != nil {
 		return nil, err
 	}
@@ -736,6 +799,10 @@ func (p *packetPacker) appendPacket(
 	pnOffset := payloadOffset - int(header.PacketNumberLen)
 	sealer.EncryptHeader(raw[pnOffset+4:pnOffset+4+16], &raw[hdrOffset], raw[pnOffset:payloadOffset])
 	buffer.Data = raw
+	// rQUIC {
+	// Should rQUIC header count for CC? Yes!
+	hdrOffset -= protocol.ByteCount(rquicOv)
+	// } rQUIC
 
 	num := p.pnManager.PopPacketNumber(encLevel)
 	if num != header.PacketNumber {

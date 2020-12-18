@@ -8,8 +8,8 @@ import (
 
 // Clone clones a Config
 func (c *Config) Clone() *Config {
-	copy := *c
-	return &copy
+	theCopy := *c
+	return &theCopy
 }
 
 func validateConfig(config *Config) error {
@@ -100,5 +100,8 @@ func populateConfig(config *Config) *Config {
 		TokenStore:                            config.TokenStore,
 		QuicTracer:                            config.QuicTracer,
 		Tracer:                                config.Tracer,
+		// rQUIC {
+		RQuic:                                 config.RQuic,
+		// } rQUIC
 	}
 }
