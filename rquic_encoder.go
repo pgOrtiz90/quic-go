@@ -286,7 +286,9 @@ func (e *encoder) maybeReduceCodingRatio() bool /* did reduce ratio */ {
 		// Match BTO --> CWND/MaxPktSz packets * 1/sRTT pacing * BTO
 		bto := bufferTimeoutDuration(e.localMaxAckDelay)
 		rtt := e.smoothedRTT()
-		newRatio *= float64(bto) / float64(rtt)
+		if btoCorrection := float64(bto) / float64(rtt); btoCorrection < 1 {
+			newRatio *= btoCorrection
+		}
 	}
 
 	if newRatio >= curRatio {
